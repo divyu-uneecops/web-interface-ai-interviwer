@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { Activity, CircleCheck, UserPlus, Target, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatsCard } from "@/components/dashboard/stats-card";
@@ -55,7 +55,7 @@ const tableHeaders = [
 ];
 
 export default function RoleManagementPage() {
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleInvite = (data: {
     email: string;
@@ -109,13 +109,16 @@ export default function RoleManagementPage() {
       {/* Users Table */}
       <div className="bg-white border border-[#e5e5e5] rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-[#e5e5e5]">
-                {tableHeaders.map((header) => (
+                {tableHeaders.map((header, idx) => (
                   <th
                     key={header}
-                    className="h-10 px-4 text-sm font-medium text-[#737373] text-left first:text-left"
+                    className={[
+                      "h-10 px-4 text-sm font-medium text-[#737373]",
+                      idx === 0 ? "text-left" : "text-center",
+                    ].join(" ")}
                   >
                     {header}
                   </th>
@@ -128,7 +131,9 @@ export default function RoleManagementPage() {
                   key={user.id}
                   className="border-b border-[#e5e5e5] last:border-b-0 h-[77px]"
                 >
-                  <td className="px-4 text-sm text-[#0a0a0a]">{user.name}</td>
+                  <td className="px-4 text-sm text-[#0a0a0a] text-left">
+                    {user.name}
+                  </td>
                   <td className="px-4 text-sm text-[#0a0a0a] text-center">
                     {user.email}
                   </td>

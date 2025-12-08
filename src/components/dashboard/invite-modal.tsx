@@ -158,14 +158,15 @@ export function InviteTeamMemberModal({
                 Basic job details
               </p>
 
+              <p className="text-sm font-medium mb-2">Email</p>
               <Input
-                // label="Email"
                 type="email"
                 placeholder="rohan@gmail.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e?.target?.value)}
               />
 
+              <p className="text-sm font-medium mb-2">Role</p>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a role" />
@@ -190,7 +191,7 @@ export function InviteTeamMemberModal({
 
               <div className="px-4 space-y-4">
                 {/* Row 1: User Management & Job Posting */}
-                <div className="flex gap-4">
+                <div className="flex gap-2">
                   {/* User Management */}
                   <div className="flex-1 bg-[#f5f5f5] p-3 rounded">
                     <p className="text-xs font-bold text-[#0a0a0a] mb-2.5">
@@ -271,7 +272,7 @@ export function InviteTeamMemberModal({
                 </div>
 
                 {/* Row 2: Candidate Management & Interview Scheduling */}
-                <div className="flex gap-4">
+                <div className="flex gap-2">
                   {/* Candidate Management */}
                   <div className="flex-1 bg-[#f5f5f5] p-3 rounded">
                     <p className="text-xs font-bold text-[#0a0a0a] mb-2.5">
@@ -389,7 +390,7 @@ export function InviteTeamMemberModal({
               </div>
 
               {/* Footer */}
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end">
                 <Button onClick={handleSubmit}>Send invite</Button>
               </div>
             </div>

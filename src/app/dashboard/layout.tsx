@@ -17,9 +17,8 @@ export default function DashboardLayout({
         <DashboardHeader />
 
         {/* Page Content */}
-        <main className="p-6">{children}</main>
+        <main className="px-6 py-[10px]">{children}</main>
       </div>
     </div>
   );
 }
-

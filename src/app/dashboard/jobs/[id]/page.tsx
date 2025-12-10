@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Building2, Clock, Plus, CheckCircle2 } from "lucide-react";
+import {
+  Building2,
+  Clock,
+  Plus,
+  CheckCircle2,
+  Search,
+  Filter,
+  Download,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +23,31 @@ import {
   type JobStat,
 } from "@/components/dashboard/job-stats-card";
 import { EditJobModal } from "@/components/dashboard/edit-job-modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { StatusTag } from "@/components/ui/status-tag";
 
 // Mock job data - in real app this would come from an API
 const mockJobData = {
@@ -37,13 +73,126 @@ const stats: JobStat[] = [
   { label: "Hired", value: 82.2, icon: "score" },
 ];
 
+// Mock applicants data
+type ApplicantStatus = "Interviewed" | "Applied" | "Rejected";
+
+interface Applicant {
+  id: string;
+  name: string;
+  email: string;
+  contact: string;
+  status: ApplicantStatus;
+  appliedDate: string;
+}
+
+const mockApplicants: Applicant[] = [
+  {
+    id: "1",
+    name: "Mohit Kumar",
+    email: "mohitkumar@gmail.com",
+    contact: "+91 9876543210",
+    status: "Interviewed",
+    appliedDate: "2d ago",
+  },
+  {
+    id: "2",
+    name: "Mohit Kumar",
+    email: "mohitkumar@gmail.com",
+    contact: "+91 9876543210",
+    status: "Applied",
+    appliedDate: "2d ago",
+  },
+  {
+    id: "3",
+    name: "Mohit Kumar",
+    email: "mohitkumar@gmail.com",
+    contact: "+91 9876543210",
+    status: "Rejected",
+    appliedDate: "2d ago",
+  },
+];
+
 export default function JobDetailsPage() {
   const params = useParams();
   const [whatsappReminder, setWhatsappReminder] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("details");
+  const [applicants, setApplicants] = useState<Applicant[]>(mockApplicants);
+  const [activeFilters, setActiveFilters] = useState<{
+    status: string[];
+    rounds: string[];
+    applied: string[];
+  }>({
+    status: [],
+    rounds: [],
+    applied: [],
+  });
+  const [applicantTab, setApplicantTab] = useState<"single" | "bulk">("single");
+  const [applicantForm, setApplicantForm] = useState({
+    name: "",
+    email: "",
+    contact: "",
+    attachment: null as File | null,
+    jobTitle: "",
+  });
 
   // In real app, fetch job data based on params.id
   const job = mockJobData;
+
+  const handleRemoveFilter = (
+    type: "status" | "rounds" | "applied",
+    value: string
+  ) => {
+    setActiveFilters((prev) => ({
+      ...prev,
+      [type]: prev[type].filter((v) => v !== value),
+    }));
+  };
+
+  const handleFilterChange = (
+    type: "status" | "rounds" | "applied",
+    value: string
+  ) => {
+    setActiveFilters((prev) => {
+      const current = prev[type];
+      if (current.includes(value)) {
+        return {
+          ...prev,
+          [type]: current.filter((v) => v !== value),
+        };
+      } else {
+        return {
+          ...prev,
+          [type]: [...current, value],
+        };
+      }
+    });
+  };
+
+  const getStatusTag = (status: ApplicantStatus) => {
+    switch (status) {
+      case "Interviewed":
+        return (
+          <StatusTag variant="success" className="bg-[#def2eb] text-[#0e4230]">
+            Interviewed
+          </StatusTag>
+        );
+      case "Applied":
+        return (
+          <Badge className="bg-[#f5e1ff] text-[#5a3c66] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#f5e1ff]">
+            Applied
+          </Badge>
+        );
+      case "Rejected":
+        return (
+          <Badge className="bg-[#fcefec] text-[#d92d20] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#fcefec]">
+            Rejected
+          </Badge>
+        );
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -105,7 +254,7 @@ export default function JobDetailsPage() {
 
       {/* Main Content Card */}
       <div className="bg-white border border-[#e5e5e5] p-4 space-y-4">
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tabs Header Row */}
           <div className="flex items-center justify-between">
             <TabsList className="bg-[#f5f5f5] h-9 p-[3px] rounded-[10px] w-[551px]">
@@ -129,14 +278,27 @@ export default function JobDetailsPage() {
               </TabsTrigger>
             </TabsList>
 
-            <Button
-              variant="default"
-              className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
-              onClick={() => setIsEditModalOpen(true)}
-            >
-              <Plus className="w-4 h-4" />
-              Edit job detils
-            </Button>
+            {activeTab === "details" && (
+              <Button
+                variant="default"
+                className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                <Plus className="w-4 h-4" />
+                Edit job detils
+              </Button>
+            )}
+
+            {activeTab === "applicants" && (
+              <Button
+                variant="default"
+                className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] bg-[#02563d] hover:bg-[#02563d]/90"
+                onClick={() => setIsAddApplicantModalOpen(true)}
+              >
+                <Plus className="w-4 h-4" />
+                Add Applicant
+              </Button>
+            )}
           </div>
 
           {/* Job Details Tab Content */}
@@ -245,11 +407,275 @@ export default function JobDetailsPage() {
           </TabsContent>
 
           {/* Applicants Tab Content */}
-          <TabsContent value="applicants" className="mt-4">
-            <div className="bg-white rounded-lg shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] p-6">
-              <p className="text-sm text-[#737373]">
-                Applicants list will appear here.
-              </p>
+          <TabsContent value="applicants" className="mt-4 space-y-4">
+            {/* Search and Filters */}
+            <div className="flex gap-3 items-center">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2.5 border-b border-[#e5e5e5]">
+                <Search className="w-[10.667px] h-[10.667px] text-[#737373]" />
+                <input
+                  type="text"
+                  placeholder="Search Applicant"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filters
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[207px] p-1 shadow-md"
+                >
+                  <div className="space-y-0">
+                    <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold">
+                      Status
+                    </DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.status.includes("Interviewed")}
+                      onCheckedChange={() =>
+                        handleFilterChange("status", "Interviewed")
+                      }
+                      className="pl-8"
+                    >
+                      Interviewed
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.status.includes("Applied")}
+                      onCheckedChange={() =>
+                        handleFilterChange("status", "Applied")
+                      }
+                      className="pl-8"
+                    >
+                      Applied
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.status.includes("Rejected")}
+                      onCheckedChange={() =>
+                        handleFilterChange("status", "Rejected")
+                      }
+                      className="pl-8"
+                    >
+                      Rejected
+                    </DropdownMenuCheckboxItem>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="space-y-0">
+                    <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold">
+                      Rounds
+                    </DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.rounds.includes("Round 1")}
+                      onCheckedChange={() =>
+                        handleFilterChange("rounds", "Round 1")
+                      }
+                      className="pl-8"
+                    >
+                      Round 1
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.rounds.includes("Round 2")}
+                      onCheckedChange={() =>
+                        handleFilterChange("rounds", "Round 2")
+                      }
+                      className="pl-8"
+                    >
+                      Round 2
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.rounds.includes("Round 3")}
+                      onCheckedChange={() =>
+                        handleFilterChange("rounds", "Round 3")
+                      }
+                      className="pl-8"
+                    >
+                      Round 3
+                    </DropdownMenuCheckboxItem>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="space-y-0">
+                    <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold">
+                      Applied
+                    </DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.applied.includes("Yesterday")}
+                      onCheckedChange={() =>
+                        handleFilterChange("applied", "Yesterday")
+                      }
+                      className="pl-8"
+                    >
+                      Yesterday
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.applied.includes("This week")}
+                      onCheckedChange={() =>
+                        handleFilterChange("applied", "This week")
+                      }
+                      className="pl-8"
+                    >
+                      This week
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={activeFilters.applied.includes("This month")}
+                      onCheckedChange={() =>
+                        handleFilterChange("applied", "This month")
+                      }
+                      className="pl-8"
+                    >
+                      This month
+                    </DropdownMenuCheckboxItem>
+                  </div>
+                  <div className="p-1">
+                    <Button
+                      variant="ghost"
+                      className="w-full h-9 justify-start text-[#02563d] hover:text-[#02563d] hover:bg-transparent font-medium"
+                      onClick={() => {
+                        // Apply filters logic here
+                        console.log("Filters applied:", activeFilters);
+                      }}
+                    >
+                      Apply filters
+                    </Button>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Active Filter Tags */}
+            {(activeFilters.status.length > 0 ||
+              activeFilters.rounds.length > 0 ||
+              activeFilters.applied.length > 0) && (
+              <div className="flex gap-2.5 items-start flex-wrap">
+                {activeFilters.status.map((filter) => (
+                  <Badge
+                    key={`status-${filter}`}
+                    className="bg-[#e5e5e5] text-[#000000] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#e5e5e5] flex items-center gap-0.5"
+                  >
+                    {filter}
+                    <button
+                      onClick={() => handleRemoveFilter("status", filter)}
+                      className="ml-0.5 hover:bg-[rgba(0,0,0,0.1)] rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+                {activeFilters.rounds.map((filter) => (
+                  <Badge
+                    key={`rounds-${filter}`}
+                    className="bg-[#e5e5e5] text-[#000000] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#e5e5e5] flex items-center gap-0.5"
+                  >
+                    {filter}
+                    <button
+                      onClick={() => handleRemoveFilter("rounds", filter)}
+                      className="ml-0.5 hover:bg-[rgba(0,0,0,0.1)] rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+                {activeFilters.applied.map((filter) => (
+                  <Badge
+                    key={`applied-${filter}`}
+                    className="bg-[#e5e5e5] text-[#000000] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#e5e5e5] flex items-center gap-0.5"
+                  >
+                    {filter}
+                    <button
+                      onClick={() => handleRemoveFilter("applied", filter)}
+                      className="ml-0.5 hover:bg-[rgba(0,0,0,0.1)] rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Applicants Table */}
+            <div className="bg-white border border-[#e5e5e5] rounded-md overflow-hidden px-4">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[#e5e5e5] h-10">
+                    <th className="text-left px-2 py-0 text-sm font-medium text-[#737373]">
+                      Applicant name
+                    </th>
+                    <th className="text-center px-2 py-0 text-sm font-medium text-[#737373] w-[220px]">
+                      Email
+                    </th>
+                    <th className="text-center px-2 py-0 text-sm font-medium text-[#737373]">
+                      Contact number
+                    </th>
+                    <th className="text-center px-2 py-0 text-sm font-medium text-[#737373] w-[166px]">
+                      Status
+                    </th>
+                    <th className="text-center px-2 py-0 text-sm font-medium text-[#737373] w-[144px]">
+                      Applied
+                    </th>
+                    <th className="text-center px-2 py-0 text-sm font-medium text-[#737373]">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {applicants.map((applicant, index) => (
+                    <tr
+                      key={applicant.id}
+                      className={`border-b border-[#e5e5e5] last:border-b-0 ${
+                        index === 0
+                          ? "h-[78px]"
+                          : index === 1
+                          ? "h-[77px]"
+                          : "h-[78px]"
+                      }`}
+                    >
+                      <td className="px-2 py-2 text-sm text-[#0a0a0a] text-left">
+                        {applicant.name}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-[#0a0a0a] text-center">
+                        {applicant.email}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-[#0a0a0a] text-center">
+                        {applicant.contact}
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        {getStatusTag(applicant.status)}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-[#0a0a0a] text-center">
+                        {applicant.appliedDate}
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="flex items-center justify-center gap-4">
+                          <button
+                            className="text-[#737373] hover:text-[#0a0a0a] transition-colors"
+                            title="Download"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="text-[#3b82f6] hover:text-[#2563eb] transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="text-[#b91c1c] hover:text-[#991b1b] transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </TabsContent>
         </Tabs>
@@ -275,6 +701,216 @@ export default function JobDetailsPage() {
           console.log("Job updated:", data);
         }}
       />
+
+      {/* Add Applicant Modal */}
+      <Dialog
+        open={isAddApplicantModalOpen}
+        onOpenChange={setIsAddApplicantModalOpen}
+      >
+        <DialogContent className="sm:max-w-[779px] max-h-[90vh] overflow-y-auto p-6 gap-4 shadow-lg">
+          <DialogHeader className="gap-1.5 items-start">
+            <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
+              Create Applicant
+            </DialogTitle>
+            <p className="text-sm text-[#737373] leading-5">
+              Add Applicant details
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Tabs */}
+            <div className="bg-[#f5f5f5] h-9 p-[3px] rounded-[10px] flex">
+              <button
+                type="button"
+                onClick={() => setApplicantTab("single")}
+                className={`flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center ${
+                  applicantTab === "single"
+                    ? "bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] border border-transparent"
+                    : "text-[#0a0a0a]"
+                }`}
+              >
+                Single Applicant
+              </button>
+              <button
+                type="button"
+                onClick={() => setApplicantTab("bulk")}
+                className={`flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center ${
+                  applicantTab === "bulk"
+                    ? "bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] border border-transparent"
+                    : "text-[#0a0a0a]"
+                }`}
+              >
+                Bulk Applicants
+              </button>
+            </div>
+
+            {applicantTab === "single" ? (
+              <div className="space-y-5">
+                {/* Parse resume */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-[#000000]">
+                    Parse resume
+                  </Label>
+                  <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+                      <p className="text-sm text-[#02563d] leading-5">
+                        Drag and drop files here or click to upload
+                      </p>
+                      <p className="text-xs text-[#747474] leading-none">
+                        Max file size is 500kb. Supported file types are .jpg
+                        and .png.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Or divider */}
+                <div className="flex items-center gap-2.5">
+                  <div className="flex-1 h-px bg-[#e5e5e5]" />
+                  <span className="text-sm text-[#737373] leading-none">
+                    or
+                  </span>
+                  <div className="flex-1 h-px bg-[#e5e5e5]" />
+                </div>
+
+                {/* Applicant name */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-[#0a0a0a]">
+                    Applicant name <span className="text-red-700">*</span>
+                  </Label>
+                  <Input
+                    value={applicantForm.name}
+                    onChange={(e) =>
+                      setApplicantForm((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    placeholder="Mohan kuman"
+                    className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
+                  />
+                </div>
+
+                {/* Email and Contact */}
+                <div className="flex gap-2.5">
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-[#0a0a0a]">
+                      Applicant email <span className="text-red-700">*</span>
+                    </Label>
+                    <Input
+                      value={applicantForm.email}
+                      onChange={(e) =>
+                        setApplicantForm((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
+                      placeholder="mohankumar@gmail.com"
+                      className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-[#0a0a0a]">
+                      Contact number <span className="text-neutral-950">*</span>
+                    </Label>
+                    <Input
+                      value={applicantForm.contact}
+                      onChange={(e) =>
+                        setApplicantForm((prev) => ({
+                          ...prev,
+                          contact: e.target.value,
+                        }))
+                      }
+                      placeholder="+91 9876543210"
+                      className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
+                    />
+                  </div>
+                </div>
+
+                {/* Attachment and Job title */}
+                <div className="flex gap-2.5">
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-[#0a0a0a]">
+                      Attachment
+                    </Label>
+                    <div className="h-9 border border-[#e5e5e5] rounded-md shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] bg-white px-3 flex items-center">
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-[#0a0a0a] px-1.5 py-px"
+                      >
+                        Choose file
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-[#0a0a0a]">
+                      Job title
+                    </Label>
+                    <Select
+                      value={applicantForm.jobTitle}
+                      onValueChange={(value) =>
+                        setApplicantForm((prev) => ({
+                          ...prev,
+                          jobTitle: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50">
+                        <SelectValue placeholder="Product manager" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="product-manager">
+                          Product manager
+                        </SelectItem>
+                        <SelectItem value="senior-pm">Senior PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-[#000000]">
+                  Upload resumes or import data excel{" "}
+                  <span className="text-red-700">*</span>
+                </Label>
+                <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+                    <p className="text-sm text-[#02563d] leading-5">
+                      Drag and drop files here or click to upload
+                    </p>
+                    <p className="text-xs text-[#747474] leading-none">
+                      Max file size is 500kb. Supported file types are .jpg and
+                      .png.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2 justify-end">
+            <Button
+              type="button"
+              variant="default"
+              className="h-9 px-4 bg-[#02563d] hover:bg-[#02563d]/90 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+              onClick={() => {
+                console.log("Applicant added:", applicantForm);
+                setIsAddApplicantModalOpen(false);
+                setApplicantForm({
+                  name: "",
+                  email: "",
+                  contact: "",
+                  attachment: null,
+                  jobTitle: "",
+                });
+              }}
+            >
+              Next
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

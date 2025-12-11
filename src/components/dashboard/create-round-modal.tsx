@@ -193,24 +193,6 @@ export function CreateRoundModal({
     }));
   };
 
-  const addCustomQuestion = () => {
-    setFormData((prev) => ({
-      ...prev,
-      customQuestions: prev.customQuestions + 1,
-      customQuestionTexts: [...prev.customQuestionTexts, ""],
-    }));
-  };
-
-  const removeCustomQuestion = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      customQuestions: prev.customQuestions - 1,
-      customQuestionTexts: prev.customQuestionTexts.filter(
-        (_, i) => i !== index
-      ),
-    }));
-  };
-
   const selectInterviewer = (id: string) => {
     setFormData((prev) => ({ ...prev, interviewer: id }));
   };
@@ -266,7 +248,7 @@ export function CreateRoundModal({
                         setFormData((prev) => ({ ...prev, roundType: value }))
                       }
                     >
-                      <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -321,7 +303,7 @@ export function CreateRoundModal({
                         setFormData((prev) => ({ ...prev, duration: value }))
                       }
                     >
-                      <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -343,7 +325,7 @@ export function CreateRoundModal({
                         setFormData((prev) => ({ ...prev, language: value }))
                       }
                     >
-                      <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -556,7 +538,7 @@ export function CreateRoundModal({
                         }))
                       }
                     >
-                      <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -589,7 +571,7 @@ export function CreateRoundModal({
                             }))
                           }
                         >
-                          <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                          <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -631,7 +613,7 @@ export function CreateRoundModal({
                             });
                           }}
                         >
-                          <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                          <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -660,47 +642,6 @@ export function CreateRoundModal({
                           placeholder="Write your question here"
                           className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
                         />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Custom questions only mode */}
-                {formData.questionType === "custom" && (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
-                        Custom questions
-                      </Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addCustomQuestion}
-                        className="h-8 px-3 text-xs font-medium border-[#e5e5e5] text-[#0a0a0a] hover:bg-[#f5f5f5]"
-                      >
-                        + Add question
-                      </Button>
-                    </div>
-                    {formData.customQuestionTexts.map((question, index) => (
-                      <div key={index} className="flex gap-2">
-                        <Input
-                          value={question}
-                          onChange={(e) =>
-                            updateCustomQuestion(index, e.target.value)
-                          }
-                          placeholder={`Question ${index + 1}`}
-                          className="h-9 flex-1 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCustomQuestion(index)}
-                          className="h-9 w-9 p-0 text-[#737373] hover:text-[#0a0a0a] hover:bg-[#f5f5f5]"
-                        >
-                          <Plus className="w-4 h-4 rotate-45" />
-                        </Button>
                       </div>
                     ))}
                   </div>
@@ -798,7 +739,7 @@ export function CreateRoundModal({
                               }))
                             }
                           >
-                            <SelectTrigger className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                            <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

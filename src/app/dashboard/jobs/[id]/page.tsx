@@ -13,6 +13,8 @@ import {
   Pencil,
   Trash2,
   X,
+  Eye,
+  MoreVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,8 +48,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { StatusTag } from "@/components/ui/status-tag";
+import {
+  CreateRoundModal,
+  type RoundFormData,
+} from "@/components/dashboard/create-round-modal";
 
 // Mock job data - in real app this would come from an API
 const mockJobData = {
@@ -112,14 +119,53 @@ const mockApplicants: Applicant[] = [
   },
 ];
 
+// Mock rounds data
+interface Round {
+  id: string;
+  name: string;
+  duration: string;
+  questions: number;
+  applicants: number;
+  created: string;
+}
+
+const mockRounds: Round[] = [
+  {
+    id: "1",
+    name: "Behavioral Round",
+    duration: "30 min",
+    questions: 5,
+    applicants: 12,
+    created: "2d ago",
+  },
+  {
+    id: "2",
+    name: "Technical Screening",
+    duration: "45 min",
+    questions: 7,
+    applicants: 8,
+    created: "3d ago",
+  },
+  {
+    id: "3",
+    name: "Final round",
+    duration: "60 min",
+    questions: 10,
+    applicants: 5,
+    created: "5d ago",
+  },
+];
+
 export default function JobDetailsPage() {
   const params = useParams();
   const [whatsappReminder, setWhatsappReminder] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
+  const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("details");
   const [applicants, setApplicants] = useState<Applicant[]>(mockApplicants);
+  const [rounds, setRounds] = useState<Round[]>(mockRounds);
   const [activeFilters, setActiveFilters] = useState<{
     status: string[];
     rounds: string[];
@@ -281,18 +327,29 @@ export default function JobDetailsPage() {
             {activeTab === "details" && (
               <Button
                 variant="default"
-                className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                size="default"
                 onClick={() => setIsEditModalOpen(true)}
               >
+                <Pencil className="w-4 h-4" />
+                Edit Job details
+              </Button>
+            )}
+
+            {activeTab === "rounds" && (
+              <Button
+                variant="default"
+                size="default"
+                onClick={() => setIsCreateRoundModalOpen(true)}
+              >
                 <Plus className="w-4 h-4" />
-                Edit job detils
+                Add round
               </Button>
             )}
 
             {activeTab === "applicants" && (
               <Button
                 variant="default"
-                className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] bg-[#02563d] hover:bg-[#02563d]/90"
+                size="default"
                 onClick={() => setIsAddApplicantModalOpen(true)}
               >
                 <Plus className="w-4 h-4" />
@@ -399,10 +456,138 @@ export default function JobDetailsPage() {
 
           {/* Rounds Tab Content */}
           <TabsContent value="rounds" className="mt-4">
-            <div className="bg-white rounded-lg shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] p-6">
-              <p className="text-sm text-[#737373]">
-                Interview rounds configuration will appear here.
-              </p>
+            <div className="bg-white border border-[#e5e5e5] rounded-md overflow-hidden">
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#e5e5e5] h-10">
+                      <th className="text-left py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Round name
+                      </th>
+                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Duration
+                      </th>
+                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Questions
+                      </th>
+                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Applicants
+                      </th>
+                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Created
+                      </th>
+                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Quick action
+                      </th>
+                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-[#e5e5e5]">
+                    {rounds.map((round, index) => (
+                      <tr
+                        key={round.id}
+                        className="hover:bg-[#fafafa] transition-colors"
+                        style={{
+                          height:
+                            index === 0
+                              ? "78px"
+                              : index === 1
+                              ? "77px"
+                              : "78px",
+                        }}
+                      >
+                        <td className="p-2 whitespace-nowrap">
+                          <span className="text-sm font-medium text-[#0a0a0a] leading-5">
+                            {round.name}
+                          </span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap text-center">
+                          <span className="text-sm text-[#0a0a0a] leading-5">
+                            {round.duration}
+                          </span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap text-center">
+                          <span className="text-sm text-[#0a0a0a] leading-5">
+                            {round.questions}
+                          </span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap text-center">
+                          <span className="text-sm text-[#0a0a0a] leading-5">
+                            {round.applicants}
+                          </span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap text-center">
+                          <span className="text-sm text-[#0a0a0a] leading-5">
+                            {round.created}
+                          </span>
+                        </td>
+                        <td className="p-2 whitespace-nowrap text-center">
+                          <Button
+                            variant="outline"
+                            className="h-9 px-4 py-2 text-sm font-medium bg-[#f5f5f5] border-0 text-[#171717] hover:bg-[#f5f5f5] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] rounded-md"
+                          >
+                            Schedule interview
+                          </Button>
+                        </td>
+                        <td className="p-2 whitespace-nowrap text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#f5f5f5] transition-colors text-[#0a0a0a] p-[10px]"
+                                title="Actions"
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-[171px] p-1 border border-[#e5e5e5] rounded-md shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]"
+                            >
+                              <DropdownMenuItem className="gap-2 pl-2 pr-2 py-1.5 cursor-pointer rounded-sm hover:bg-[#f5f5f5]">
+                                <Eye className="w-4 h-4 text-[#737373]" />
+                                <span className="text-sm text-[#0a0a0a] leading-5">
+                                  View details
+                                </span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2 pl-8 pr-2 py-1.5 cursor-pointer rounded-sm hover:bg-[#f5f5f5] relative"
+                                inset
+                              >
+                                <Pencil className="w-4 h-4 text-[#737373] absolute left-2" />
+                                <span className="text-sm text-[#0a0a0a] leading-5">
+                                  Edit
+                                </span>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="h-px bg-[#e5e5e5] my-1" />
+                              <DropdownMenuItem
+                                variant="destructive"
+                                className="gap-2 pl-8 pr-2 py-1.5 cursor-pointer rounded-sm hover:bg-[#f5f5f5] relative"
+                                inset
+                              >
+                                <Trash2 className="w-4 h-4 text-[#b91c1c] absolute left-2" />
+                                <span className="text-sm text-[#b91c1c] leading-5">
+                                  Delete
+                                </span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {rounds.length === 0 && (
+                <div className="p-12 text-center">
+                  <p className="text-sm text-[#737373]">
+                    No rounds created yet. Click "Add round" to create your
+                    first round.
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -699,6 +884,30 @@ export default function JobDetailsPage() {
         }}
         onSubmit={(data) => {
           console.log("Job updated:", data);
+        }}
+      />
+
+      {/* Create Round Modal */}
+      <CreateRoundModal
+        open={isCreateRoundModalOpen}
+        onOpenChange={setIsCreateRoundModalOpen}
+        onSubmit={(data) => {
+          // Handle round creation
+          const newRound: Round = {
+            id: Date.now().toString(),
+            name: data.roundName,
+            duration: `${data.duration} min`,
+            questions:
+              data.questionType === "ai"
+                ? data.aiGeneratedQuestions
+                : data.questionType === "hybrid"
+                ? data.aiGeneratedQuestions + data.customQuestions
+                : data.customQuestions,
+            applicants: 0,
+            created: "Just now",
+          };
+          setRounds((prev) => [...prev, newRound]);
+          setIsCreateRoundModalOpen(false);
         }}
       />
 

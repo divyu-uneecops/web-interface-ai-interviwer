@@ -14,7 +14,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Header } from "@/components/header";
 
 export default function LoginPage() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -27,13 +26,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      {/* Header */}
-      <Header />
-
       {/* Main Content */}
-      <div className="pt-[73px] flex">
-        {/* Left Side - Login Form */}
-        <div className="flex-1 flex items-center justify-center p-8 min-h-[calc(100vh-73px)]">
+      <div className="flex min-h-screen">
+
+         {/* Left Side - Stats Panel */}
+         <div className="hidden lg:block w-1/2 h-screen sticky top-0">
+          <StatsPanel />
+        </div>
+        {/* Right Side - Login Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 min-h-screen">
           <div className="w-full max-w-md flex flex-col gap-8">
             <Logo />
 
@@ -129,21 +130,16 @@ export default function LoginPage() {
                 </CardContent>
               </Card>
 
-              <div className="flex items-center justify-between px-20">
-                <p className="text-sm text-[#45556c] text-center">
+              <div className="flex items-center justify-center gap-1 mt-2">
+                <span className="text-sm text-[#45556c]">
                   Don&apos;t have an account?
-                </p>
-                <Link href="/signup">
-                  <Button variant="ghost">Create an account</Button>
+                </span>
+                <Link href="/signup" className="text-sm text-[#02563d] font-medium hover:underline">
+                  Create an account
                 </Link>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Right Side - Stats Panel */}
-        <div className="hidden lg:block w-[614px] h-[calc(100vh-73px)] sticky top-[73px]">
-          <StatsPanel />
         </div>
       </div>
     </div>

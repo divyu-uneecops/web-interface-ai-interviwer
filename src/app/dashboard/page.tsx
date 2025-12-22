@@ -121,7 +121,7 @@ export default function DashboardPage() {
               key={index}
               className="bg-white border border-[rgba(0,0,0,0.1)] rounded-[4px] p-px"
             >
-              <div className="flex flex-col gap-[8px] pt-[24px] px-[24px] pb-0 h-full">
+              <div className="flex flex-col gap-[8px] p-[24px] h-full">
                 <div className="flex h-[20px] items-center justify-between">
                   <p className="font-['Inter',sans-serif] font-normal text-sm leading-5 text-[#45556c] tracking-[-0.15px]">
                     {stat.label}

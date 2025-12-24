@@ -6,7 +6,7 @@ import axios, {
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: "",
+  baseURL: "https://api.hrone.studio/api",
   headers: {
     "Content-Type": "application/json",
   },

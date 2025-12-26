@@ -1,4 +1,4 @@
-import api from "./api"; // import the axios instance we made
+import api from "./axios.service";
 
 class ServerInterfaceService {
   async get<T = any>(

@@ -21,7 +21,7 @@ import {
 import {
   CreateJobModal,
   type JobFormData,
-} from "@/components/dashboard/create-job-modal";
+} from "@/components/dashboard/job/components/create-job-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,

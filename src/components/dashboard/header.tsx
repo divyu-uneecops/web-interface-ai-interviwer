@@ -31,14 +31,6 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
             variant="secondary"
             size="default"
             className="h-9 px-4 rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
-          >
-            Create job
-          </Button>
-
-          <Button
-            variant="default"
-            size="default"
-            className="h-9 px-4 rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] bg-[#02563d] hover:bg-[#02563d]/90"
             onClick={() => setIsCreateInterviewOpen(true)}
           >
             <Plus className="w-4 h-4" />

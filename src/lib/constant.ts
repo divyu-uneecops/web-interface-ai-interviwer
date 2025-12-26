@@ -9,7 +9,6 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: "/auth/reset-password",
   },
   JOB_OPENING: {
-    CREATE: "/objects/694a2393c9ba83a076aac175/records",
-    
+    CREATE: "/v2/forminstances",
   },
 };

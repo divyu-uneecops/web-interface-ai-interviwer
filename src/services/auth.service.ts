@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/constant";
-import serverInterfaceService from "./serverInterfaceService";
+import serverInterfaceService from "./server-interface.service";
 
 export const authService = {
   login: (user: { name: string; email: string }) =>

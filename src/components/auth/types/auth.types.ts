@@ -15,6 +15,19 @@ export interface VerificationFormValues {
   verificationCode: string;
 }
 
+export interface SignupFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  countryCode: string;
+  phone: string;
+  designation: string;
+  companyName: string;
+  website: string;
+  industry: string;
+  companySize: string;
+}
+
 
 
 

@@ -99,6 +99,147 @@ export const transformAPIResponseToJobs = (
   };
 };
 
+// API Response Types for Job Detail
+interface APIJobDetailField {
+  key: string;
+  value: any;
+  type: string;
+  fields?: APIJobDetailField[];
+}
+
+interface APIJobDetailSection {
+  section: string;
+  fields: APIJobDetailField[];
+}
+
+export interface JobDetail {
+  id: string;
+  title: string;
+  status: "active" | "draft" | "closed";
+  department: string;
+  type: string;
+  postedDate: string;
+  description: string;
+  skills: string[];
+  jobLevel: string;
+  userType: string;
+  experience: string;
+  salaryRange?: string;
+  minExp?: number;
+  maxExp?: number;
+  numOfOpenings?: number;
+  industry?: string;
+  jobId?: string;
+}
+
+// Transform API response to Job Detail format
+export const transformAPIResponseToJobDetail = (
+  data: APIJobDetailSection[],
+  jobId: string
+): JobDetail => {
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      id: jobId,
+      title: "",
+      status: "draft",
+      department: "",
+      type: "",
+      postedDate: "",
+      description: "",
+      skills: [],
+      jobLevel: "",
+      userType: "",
+      experience: "",
+    };
+  }
+
+  // Create a map of all fields for easy lookup
+  const fieldsMap = new Map<string, any>();
+
+  data.forEach((section) => {
+    if (Array.isArray(section.fields)) {
+      section.fields.forEach((field) => {
+        if (field.key) {
+          fieldsMap.set(field.key, field.value);
+        }
+      });
+    }
+  });
+
+  // Extract values with fallbacks
+  const title = fieldsMap.get("title") || "";
+  const status = fieldsMap.get("status") || "Draft";
+  const description = fieldsMap.get("description") || "";
+  const jobLevel = fieldsMap.get("jobLevel") || "";
+  const jobType = fieldsMap.get("jobType") || "";
+  const industry = fieldsMap.get("industry") || "";
+  const minExp = fieldsMap.get("minExp") || 0;
+  const maxExp = fieldsMap.get("maxExp") || 0;
+  const numOfOpenings = fieldsMap.get("numOfOpenings") || 0;
+  const jobIdValue = fieldsMap.get("jobId") || jobId;
+
+  // Normalize status to lowercase
+  const statusLower = String(status).toLowerCase();
+  const normalizedStatus =
+    statusLower === "active"
+      ? "active"
+      : statusLower === "closed"
+      ? "closed"
+      : "draft";
+
+  // Extract skills from nestedFieldArray
+  let skills: string[] = [];
+  const requiredSkills = fieldsMap.get("requiredSkills");
+  if (Array.isArray(requiredSkills)) {
+    skills = requiredSkills
+      .map((skillArray) => {
+        if (Array.isArray(skillArray) && skillArray.length > 0) {
+          const skillField = skillArray.find((item) => item.key === "skill");
+          return skillField?.value;
+        }
+        return null;
+      })
+      .filter((skill): skill is string => Boolean(skill));
+  }
+
+  // Format experience
+  const experience =
+    minExp && maxExp
+      ? `${minExp}-${maxExp} years`
+      : minExp
+      ? `${minExp}+ years`
+      : maxExp
+      ? `Up to ${maxExp} years`
+      : "";
+
+  // Format posted date (you might need to get this from createdOn/updatedOn if available)
+  const postedDate = "Nov 15, 2025"; // This should come from API if available
+
+  return {
+    id: jobId,
+    jobId: jobIdValue,
+    title: String(title),
+    status: normalizedStatus as "active" | "draft" | "closed",
+    department: String(industry || ""),
+    type: String(jobType || ""),
+    postedDate,
+    description: String(description),
+    skills,
+    jobLevel: String(jobLevel || ""),
+    userType: String(jobType || ""),
+    experience,
+    minExp:
+      typeof minExp === "number" ? minExp : parseInt(String(minExp), 10) || 0,
+    maxExp:
+      typeof maxExp === "number" ? maxExp : parseInt(String(maxExp), 10) || 0,
+    numOfOpenings:
+      typeof numOfOpenings === "number"
+        ? numOfOpenings
+        : parseInt(String(numOfOpenings), 10) || 0,
+    industry: String(industry || ""),
+  };
+};
+
 // Format timestamp to relative time (e.g., "2d ago", "1h ago")
 export const formatRelativeTime = (timestamp: number): string => {
   const now = Date.now();

@@ -47,21 +47,6 @@ export default function JobList() {
   const [isLoading, setIsLoading] = useState(false);
   const PAGE_LIMIT = 10;
 
-  const handleCreateJob = (data: JobFormData) => {
-    const newJob: Job = {
-      id: `new-${Date.now()}`,
-      position: data.title || "New Position",
-      status: data.status as "active" | "draft" | "closed",
-      noOfOpening: parseInt(data.noOfOpenings) || 1,
-      applicants: 0,
-      interviews: 0,
-      created: "Just now",
-    };
-
-    setJobs((prev) => [newJob, ...prev]);
-    console.log("New job created:", data);
-  };
-
   const handleDeleteJob = async (id: string) => {
     if (isEmpty(id)) return;
     try {
@@ -259,7 +244,6 @@ export default function JobList() {
       <CreateJobModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
-        onSubmit={handleCreateJob}
       />
     </div>
   );

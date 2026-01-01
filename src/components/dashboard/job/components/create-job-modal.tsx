@@ -35,11 +35,7 @@ import {
   userTypeOptions,
 } from "../constants/job.constants";
 
-export function CreateJobModal({
-  open,
-  onOpenChange,
-  onSubmit,
-}: CreateJobModalProps) {
+export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
   const [skillInput, setSkillInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formik = useFormik<JobFormData>({
@@ -62,7 +58,6 @@ export function CreateJobModal({
       try {
         const payload = transformToAPIPayload(values);
         await jobService.createJobOpening(payload);
-        onSubmit?.(values);
         formik.resetForm();
         setSkillInput("");
         onOpenChange(false);

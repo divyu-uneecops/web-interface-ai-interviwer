@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
   Building2,
@@ -48,10 +48,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { StatusTag } from "@/components/ui/status-tag";
-import {
-  CreateRoundModal,
-  type RoundFormData,
-} from "@/components/dashboard/create-round-modal";
+import { CreateRoundModal } from "@/components/dashboard/create-round-modal";
 import {
   Applicant,
   JobStat,
@@ -59,10 +56,15 @@ import {
 } from "@/components/dashboard/job/interfaces/job.interface";
 import {
   mockApplicants,
-  mockJobData,
   mockRounds,
 } from "@/components/dashboard/job/constants/job.constants";
 import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
+import { jobService } from "@/components/dashboard/job/services/job.service";
+import {
+  transformAPIResponseToJobDetail,
+  JobDetail,
+} from "@/components/dashboard/job/utils/job.utils";
+import { toast } from "sonner";
 
 export const stats: JobStat[] = [
   { label: "Total Applicants", value: 143, icon: "applicants" },
@@ -98,9 +100,41 @@ export default function JobDetailsPage() {
     attachment: null as File | null,
     jobTitle: "",
   });
+  const [job, setJob] = useState<JobDetail | null>(null);
+  const [isLoadingJob, setIsLoadingJob] = useState(true);
 
-  // In real app, fetch job data based on params.id
-  const job = mockJobData;
+  // Fetch job detail
+  useEffect(() => {
+    const fetchJobDetail = async () => {
+      if (!params.id || typeof params.id !== "string") {
+        setIsLoadingJob(false);
+        return;
+      }
+
+      setIsLoadingJob(true);
+      try {
+        const response = await jobService.getJobDetail(params.id, {
+          appId: "69521cd1c9ba83a076aac3ae",
+        });
+        const transformedJob = transformAPIResponseToJobDetail(
+          response,
+          params.id
+        );
+        setJob(transformedJob);
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.message || "Failed to fetch job details",
+          {
+            duration: 8000,
+          }
+        );
+      } finally {
+        setIsLoadingJob(false);
+      }
+    };
+
+    fetchJobDetail();
+  }, [params.id]);
 
   const handleRemoveFilter = (
     type: "status" | "rounds" | "applied",
@@ -155,6 +189,22 @@ export default function JobDetailsPage() {
     }
   };
 
+  if (isLoadingJob) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-sm text-[#737373]">Loading job details...</p>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-sm text-[#737373]">Job not found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Job Header */}
@@ -165,8 +215,20 @@ export default function JobDetailsPage() {
             <h1 className="text-xl font-bold text-black leading-7">
               {job.title}
             </h1>
-            <Badge className="bg-[#def2eb] text-[#0e4230] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#def2eb]">
-              Active
+            <Badge
+              className={`border-0 rounded-full px-2 h-6 text-xs font-normal ${
+                job.status === "active"
+                  ? "bg-[#def2eb] text-[#0e4230] hover:bg-[#def2eb]"
+                  : job.status === "closed"
+                  ? "bg-[#fcefec] text-[#d92d20] hover:bg-[#fcefec]"
+                  : "bg-[#e5e5e5] text-[#000000] hover:bg-[#e5e5e5]"
+              }`}
+            >
+              {job.status === "active"
+                ? "Active"
+                : job.status === "closed"
+                ? "Closed"
+                : "Draft"}
             </Badge>
           </div>
 
@@ -181,12 +243,14 @@ export default function JobDetailsPage() {
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4 text-[#45556c]" />
               <span className="text-sm text-[#45556c] leading-5">
-                {job.type}
+                {job.type || job.userType}
               </span>
             </div>
-            <span className="text-sm text-[#45556c] leading-5">
-              Posted {job.postedDate}
-            </span>
+            {job.postedDate && (
+              <span className="text-sm text-[#45556c] leading-5">
+                Posted {job.postedDate}
+              </span>
+            )}
           </div>
         </div>
 
@@ -348,7 +412,8 @@ export default function JobDetailsPage() {
                         Experience
                       </p>
                       <p className="text-sm text-neutral-950 leading-5 tracking-[-0.15px]">
-                        {job.experience}
+                        {job.experience ||
+                          `${job.minExp || 0}-${job.maxExp || 0} years`}
                       </p>
                     </div>
 
@@ -360,7 +425,7 @@ export default function JobDetailsPage() {
                         Salary range
                       </p>
                       <p className="text-sm text-neutral-950 leading-5 tracking-[-0.15px]">
-                        {job.salaryRange}
+                        {job.salaryRange || "Not specified"}
                       </p>
                     </div>
                   </div>
@@ -787,15 +852,18 @@ export default function JobDetailsPage() {
         onOpenChange={setIsEditModalOpen}
         initialData={{
           title: job.title,
-          industry: "technical",
-          jobLevel: "senior",
-          userType: "full-time",
-          minExperience: "5",
-          maxExperience: "8",
+          industry: job.industry || "technical",
+          jobLevel: job.jobLevel?.toLowerCase() || "senior",
+          userType:
+            job.userType?.toLowerCase().replace(" ", "-") ||
+            job.type?.toLowerCase().replace(" ", "-") ||
+            "full-time",
+          minExperience: String(job.minExp || 0),
+          maxExperience: String(job.maxExp || 0),
           minSalary: "10",
           maxSalary: "12",
           description: job.description,
-          skills: job.skills,
+          skills: job.skills || [],
         }}
         onSubmit={(data) => {
           console.log("Job updated:", data);

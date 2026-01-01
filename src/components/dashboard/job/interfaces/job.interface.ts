@@ -3,7 +3,6 @@ import { ApplicantStatus } from "../types/job.types";
 export interface CreateJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: JobFormData) => void;
 }
 
 export interface JobFormData {

@@ -29,4 +29,14 @@ export const jobService = {
     serverInterfaceService.delete(
       buildUrl(API_ENDPOINTS.JOB_OPENING.DELETE, { id })
     ),
+  getJobDetail: (
+    id: string,
+    params?: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.get(
+      buildUrl(API_ENDPOINTS.JOB_OPENING.DETAIL, { id }),
+      params,
+      signal
+    ),
 };

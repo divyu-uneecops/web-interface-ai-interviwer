@@ -418,16 +418,6 @@ export default function JobDetailsPage() {
                     </div>
 
                     <div className="h-px bg-slate-200" />
-
-                    {/* Salary Range */}
-                    <div className="space-y-1 h-10">
-                      <p className="text-xs text-[#62748e] leading-4">
-                        Salary range
-                      </p>
-                      <p className="text-sm text-neutral-950 leading-5 tracking-[-0.15px]">
-                        {job.salaryRange || "Not specified"}
-                      </p>
-                    </div>
                   </div>
                 </div>
               </div>

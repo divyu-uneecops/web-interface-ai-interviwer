@@ -1,70 +1,190 @@
-# AI Interview - Landing Page
+# AI Interview Platform - Web Interface
 
-A modern, responsive landing page for an AI-powered interview platform built with Next.js and Tailwind CSS from Figma design specifications.
+A comprehensive AI-powered interview management platform built with Next.js. This application enables recruiters and hiring managers to create, manage, and conduct AI-powered interviews at scale with support for text, voice, and video interview modes.
 
-## 🎨 Design
+## 🎯 Overview
 
-This landing page was implemented from a Figma design file featuring:
+This platform provides a complete solution for automated candidate screening and interviewing. It features a modern landing page, full authentication system, comprehensive dashboard, job management, interview creation wizard, and AI interviewer management capabilities.
 
-- Modern UI/UX with smooth animations
-- Fully responsive layout using Tailwind CSS
-- Clean typography using system fonts
-- Professional color scheme with green primary color (#02563d)
+## ✨ Key Features
 
-## 🚀 Technologies
+### 🏠 Landing Page
 
-- **Next.js 15** - React framework with App Router
-- **TypeScript** - Type-safe code
-- **Tailwind CSS** - Utility-first CSS framework
-- **React 19** - UI library
-- **Modern Architecture** - Server and Client Components
+- Modern, responsive marketing site
+- Feature showcase (multi-modal interviews, AI capabilities)
+- Pricing tiers (Starter, Professional, Enterprise)
+- How it works section
+- Competitive advantages
+
+### 🔐 Authentication
+
+- User registration with phone number
+- OTP-based verification
+- Login system
+- Password reset flow
+- Secure session management
+
+### 📊 Dashboard
+
+- Real-time statistics (Active Jobs, Applicants, Interviews, Scores)
+- Active jobs overview with metrics
+- Recent interviews list with status tracking
+- Quick navigation to key features
+
+### 💼 Job Management
+
+- Create and manage job postings
+- Job details: title, industry, level, type, experience requirements
+- Skills management
+- Job status tracking (active, draft, closed)
+- Round management per job
+- Applicant tracking
+
+### 🎤 Interview Creation
+
+- **Multi-step wizard** for creating interviews:
+  1. Choose interview source (new job or existing job)
+  2. Job selection/creation
+  3. Round details configuration
+  4. Questions setup (AI-generated, custom, or hybrid)
+  5. Instructions and settings
+- Support for multiple interview modes (text, voice, video)
+- Customizable interview parameters
+- Interview link generation and sharing
+
+### 🤖 AI Interviewer Management
+
+- Create and configure AI interviewers
+- Customize interviewer personality and behavior
+- Assign interviewers to specific rounds
+- Interviewer profile management
+
+### 👥 User & Role Management
+
+- Role-based access control
+- User management interface
+- Permission management
+
+## 🚀 Technology Stack
+
+### Core Framework
+
+- **Next.js 16.0.7** - React framework with App Router
+- **React 19.2.1** - UI library
+- **TypeScript 5** - Type-safe development
+
+### Styling & UI
+
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+  - Dialog, Dropdown Menu, Select, Checkbox, Radio Group, Slider, Tabs
+- **shadcn/ui** - Pre-built component library (New York style)
+- **Lucide React** - Icon library
+- **class-variance-authority** - Component variants
+- **tailwind-merge** - Tailwind class merging utility
+
+### Forms & State Management
+
+- **Formik 2.4.9** - Form state management
+- React Hooks for local state
+
+### API & Data Fetching
+
+- **Axios 1.13.2** - HTTP client
+- Custom service layer for API abstraction
+- Request/response interceptors for authentication
+
+### Notifications
+
+- **Sonner 2.0.7** - Toast notifications
+
+### Development Tools
+
+- **TypeScript** - Static type checking
+- **ESLint** - Code linting
+- **Next.js ESLint Config** - Next.js-specific linting rules
 
 ## 📁 Project Structure
 
 ```
 web-interface-ai-interviwer/
 ├── src/
-│   └── app/
-│       ├── page.tsx          # Main landing page component
-│       ├── layout.tsx         # Root layout
-│       ├── globals.css        # Global styles & Tailwind config
-│       └── favicon.ico        # Favicon
-├── public/                    # Static assets
-├── next.config.ts             # Next.js configuration
-├── tailwind.config.ts         # Tailwind configuration
-├── tsconfig.json              # TypeScript configuration
-└── package.json               # Dependencies
+│   ├── app/                          # Next.js App Router pages
+│   │   ├── dashboard/                # Dashboard routes
+│   │   │   ├── page.tsx              # Main dashboard
+│   │   │   ├── layout.tsx            # Dashboard layout (sidebar + header)
+│   │   │   ├── jobs/                 # Job management
+│   │   │   │   ├── page.tsx          # Jobs list
+│   │   │   │   └── [id]/             # Job detail page
+│   │   │   ├── interviewers/         # Interviewer management
+│   │   │   └── role-management/      # User role management
+│   │   ├── login/                    # Login page
+│   │   ├── signup/                   # Signup page
+│   │   ├── verification/             # OTP verification
+│   │   ├── page.tsx                  # Landing page
+│   │   ├── layout.tsx                # Root layout
+│   │   └── globals.css               # Global styles
+│   │
+│   ├── components/                    # React components
+│   │   ├── auth/                     # Authentication components
+│   │   │   ├── components/           # Login, Signup, Verification
+│   │   │   ├── types/                # Auth type definitions
+│   │   │   └── utils/                # Auth utilities
+│   │   │
+│   │   ├── dashboard/                # Dashboard components
+│   │   │   ├── create-interview/     # Interview creation wizard
+│   │   │   │   ├── components/       # Step components
+│   │   │   │   ├── hooks/            # Custom hooks
+│   │   │   │   ├── constants.ts      # Constants
+│   │   │   │   ├── types.ts          # Type definitions
+│   │   │   │   └── utils.ts          # Utilities
+│   │   │   ├── job/                  # Job management components
+│   │   │   │   ├── components/       # Job list, create modal, stats
+│   │   │   │   ├── interfaces/       # Job interfaces
+│   │   │   │   ├── services/         # Job API services
+│   │   │   │   ├── types/            # Job types
+│   │   │   │   └── utils/            # Job utilities
+│   │   │   ├── create-interviewer-modal.tsx
+│   │   │   ├── create-round-modal.tsx
+│   │   │   ├── edit-job-modal.tsx
+│   │   │   ├── invite-modal.tsx
+│   │   │   ├── sidebar.tsx           # Dashboard sidebar
+│   │   │   └── header.tsx            # Dashboard header
+│   │   │
+│   │   ├── ui/                       # shadcn/ui components
+│   │   │   ├── button.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── select.tsx
+│   │   │   └── ...                   # Other UI components
+│   │   │
+│   │   ├── shared/                   # Shared components
+│   │   │   └── components/           # Data table, etc.
+│   │   │
+│   │   ├── header.tsx                # Landing page header
+│   │   ├── logo.tsx                  # Logo component
+│   │   └── stats-panel.tsx           # Statistics panel
+│   │
+│   ├── services/                     # API services
+│   │   ├── axios.service.ts          # Axios instance & interceptors
+│   │   ├── auth.service.ts           # Authentication API
+│   │   └── server-interface.service.ts  # Generic API service
+│   │
+│   └── lib/                          # Utilities & constants
+│       ├── constant.ts               # API endpoints & constants
+│       └── utils.ts                  # Helper functions
+│
+├── public/                            # Static assets
+│   ├── *.svg                         # Icons and images
+│   └── *.jpg                         # Image assets
+│
+├── components.json                   # shadcn/ui configuration
+├── next.config.ts                   # Next.js configuration
+├── tsconfig.json                     # TypeScript configuration
+├── postcss.config.mjs                # PostCSS configuration
+├── eslint.config.mjs                # ESLint configuration
+└── package.json                      # Dependencies
 ```
-
-## ✨ Features Implemented
-
-### Navigation
-
-- ✅ Sticky header with backdrop blur
-- ✅ Logo with icon
-- ✅ Navigation links (Features, How it Works, Pricing, etc.)
-- ✅ CTA buttons (Free Trial, Sign In)
-- ✅ Responsive mobile menu ready
-
-### Hero Section
-
-- ✅ AI-Powered badge with icon
-- ✅ Gradient headline text
-- ✅ Dual CTA buttons
-- ✅ Hero image placeholder with overlay
-- ✅ Floating statistics badge (10,000+ Interviews)
-- ✅ 4-column statistics grid
-
-### Core Features
-
-- ✅ **Multi-Modal Section** - Text, Voice, Video interview options
-- ✅ **Core Capabilities** - 6 feature cards with hover effects
-- ✅ **24/7 Availability** - Global statistics grid
-- ✅ **How It Works** - 4-step process visualization
-- ✅ **Why Choose Us** - 6 competitive advantages
-- ✅ **Pricing** - 3 pricing tiers (Starter, Professional, Enterprise)
-- ✅ **CTA Section** - Gradient background with prominent buttons
-- ✅ **Footer** - 4-column layout with links
 
 ## 🎨 Design System
 
@@ -73,139 +193,220 @@ web-interface-ai-interviwer/
 ```css
 Primary Green: #02563d
 Primary Dark: #034d35
-Secondary: #f5f5f5
+Success Green: #00a63e / #008236
 Text Primary: #0a0a0a
-Text Secondary: #404040
-Text Tertiary: #737373
+Text Secondary: #404040 / #45556c
+Text Tertiary: #737373 / #62748e
+Background: #fafafa
+Border: rgba(0,0,0,0.1)
 ```
 
 ### Typography
 
-- System fonts with fallbacks
-- Responsive text sizing
-- Professional font weights
+- **Primary Font**: Inter (Google Fonts)
+- **Secondary Font**: Public Sans (Google Fonts)
+- Responsive text sizing with Tailwind utilities
+- Font weights: 400, 500, 600, 700
 
-## 📱 Responsive Design
+### Component Library
 
-Fully responsive with Tailwind breakpoints:
+- Built on **shadcn/ui** (New York style)
+- Uses **Radix UI** primitives for accessibility
+- Consistent spacing and border radius
+- Responsive breakpoints
 
-- **Mobile**: < 768px
-- **Tablet**: 768px - 1023px
-- **Desktop**: ≥ 1024px
+## 🔌 API Integration
+
+### Base Configuration
+
+- **Base URL**: `https://api.hrone.studio/api`
+- Authentication via Bearer tokens
+- Custom headers: `x-org-id`, `x-app-id`
+- Request/response interceptors for token management
+
+### API Endpoints
+
+#### Authentication
+
+- `POST /auth/login` - User login
+- `POST /auth/register` - User registration
+- `POST /auth/verify-otp` - OTP verification
+- `POST /auth/resend-otp` - Resend OTP
+- `POST /auth/forgot-password` - Password reset request
+- `POST /auth/verify-forgot-password-otp` - Verify reset OTP
+- `POST /auth/reset-password` - Reset password
+
+#### Job Management
+
+- `POST /v2/forminstances` - Create job opening
+- `POST /objects/{objectId}/views/{viewId}/records` - List jobs
+- `GET /objects/{objectId}/records/{id}` - Get job details
+- `DELETE /objects/{objectId}/records/{id}` - Delete job
 
 ## 🚦 Getting Started
 
-1. **Install dependencies:**
+### Prerequisites
+
+- **Node.js** 18+
+- **npm** or **yarn**
+- Backend API access (configure in `src/services/axios.service.ts`)
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd web-interface-ai-interviwer
+   ```
+
+2. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. **Run development server:**
+3. **Configure environment variables**
+   Create a `.env.local` file (if needed):
+
+   ```env
+   NEXT_PUBLIC_API_URL=https://api.hrone.studio/api
+   ```
+
+4. **Update API configuration**
+   Edit `src/services/axios.service.ts` to configure:
+
+   - Base URL
+   - Organization ID (`x-org-id`)
+   - Application ID (`x-app-id`)
+   - Authentication token (or implement dynamic token retrieval)
+
+5. **Run development server**
 
    ```bash
    npm run dev
    ```
 
-3. **Open browser:**
+6. **Open browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-4. **Build for production:**
-   ```bash
-   npm run build
-   npm start
-   ```
+### Build for Production
+
+```bash
+# Build the application
+npm run build
+
+# Start production server
+npm start
+```
 
 ## 🛠️ Development
 
-### Key Commands
+### Available Scripts
 
 ```bash
-npm run dev          # Start development server
+npm run dev          # Start development server (port 3000)
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
 ```
 
-### Architecture Notes
+### Development Guidelines
 
-- **App Router**: Using Next.js 15 App Router (`src/app/`)
-- **Client Components**: Page uses `"use client"` directive for interactivity
-- **Tailwind CSS**: All styling done with utility classes
-- **TypeScript**: Full type safety throughout
-- **No External Images**: All icons inline as SVG
+1. **Component Structure**
 
-## 🎯 Key Sections
+   - Use TypeScript for all components
+   - Follow the existing folder structure
+   - Separate concerns: components, hooks, services, types
 
-### 1. Navigation Header
+2. **Styling**
 
-- Fixed position sticky header
-- Glassmorphism effect with backdrop blur
-- Responsive navigation
+   - Use Tailwind CSS utility classes
+   - Follow the design system colors
+   - Maintain responsive design (mobile-first)
 
-### 2. Hero Section
+3. **State Management**
 
-- Eye-catching gradient headline
-- Statistics showcase
-- Clear call-to-action buttons
+   - Use React hooks for local state
+   - Formik for form state
+   - Custom hooks for reusable logic
 
-### 3. Features Sections
+4. **API Calls**
 
-- Multi-modal interview options
-- Core capabilities grid
-- 24/7 availability stats
-- Process steps
-- Competitive advantages
+   - Use the service layer (`server-interface.service.ts`)
+   - Handle errors appropriately
+   - Show user-friendly notifications (Sonner)
 
-### 4. Pricing
+5. **Type Safety**
+   - Define interfaces/types for all data structures
+   - Use TypeScript strictly
+   - Avoid `any` types where possible
 
-- Three-tier pricing model
-- Feature comparison
-- "Most Popular" badge on Professional plan
+## 📱 Responsive Design
 
-### 5. Footer
+The application is fully responsive with Tailwind breakpoints:
 
-- Organized link sections
-- Brand information
-- Copyright notice
+- **Mobile**: < 768px
+- **Tablet**: 768px - 1023px
+- **Desktop**: ≥ 1024px
 
-## 🎨 Customization
+## 🔒 Security Considerations
 
-### Colors
+- Authentication tokens stored securely
+- API interceptors for automatic token injection
+- Protected routes (dashboard requires authentication)
+- Input validation on forms
+- Secure password reset flow
 
-Edit Tailwind config or use inline colors:
+## 🎯 Key Features Deep Dive
 
-```tsx
-className = "bg-[#02563d]"; // Custom color
-className = "text-gray-900"; // Tailwind color
-```
+### Interview Creation Wizard
 
-### Content
+The interview creation process is a 5-step wizard:
 
-Edit `src/app/page.tsx` - all sections are clearly labeled with comments.
+1. **Step 1: Interview Source**
 
-### Styling
+   - Choose between creating a new job or using an existing job
 
-Modify `src/app/globals.css` for global styles and animations.
+2. **Step 2: Job Selection/Creation**
 
-## 🌟 Performance Features
+   - Select existing job or create new job with details
+   - Configure job requirements and skills
 
-- ✅ Server-side rendering with Next.js
-- ✅ Optimized bundle size
-- ✅ Tailwind CSS purging
-- ✅ Modern React 19 features
-- ✅ TypeScript for type safety
+3. **Step 3: Round Details**
 
-## 📄 Browser Support
+   - Configure round name, type, objective
+   - Set duration, language, interviewer
+   - Define round-specific skills
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+4. **Step 4: Questions**
+
+   - Choose question type: AI-generated, custom, or hybrid
+   - Configure number of questions
+   - Add custom questions if needed
+
+5. **Step 5: Instructions & Settings**
+   - Set interview instructions
+   - Configure options: skip questions, reminders, recording, transcription, feedback
+
+### Job Management
+
+- **Create Jobs**: Full job posting with all details
+- **Edit Jobs**: Update job information
+- **View Jobs**: Detailed job view with rounds and applicants
+- **Delete Jobs**: Remove job postings
+- **Job Stats**: Track applicants, interviews, and hires
+
+### Dashboard Analytics
+
+- **Active Jobs**: Overview of all active job postings
+- **Total Applicants**: Track candidate applications
+- **Interviews Done**: Monitor interview completion
+- **Average Score**: Performance metrics across interviews
 
 ## 🚀 Deployment
 
-Deploy to Vercel (recommended for Next.js):
+### Recommended: Vercel
 
 ```bash
 # Install Vercel CLI
@@ -215,52 +416,56 @@ npm i -g vercel
 vercel
 ```
 
-Or deploy to any platform that supports Next.js:
+### Other Platforms
 
-- Netlify
-- AWS Amplify
-- Railway
-- DigitalOcean
+The application can be deployed to any platform supporting Next.js:
+
+- **Netlify**
+- **AWS Amplify**
+- **Railway**
+- **DigitalOcean App Platform**
+- **Docker** (with custom Dockerfile)
+
+### Build Configuration
+
+Ensure the following environment variables are set in production:
+
+- API base URL
+- Organization ID
+- Application ID
+- Any other required API credentials
 
 ## 📝 Notes
 
-- All images are currently placeholders (gradient backgrounds)
-- Replace with actual images from Figma or your assets
-- SVG icons are inline for performance
-- Fully accessible with semantic HTML
+- The application uses a hardcoded authentication token in development (see `axios.service.ts`)
+- In production, implement dynamic token retrieval from secure storage
+- All API endpoints are configured in `src/lib/constant.ts`
+- The project uses Next.js App Router (not Pages Router)
+- All components are client-side by default (use `"use client"` directive)
 
 ## 🔧 Future Enhancements
 
-- [ ] Add actual images from Figma CDN or local assets
-- [ ] Implement smooth scroll animations
-- [ ] Add form validation for contact forms
-- [ ] Integrate with CMS for dynamic content
-- [ ] Add internationalization (i18n)
-- [ ] Implement dark mode toggle
-- [ ] Add analytics tracking
+- [ ] Implement proper authentication state management
+- [ ] Add real-time interview status updates
+- [ ] Integrate video/voice interview capabilities
+- [ ] Add analytics and reporting dashboard
+- [ ] Implement ATS integrations
+- [ ] Add bulk operations for jobs and interviews
+- [ ] Enhance mobile experience
+- [ ] Add dark mode support
+- [ ] Implement internationalization (i18n)
+- [ ] Add comprehensive error boundaries
+- [ ] Implement caching strategies
+- [ ] Add unit and integration tests
+
+## 📄 License
+
+[Add your license information here]
+
+## 👥 Contributing
+
+[Add contributing guidelines here]
 
 ---
 
-**Built with ❤️ from Figma design specifications using Next.js 15 and Tailwind CSS**
-
-## Architecture Diagram
-
-```
-┌─────────────────────────────────────┐
-│         Next.js App Router          │
-├─────────────────────────────────────┤
-│  src/app/                           │
-│  ├── layout.tsx (Root Layout)       │
-│  ├── page.tsx (Landing Page) ✨     │
-│  └── globals.css (Tailwind)         │
-├─────────────────────────────────────┤
-│         Tailwind CSS v4             │
-│  - Utility-first styling            │
-│  - Custom colors & spacing          │
-│  - Responsive breakpoints           │
-├─────────────────────────────────────┤
-│         TypeScript                  │
-│  - Type-safe components             │
-│  - IntelliSense support             │
-└─────────────────────────────────────┘
-```
+**Built with ❤️ using Next.js 16, React 19, TypeScript, and Tailwind CSS**

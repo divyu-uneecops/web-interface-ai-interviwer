@@ -2,12 +2,7 @@
 
 import { Target, UserPlus, CircleCheck, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export interface JobStat {
-  label: string;
-  value: string | number;
-  icon: "applicants" | "completed" | "hired" | "score";
-}
+import { JobStat } from "../interfaces/job.interface";
 
 const iconMap = {
   applicants: {

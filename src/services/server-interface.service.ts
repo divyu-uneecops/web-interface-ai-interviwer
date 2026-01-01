@@ -13,8 +13,16 @@ class ServerInterfaceService {
     return data;
   }
 
-  async post<T = any>(url: string, body?: Record<string, any>) {
-    const { data } = await api.post<T>(url, body);
+  async post<T = any>(
+    url: string,
+    params?: Record<string, any>,
+    body?: Record<string, any>,
+    signal?: AbortSignal
+  ) {
+    const { data } = await api.post<T>(url, body, {
+      params,
+      signal,
+    });
     return data;
   }
 

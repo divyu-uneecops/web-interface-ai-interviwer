@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   JobStatsGrid,
   type JobStat,
-} from "@/components/dashboard/job-stats-card";
+} from "@/components/dashboard/job/components/job-stats-card";
 import { EditJobModal } from "@/components/dashboard/edit-job-modal";
 import {
   Dialog,

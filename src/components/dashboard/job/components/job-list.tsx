@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -10,13 +10,12 @@ import {
   Eye,
   Pencil,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DataTable, Column } from "@/components/shared/components/data-table";
 import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
 import {
   DropdownMenu,
@@ -64,6 +63,97 @@ export default function JobList() {
   const handleDeleteJob = (id: string) => {
     setJobs((prev) => prev.filter((job) => job.id !== id));
   };
+
+  // Define table columns
+  const columns: Column<Job>[] = useMemo(
+    () => [
+      {
+        id: "position",
+        header: "Position",
+        align: "left",
+        accessor: (job) => job.position,
+      },
+      {
+        id: "status",
+        header: "Status",
+        align: "center",
+        width: "125px",
+        cell: (job) => (
+          <div className="flex justify-center">
+            <Badge
+              variant="outline"
+              className={`capitalize font-normal text-xs tracking-[0.3px] rounded-full px-2 py-0 h-6 ${
+                statusStyles[job?.status]
+              }`}
+            >
+              {job?.status === "active"
+                ? "Active"
+                : job?.status === "closed"
+                ? "Closed"
+                : "Draft"}
+            </Badge>
+          </div>
+        ),
+      },
+      {
+        id: "noOfOpening",
+        header: "No. of opening",
+        align: "center",
+        accessor: (job) => job.noOfOpening,
+      },
+      {
+        id: "applicants",
+        header: "Applicants",
+        align: "center",
+        accessor: (job) => job.applicants,
+      },
+      {
+        id: "interviews",
+        header: "Interviews",
+        align: "center",
+        accessor: (job) => job.interviews,
+      },
+      {
+        id: "created",
+        header: "Created",
+        align: "center",
+        accessor: (job) => job.created,
+      },
+    ],
+    []
+  );
+
+  // Row actions renderer
+  const renderRowActions = (job: Job) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/dashboard/jobs/${job.id}`}>
+            <Eye className="h-4 text-[#737373]" />
+            View details
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Pencil className="h-4 text-[#737373]" />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => handleDeleteJob(job.id)}
+        >
+          <Trash2 className="h-4" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -141,173 +231,17 @@ export default function JobList() {
       <JobStatsGrid stats={stats} />
 
       {/* Jobs Table */}
-      <div>
-        {/* Pagination Controls - Top Right */}
-        {pagination.total > 0 &&
-          (() => {
-            const startResult = currentOffset + 1;
-            const endResult = Math.min(
-              currentOffset + jobs.length,
-              pagination.total
-            );
-
-            return (
-              <div className="flex items-center justify-end">
-                <div className="flex items-center gap-2 mr-2 mb-2">
-                  <div className="text-sm text-[#737373] mr-2">
-                    {startResult}-{endResult} of {pagination.total}
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (
-                        pagination.previousOffset !== null &&
-                        pagination.previousOffset >= 0
-                      ) {
-                        setCurrentOffset(pagination.previousOffset);
-                      }
-                    }}
-                    disabled={
-                      pagination.previousOffset === null ||
-                      pagination.previousOffset < 0 ||
-                      isLoading
-                    }
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="sr-only">Previous</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      if (pagination.nextOffset !== null) {
-                        setCurrentOffset(pagination.nextOffset);
-                      }
-                    }}
-                    disabled={pagination.nextOffset === null || isLoading}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                    <span className="sr-only">Next</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
-
-        <div className="bg-white border border-[#e5e5e5] rounded-lg overflow-hidden px-4">
-          <table className="w-full ">
-            <thead>
-              <tr className="border-b border-[#e5e5e5] h-10">
-                <th className="text-left px-2 text-sm font-medium text-[#737373]">
-                  Position
-                </th>
-                <th className="text-center px-2 text-sm font-medium text-[#737373] w-[125px]">
-                  Status
-                </th>
-                <th className="text-center px-2 text-sm font-medium text-[#737373]">
-                  No. of opening
-                </th>
-                <th className="text-center px-2 text-sm font-medium text-[#737373]">
-                  Applicants
-                </th>
-                <th className="text-center px-2 text-sm font-medium text-[#737373]">
-                  Interviews
-                </th>
-                <th className="text-center px-2 text-sm font-medium text-[#737373]">
-                  Created
-                </th>
-                <th className="w-16"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs?.map((job) => (
-                <tr
-                  key={job.id}
-                  className="border-b border-[#e5e5e5] last:border-b-0 hover:bg-[#fafafa] h-[66px]"
-                >
-                  <td className="px-2 text-sm font-normal text-[#0a0a0a]">
-                    {job.position}
-                  </td>
-                  <td className="px-2 text-center">
-                    <div className="flex justify-center">
-                      <Badge
-                        variant="outline"
-                        className={`capitalize font-normal text-xs tracking-[0.3px] rounded-full px-2 py-0 h-6 ${
-                          statusStyles[job.status]
-                        }`}
-                      >
-                        {job.status === "active"
-                          ? "Active"
-                          : job.status === "closed"
-                          ? "Closed"
-                          : "Draft"}
-                      </Badge>
-                    </div>
-                  </td>
-                  <td className="px-2 text-sm text-[#0a0a0a] text-center">
-                    {job.noOfOpening}
-                  </td>
-                  <td className="px-2 text-sm text-[#0a0a0a] text-center">
-                    {job.applicants}
-                  </td>
-                  <td className="px-2 text-sm text-[#0a0a0a] text-center">
-                    {job.interviews}
-                  </td>
-                  <td className="px-2 text-sm text-[#0a0a0a] text-center">
-                    {job.created}
-                  </td>
-                  <td className="px-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 p-0"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/jobs/${job.id}`}>
-                            <Eye className="h-4 text-[#737373]" />
-                            View details
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Pencil className="h-4 text-[#737373]" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => handleDeleteJob(job.id)}
-                        >
-                          <Trash2 className="h-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Empty State */}
-        {jobs?.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <p className="text-[#737373]">No jobs found</p>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <p className="text-[#737373]">Loading...</p>
-          </div>
-        )}
-      </div>
+      <DataTable<Job>
+        data={jobs}
+        columns={columns}
+        getRowId={(job) => job?.id}
+        pagination={pagination}
+        currentOffset={currentOffset}
+        onPaginationChange={setCurrentOffset}
+        isLoading={isLoading}
+        emptyMessage="No jobs found"
+        rowActions={renderRowActions}
+      />
 
       {/* Create Job Modal */}
       <CreateJobModal

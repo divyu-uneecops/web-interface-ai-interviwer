@@ -11,6 +11,8 @@ interface PhoneInputProps {
   phoneNumber: string
   onCountryCodeChange: (value: string) => void
   onPhoneNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   id?: string
   className?: string
 }
@@ -47,6 +49,8 @@ export function PhoneInput({
   phoneNumber,
   onCountryCodeChange,
   onPhoneNumberChange,
+  onFocus,
+  onBlur,
   id,
   className,
 }: PhoneInputProps) {
@@ -87,6 +91,8 @@ export function PhoneInput({
           type="tel"
           value={phoneNumber}
           onChange={onPhoneNumberChange}
+          onFocus={onFocus}
+          onBlur={onBlur}
           placeholder="9876543210"
           data-slot="input"
           aria-invalid={error ? "true" : undefined}

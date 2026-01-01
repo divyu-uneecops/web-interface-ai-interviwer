@@ -30,6 +30,8 @@ import { CreateJobModal } from "./create-job-modal";
 import { jobService } from "../services/job.service";
 import { transformAPIResponseToJobs } from "../utils/job.utils";
 import { stats, statusStyles } from "../constants/job.constants";
+import { isEmpty } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,8 +62,18 @@ export default function JobList() {
     console.log("New job created:", data);
   };
 
-  const handleDeleteJob = (id: string) => {
-    setJobs((prev) => prev.filter((job) => job.id !== id));
+  const handleDeleteJob = async (id: string) => {
+    if (isEmpty(id)) return;
+    try {
+      await jobService.deleteJobOpening(id);
+    } catch (error: any) {
+      toast.error(
+        error ? error.response.data.message : "An unknown error occurred",
+        {
+          duration: 8000, // 8 seconds
+        }
+      );
+    }
   };
 
   // Define table columns
@@ -146,7 +158,7 @@ export default function JobList() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onClick={() => handleDeleteJob(job.id)}
+          onClick={() => handleDeleteJob(job?.id)}
         >
           <Trash2 className="h-4" />
           Delete

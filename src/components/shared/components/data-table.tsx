@@ -218,7 +218,7 @@ export function DataTable<T>({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={className}>
       {/* Pagination Controls - Top */}
       {showPagination &&
         pagination &&

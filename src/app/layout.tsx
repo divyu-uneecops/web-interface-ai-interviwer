@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Public_Sans } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -16,7 +17,8 @@ const publicSans = Public_Sans({
 
 export const metadata: Metadata = {
   title: "AI Interview - Your Candidates Are Waiting",
-  description: "Sign in to review completed interviews, schedule new ones, and make faster hiring decisions with AI-powered insights.",
+  description:
+    "Sign in to review completed interviews, schedule new ones, and make faster hiring decisions with AI-powered insights.",
 };
 
 export default function RootLayout({
@@ -28,8 +30,9 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${inter.variable} ${publicSans.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-inter)' }}
+        style={{ fontFamily: "var(--font-inter)" }}
       >
+        <Toaster position="top-center" />
         {children}
       </body>
     </html>

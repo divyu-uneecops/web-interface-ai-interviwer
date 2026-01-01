@@ -35,9 +35,15 @@ class ServerInterfaceService {
     const { data } = await api.patch<T>(url, body);
     return data;
   }
-
-  async delete<T = any>(url: string, params?: Record<string, any>) {
-    const { data } = await api.delete<T>(url, { params });
+  async delete<T = any>(
+    url: string,
+    body: Record<string, any> = {} as Record<string, any>,
+    params?: Record<string, any>
+  ): Promise<T> {
+    const { data } = await api.delete<T>(url, {
+      params,
+      data: body,
+    });
     return data;
   }
 }

@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/lib/constant";
 import serverInterfaceService from "../../../../services/server-interface.service";
+import { buildUrl } from "@/lib/utils";
 
 export const jobService = {
   createJobOpening: (
@@ -23,5 +24,9 @@ export const jobService = {
       params,
       payload,
       signal
+    ),
+  deleteJobOpening: (id: string) =>
+    serverInterfaceService.delete(
+      buildUrl(API_ENDPOINTS.JOB_OPENING.DELETE, { id })
     ),
 };

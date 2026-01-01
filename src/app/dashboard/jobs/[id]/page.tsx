@@ -20,10 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  JobStatsGrid,
-  type JobStat,
-} from "@/components/dashboard/job/components/job-stats-card";
+import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
 import { EditJobModal } from "@/components/dashboard/edit-job-modal";
 import {
   Dialog,
@@ -55,105 +52,23 @@ import {
   CreateRoundModal,
   type RoundFormData,
 } from "@/components/dashboard/create-round-modal";
+import {
+  Applicant,
+  JobStat,
+  Round,
+} from "@/components/dashboard/job/interfaces/job.interface";
+import {
+  mockApplicants,
+  mockJobData,
+  mockRounds,
+} from "@/components/dashboard/job/constants/job.constants";
+import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
 
-// Mock job data - in real app this would come from an API
-const mockJobData = {
-  id: "1",
-  title: "Senior Product Manager",
-  status: "active" as const,
-  department: "Engineering",
-  type: "Full-time",
-  postedDate: "Nov 15, 2025",
-  description:
-    "We are looking for an experienced product manager to join our team and help build amazing user experiences. We are looking for an experienced product manager to join our team and help build amazing user experiences.",
-  skills: ["Collaboration", "Problem solving"],
-  jobLevel: "Senior",
-  userType: "Full-time",
-  experience: "5-8 years",
-  salaryRange: "10 LPA - 12 LPA",
-};
-
-const stats: JobStat[] = [
+export const stats: JobStat[] = [
   { label: "Total Applicants", value: 143, icon: "applicants" },
-  { label: "In screening", value: 90, icon: "completed" },
-  { label: "Final round", value: 7, icon: "hired" },
-  { label: "Hired", value: 82.2, icon: "score" },
-];
-
-// Mock applicants data
-type ApplicantStatus = "Interviewed" | "Applied" | "Rejected";
-
-interface Applicant {
-  id: string;
-  name: string;
-  email: string;
-  contact: string;
-  status: ApplicantStatus;
-  appliedDate: string;
-}
-
-const mockApplicants: Applicant[] = [
-  {
-    id: "1",
-    name: "Mohit Kumar",
-    email: "mohitkumar@gmail.com",
-    contact: "+91 9876543210",
-    status: "Interviewed",
-    appliedDate: "2d ago",
-  },
-  {
-    id: "2",
-    name: "Mohit Kumar",
-    email: "mohitkumar@gmail.com",
-    contact: "+91 9876543210",
-    status: "Applied",
-    appliedDate: "2d ago",
-  },
-  {
-    id: "3",
-    name: "Mohit Kumar",
-    email: "mohitkumar@gmail.com",
-    contact: "+91 9876543210",
-    status: "Rejected",
-    appliedDate: "2d ago",
-  },
-];
-
-// Mock rounds data
-interface Round {
-  id: string;
-  name: string;
-  duration: string;
-  questions: number;
-  applicants: number;
-  created: string;
-}
-
-const mockRounds: Round[] = [
-  {
-    id: "1",
-    name: "Behavioral Round",
-    duration: "30 min",
-    questions: 5,
-    applicants: 12,
-    created: "2d ago",
-  },
-  {
-    id: "2",
-    name: "Technical Screening",
-    duration: "45 min",
-    questions: 7,
-    applicants: 8,
-    created: "3d ago",
-  },
-  {
-    id: "3",
-    name: "Final round",
-    duration: "60 min",
-    questions: 10,
-    applicants: 5,
-    created: "5d ago",
-  },
+  { label: "Completed", value: 90, icon: "completed" },
+  { label: "Total Hired", value: 7, icon: "hired" },
+  { label: "Avg Score", value: 82.2, icon: "score" },
 ];
 
 export default function JobDetailsPage() {

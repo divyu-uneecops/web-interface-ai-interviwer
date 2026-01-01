@@ -1,4 +1,4 @@
-import { JobStat } from "../interfaces/job.interface";
+import { Applicant, JobStat, Round } from "../interfaces/job.interface";
 
 export const domainOptions = [
   { value: "engineering", label: "Engineering" },
@@ -53,15 +53,85 @@ export const statusOptions = [
   { value: "closed", label: "Closed" },
 ];
 
-export const stats: JobStat[] = [
-  { label: "Total Applicants", value: 143, icon: "applicants" },
-  { label: "Completed", value: 90, icon: "completed" },
-  { label: "Total Hired", value: 7, icon: "hired" },
-  { label: "Avg Score", value: 82.2, icon: "score" },
-];
-
 export const statusStyles = {
   active: "bg-[#def2eb] text-[#0e4230] border-transparent",
   draft: "bg-[#e5e5e5] text-[#000000] border-transparent",
   closed: "bg-[#fcefec] text-[#d92d20] border-transparent",
 };
+
+export const mockJobData = {
+  id: "1",
+  title: "Senior Product Manager",
+  status: "active" as const,
+  department: "Engineering",
+  type: "Full-time",
+  postedDate: "Nov 15, 2025",
+  description:
+    "We are looking for an experienced product manager to join our team and help build amazing user experiences. We are looking for an experienced product manager to join our team and help build amazing user experiences.",
+  skills: ["Collaboration", "Problem solving"],
+  jobLevel: "Senior",
+  userType: "Full-time",
+  experience: "5-8 years",
+  salaryRange: "10 LPA - 12 LPA",
+};
+
+export const stats: JobStat[] = [
+  { label: "Total Applicants", value: 143, icon: "applicants" },
+  { label: "In screening", value: 90, icon: "completed" },
+  { label: "Final round", value: 7, icon: "hired" },
+  { label: "Hired", value: 82.2, icon: "score" },
+];
+
+export const mockApplicants: Applicant[] = [
+  {
+    id: "1",
+    name: "Mohit Kumar",
+    email: "mohitkumar@gmail.com",
+    contact: "+91 9876543210",
+    status: "Interviewed",
+    appliedDate: "2d ago",
+  },
+  {
+    id: "2",
+    name: "Mohit Kumar",
+    email: "mohitkumar@gmail.com",
+    contact: "+91 9876543210",
+    status: "Applied",
+    appliedDate: "2d ago",
+  },
+  {
+    id: "3",
+    name: "Mohit Kumar",
+    email: "mohitkumar@gmail.com",
+    contact: "+91 9876543210",
+    status: "Rejected",
+    appliedDate: "2d ago",
+  },
+];
+
+export const mockRounds: Round[] = [
+  {
+    id: "1",
+    name: "Behavioral Round",
+    duration: "30 min",
+    questions: 5,
+    applicants: 12,
+    created: "2d ago",
+  },
+  {
+    id: "2",
+    name: "Technical Screening",
+    duration: "45 min",
+    questions: 7,
+    applicants: 8,
+    created: "3d ago",
+  },
+  {
+    id: "3",
+    name: "Final round",
+    duration: "60 min",
+    questions: 10,
+    applicants: 5,
+    created: "5d ago",
+  },
+];

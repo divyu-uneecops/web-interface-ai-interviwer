@@ -1,3 +1,5 @@
+import { ApplicantStatus } from "../types/job.types";
+
 export interface CreateJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,4 +34,22 @@ export interface JobStat {
   label: string;
   value: string | number;
   icon: "applicants" | "completed" | "hired" | "score";
+}
+
+export interface Round {
+  id: string;
+  name: string;
+  duration: string;
+  questions: number;
+  applicants: number;
+  created: string;
+}
+
+export interface Applicant {
+  id: string;
+  name: string;
+  email: string;
+  contact: string;
+  status: ApplicantStatus;
+  appliedDate: string;
 }

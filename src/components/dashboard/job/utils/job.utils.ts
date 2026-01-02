@@ -1,32 +1,13 @@
-import { JobFormData, Job } from "../interfaces/job.interface";
+import {
+  JobFormData,
+  Job,
+  APIJobItem,
+  APIPaginationInfo,
+  JobsWithPagination,
+  APIJobDetailSection,
+  JobDetail,
+} from "../interfaces/job.interface";
 
-// API Response Types
-interface APIJobValue {
-  propertyId: string;
-  key: string;
-  value: any;
-}
-
-interface APIJobItem {
-  values: APIJobValue[];
-  createdOn: number;
-  updatedOn: number;
-  id: string;
-}
-
-interface APIPaginationInfo {
-  total: number;
-  nextOffset: number | null;
-  previousOffset: number | null;
-  limit: number;
-}
-
-export interface JobsWithPagination {
-  jobs: Job[];
-  pagination: APIPaginationInfo;
-}
-
-// Transform API response to Job format
 export const transformAPIResponseToJobs = (
   data: APIJobItem[],
   pagination?: APIPaginationInfo
@@ -99,40 +80,6 @@ export const transformAPIResponseToJobs = (
   };
 };
 
-// API Response Types for Job Detail
-interface APIJobDetailField {
-  key: string;
-  value: any;
-  type: string;
-  fields?: APIJobDetailField[];
-}
-
-interface APIJobDetailSection {
-  section: string;
-  fields: APIJobDetailField[];
-}
-
-export interface JobDetail {
-  id: string;
-  title: string;
-  status: "active" | "draft" | "closed";
-  department: string;
-  type: string;
-  postedDate: string;
-  description: string;
-  skills: string[];
-  jobLevel: string;
-  userType: string;
-  experience: string;
-  salaryRange?: string;
-  minExp?: number;
-  maxExp?: number;
-  numOfOpenings?: number;
-  industry?: string;
-  jobId?: string;
-}
-
-// Transform API response to Job Detail format
 export const transformAPIResponseToJobDetail = (
   data: APIJobDetailSection[],
   jobId: string
@@ -261,7 +208,6 @@ export const formatRelativeTime = (timestamp: number): string => {
   return "Just now";
 };
 
-// Mapping functions for API format
 export const mapIndustryToAPI = (industry: string): string => {
   const industryMap: Record<string, string> = {
     engineering: "IT/Software",
@@ -301,7 +247,6 @@ export const mapStatusToAPI = (status: string): string => {
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-// Transform form data to API payload format
 export const transformToAPIPayload = (values: JobFormData) => {
   // Generate a unique jobId (you might want to get this from the backend)
   const jobId = Math.floor(Math.random() * 1000) + 100;
@@ -387,6 +332,11 @@ export const transformToAPIPayload = (values: JobFormData) => {
       key: "accessibility",
       value: "Private",
     },
+    {
+      propertyId: "6957547fc9ba83a076aac57c",
+      key: "formUser",
+      value: ["6936a4d92276e3fc3ac7b13b"],
+    },
     ...(values.skills.length > 0
       ? [
           {
@@ -414,6 +364,7 @@ export const transformToAPIPayload = (values: JobFormData) => {
       "6952595cc9ba83a076aac431",
       "6952598ec9ba83a076aac432",
       "695259d0c9ba83a076aac435",
+      "6957547fc9ba83a076aac57c",
     ],
     flows: [
       {
@@ -426,7 +377,6 @@ export const transformToAPIPayload = (values: JobFormData) => {
   };
 };
 
-// Formik validation function
 export const validate = (values: JobFormData) => {
   const errors: Partial<Record<keyof JobFormData, string>> = {};
 
@@ -463,6 +413,5 @@ export const validate = (values: JobFormData) => {
     errors.skills = "At least one skill is required";
   }
 
-  console.log(errors);
   return errors;
 };

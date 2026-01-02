@@ -1,7 +1,7 @@
 "use client";
 
-import { ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ReactNode, useMemo } from "react";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -99,8 +99,61 @@ function DataTablePagination({
 }: DataTablePaginationProps) {
   if (pagination.total === 0) return null;
 
-  const startResult = currentOffset + 1;
-  const endResult = Math.min(currentOffset + dataLength, pagination.total);
+  // Calculate current page from offset
+  const currentPage = Math.floor(currentOffset / pagination.limit) + 1;
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
+
+  // Calculate which page numbers to show
+  const pageNumbers = useMemo(() => {
+    const pages: (number | "ellipsis")[] = [];
+    const maxVisiblePages = 3;
+
+    if (totalPages <= maxVisiblePages + 2) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      // Calculate start and end of visible range
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      // Adjust if we're near the start
+      if (currentPage <= 2) {
+        end = Math.min(totalPages - 1, 3);
+      }
+
+      // Adjust if we're near the end
+      if (currentPage >= totalPages - 1) {
+        start = Math.max(2, totalPages - 2);
+      }
+
+      // Add ellipsis after first page if needed
+      if (start > 2) {
+        pages.push("ellipsis");
+      }
+
+      // Add visible page range
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      // Add ellipsis before last page if needed
+      if (end < totalPages - 1) {
+        pages.push("ellipsis");
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  }, [currentPage, totalPages]);
 
   const handlePrevious = () => {
     if (pagination.previousOffset !== null && pagination.previousOffset >= 0) {
@@ -114,6 +167,11 @@ function DataTablePagination({
     }
   };
 
+  const handlePageClick = (page: number) => {
+    const newOffset = (page - 1) * pagination.limit;
+    onPaginationChange(newOffset);
+  };
+
   const isPreviousDisabled =
     pagination.previousOffset === null ||
     pagination.previousOffset < 0 ||
@@ -122,43 +180,76 @@ function DataTablePagination({
   const isNextDisabled = pagination.nextOffset === null || isLoading;
 
   return (
-    <div className="flex items-center justify-end">
-      <div className="flex items-center gap-2 mr-2 mb-2">
-        <div className="text-sm text-[#737373] mr-2">
-          {startResult}-{endResult} of {pagination.total}
-        </div>
-        <button
-          onClick={handlePrevious}
-          disabled={isPreviousDisabled}
-          className={cn(
-            "inline-flex items-center justify-center rounded-md transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            "disabled:pointer-events-none disabled:opacity-50",
-            "hover:bg-accent hover:text-accent-foreground",
-            isPreviousDisabled && "cursor-not-allowed opacity-50"
-          )}
-          aria-label="Previous page"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Previous</span>
-        </button>
+    <div className="flex items-center justify-end gap-1 mt-2">
+      {/* Previous Button */}
+      <button
+        onClick={handlePrevious}
+        disabled={isPreviousDisabled}
+        className={cn(
+          "inline-flex items-center gap-1 h-9 px-4 py-2 rounded-md transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "disabled:pointer-events-none disabled:opacity-50",
+          "hover:bg-[#f5f5f5] text-[#0a0a0a]",
+          isPreviousDisabled && "cursor-not-allowed opacity-50"
+        )}
+        aria-label="Previous page"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm font-medium">Previous</span>
+      </button>
 
-        <button
-          onClick={handleNext}
-          disabled={isNextDisabled}
-          className={cn(
-            "inline-flex items-center justify-center rounded-md transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            "disabled:pointer-events-none disabled:opacity-50",
-            "hover:bg-accent hover:text-accent-foreground",
-            isNextDisabled && "cursor-not-allowed opacity-50"
-          )}
-          aria-label="Next page"
-        >
-          <ChevronRight className="h-4 w-4" />
-          <span className="sr-only">Next</span>
-        </button>
-      </div>
+      {/* Page Numbers */}
+      {pageNumbers.map((page, index) => {
+        if (page === "ellipsis") {
+          return (
+            <div
+              key={`ellipsis-${index}`}
+              className="flex items-center justify-center h-9 w-9 p-2.5"
+            >
+              <MoreHorizontal className="h-4 w-4 text-[#0a0a0a]" />
+            </div>
+          );
+        }
+
+        const isActive = page === currentPage;
+        return (
+          <button
+            key={page}
+            onClick={() => handlePageClick(page)}
+            disabled={isLoading}
+            className={cn(
+              "inline-flex items-center justify-center h-9 w-9 rounded-md transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "disabled:pointer-events-none disabled:opacity-50",
+              "text-sm font-medium",
+              isActive
+                ? "bg-white border border-[#e5e5e5] text-[#0a0a0a] shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
+                : "hover:bg-[#f5f5f5] text-[#0a0a0a]"
+            )}
+            aria-label={`Go to page ${page}`}
+            aria-current={isActive ? "page" : undefined}
+          >
+            {page}
+          </button>
+        );
+      })}
+
+      {/* Next Button */}
+      <button
+        onClick={handleNext}
+        disabled={isNextDisabled}
+        className={cn(
+          "inline-flex items-center gap-1 h-9 px-4 py-2 rounded-md transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "disabled:pointer-events-none disabled:opacity-50",
+          "hover:bg-[#f5f5f5] text-[#0a0a0a]",
+          isNextDisabled && "cursor-not-allowed opacity-50"
+        )}
+        aria-label="Next page"
+      >
+        <span className="text-sm font-medium">Next</span>
+        <ChevronRight className="h-4 w-4" />
+      </button>
     </div>
   );
 }
@@ -219,20 +310,6 @@ export function DataTable<T>({
 
   return (
     <div className={className}>
-      {/* Pagination Controls - Top */}
-      {showPagination &&
-        pagination &&
-        onPaginationChange &&
-        pagination.total > 0 && (
-          <DataTablePagination
-            pagination={pagination}
-            currentOffset={currentOffset}
-            onPaginationChange={onPaginationChange}
-            isLoading={isLoading}
-            dataLength={data?.length}
-          />
-        )}
-
       {/* Table */}
       <div className="bg-white border border-[#e5e5e5] rounded-lg overflow-hidden px-4">
         <table className={cn("w-full", tableClassName)}>
@@ -286,6 +363,20 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls - Bottom */}
+      {showPagination &&
+        pagination &&
+        onPaginationChange &&
+        pagination.total > 0 && (
+          <DataTablePagination
+            pagination={pagination}
+            currentOffset={currentOffset}
+            onPaginationChange={onPaginationChange}
+            isLoading={isLoading}
+            dataLength={data?.length}
+          />
+        )}
 
       {/* Loading State */}
       {isLoading &&

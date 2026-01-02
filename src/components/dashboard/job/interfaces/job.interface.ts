@@ -52,3 +52,60 @@ export interface Applicant {
   status: ApplicantStatus;
   appliedDate: string;
 }
+
+export interface APIJobValue {
+  propertyId: string;
+  key: string;
+  value: any;
+}
+
+export interface APIJobItem {
+  values: APIJobValue[];
+  createdOn: number;
+  updatedOn: number;
+  id: string;
+}
+
+export interface APIPaginationInfo {
+  total: number;
+  nextOffset: number | null;
+  previousOffset: number | null;
+  limit: number;
+}
+
+export interface JobsWithPagination {
+  jobs: Job[];
+  pagination: APIPaginationInfo;
+}
+
+export interface APIJobDetailField {
+  key: string;
+  value: any;
+  type: string;
+  fields?: APIJobDetailField[];
+}
+
+export interface APIJobDetailSection {
+  section: string;
+  fields: APIJobDetailField[];
+}
+
+export interface JobDetail {
+  id: string;
+  title: string;
+  status: "active" | "draft" | "closed";
+  department: string;
+  type: string;
+  postedDate: string;
+  description: string;
+  skills: string[];
+  jobLevel: string;
+  userType: string;
+  experience: string;
+  salaryRange?: string;
+  minExp?: number;
+  maxExp?: number;
+  numOfOpenings?: number;
+  industry?: string;
+  jobId?: string;
+}

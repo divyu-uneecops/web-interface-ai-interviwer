@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useFormik } from "formik";
+
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+
 import { jobService } from "../services/job.service";
 import { CreateJobModalProps, JobFormData } from "../interfaces/job.interface";
 import { transformToAPIPayload, validate } from "../utils/job.utils";
@@ -34,6 +36,7 @@ import {
   statusOptions,
   userTypeOptions,
 } from "../constants/job.constants";
+import { toast } from "sonner";
 
 export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
   const [skillInput, setSkillInput] = useState("");
@@ -57,12 +60,23 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
       setIsSubmitting(true);
       try {
         const payload = transformToAPIPayload(values);
-        await jobService.createJobOpening(payload);
+        const response = await jobService.createJobOpening({}, payload);
+        toast.success(
+          response?.message ? response?.message : "An unknown error occurred",
+          {
+            duration: 8000, // 8 seconds
+          }
+        );
         formik.resetForm();
         setSkillInput("");
         onOpenChange(false);
-      } catch (error) {
-        console.error("Error creating job opening:", error);
+      } catch (error: any) {
+        toast.error(
+          error ? error.response.data.message : "An unknown error occurred",
+          {
+            duration: 8000, // 8 seconds
+          }
+        );
         // You might want to show an error toast here
       } finally {
         setIsSubmitting(false);

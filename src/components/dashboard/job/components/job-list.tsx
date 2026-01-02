@@ -47,10 +47,50 @@ export default function JobList() {
   const [isLoading, setIsLoading] = useState(false);
   const PAGE_LIMIT = 10;
 
+  useEffect(() => {
+    fetchJobs();
+  }, [currentOffset]);
+
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    setJobs([]);
+    try {
+      const params = {
+        limit: PAGE_LIMIT,
+        offset: currentOffset,
+      };
+      const response = await jobService.getJobOpenings(params, {
+        filters: {
+          $and: [],
+        },
+        appId: "69521cd1c9ba83a076aac3ae",
+      });
+      const result = transformAPIResponseToJobs(response.data, response.page);
+      setJobs(result.jobs);
+      setPagination(result.pagination);
+      // Scroll to top when page changes
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      setJobs([]);
+      setPagination({
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: 10,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleDeleteJob = async (id: string) => {
     if (isEmpty(id)) return;
     try {
-      await jobService.deleteJobOpening(id);
+      const response = await jobService.deleteJobOpening(id);
+      toast.success(response ? response : "An unknown error occurred", {
+        duration: 8000, // 8 seconds
+      });
+      setCurrentOffset(0);
     } catch (error: any) {
       toast.error(
         error ? error.response.data.message : "An unknown error occurred",
@@ -151,42 +191,6 @@ export default function JobList() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setIsLoading(true);
-      setJobs([]);
-      try {
-        const params = {
-          limit: PAGE_LIMIT,
-          offset: currentOffset,
-        };
-        const response = await jobService.getJobOpenings(params, {
-          filters: {
-            $and: [],
-          },
-          appId: "69521cd1c9ba83a076aac3ae",
-        });
-        const result = transformAPIResponseToJobs(response.data, response.page);
-        setJobs(result.jobs);
-        setPagination(result.pagination);
-        // Scroll to top when page changes
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-        setJobs([]);
-        setPagination({
-          total: 0,
-          nextOffset: null,
-          previousOffset: null,
-          limit: 10,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchJobs();
-  }, [currentOffset]);
 
   return (
     <div className="space-y-6">

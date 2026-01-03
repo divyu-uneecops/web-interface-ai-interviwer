@@ -8,6 +8,80 @@ import {
   JobDetail,
 } from "../interfaces/job.interface";
 
+export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
+  // Create a map of values for easy lookup
+  const valuesMap = new Map<string, any>();
+  if (Array.isArray(item.values)) {
+    item.values.forEach((val) => {
+      if (val && val.key) {
+        valuesMap.set(val.key, val.value);
+      }
+    });
+  }
+
+  // Extraction with fallback
+  const jobId = valuesMap.get("jobId") || "";
+  const title = valuesMap.get("title") || "";
+  const industry = valuesMap.get("industry") || "";
+  const jobLevel = valuesMap.get("jobLevel") || "";
+  const jobType = valuesMap.get("jobType") || "";
+  const minExp = valuesMap.get("minExp") ?? 0;
+  const maxExp = valuesMap.get("maxExp") ?? 0;
+  const description = valuesMap.get("description") || "";
+  const numOfOpenings = valuesMap.get("numOfOpenings") ?? 0;
+  const status = valuesMap.get("status") || "draft";
+  const accessibility = valuesMap.get("accessibility") || "";
+  const formUser = valuesMap.get("formUser") || "";
+  // Required skills extraction (expecting nested array of [{ key: 'skill', value: ... }])
+  let requiredSkills: string[] = [];
+  const skillsValue = valuesMap.get("requiredSkills");
+  if (Array.isArray(skillsValue) && skillsValue.length > 0) {
+    // The value is an array of arrays, each inner array might have an object with .value or "skill"
+    requiredSkills = skillsValue
+      .flat()
+      .map((sk: any) => {
+        if (sk && typeof sk === "object") return sk.value || sk.skill || "";
+        return "";
+      })
+      .filter((v) => !!v);
+  }
+
+  let normalizedStatus: "active" | "draft" | "closed" =
+    typeof status === "string"
+      ? status.toLowerCase() === "active"
+        ? "active"
+        : status.toLowerCase() === "closed"
+        ? "closed"
+        : "draft"
+      : "draft";
+
+  // createdOn default
+  const createdOnRaw = item.createdOn;
+
+  return {
+    id: String(item?.id || ""),
+    jobId: String(jobId),
+    title: String(title),
+    status: normalizedStatus,
+    industry: String(industry),
+    jobLevel: String(jobLevel),
+    jobType: String(jobType),
+    minExp: typeof minExp === "string" ? parseInt(minExp, 10) || 0 : minExp,
+    maxExp: typeof maxExp === "string" ? parseInt(maxExp, 10) || 0 : maxExp,
+    description: String(description),
+    numOfOpenings:
+      typeof numOfOpenings === "string"
+        ? parseInt(numOfOpenings, 10) || 0
+        : numOfOpenings,
+    accessibility: String(accessibility),
+    applicants: 0,
+    interviews: 0,
+    formUser: formUser[0] || "",
+    requiredSkills,
+    createdOn: formatRelativeTime(createdOnRaw),
+  };
+};
+
 export const transformAPIResponseToJobs = (
   data: APIJobItem[],
   pagination?: APIPaginationInfo
@@ -24,50 +98,7 @@ export const transformAPIResponseToJobs = (
     };
   }
 
-  const jobs = data.map((item) => {
-    // Create a map of values for easy lookup
-    const valuesMap = new Map<string, any>();
-    if (Array.isArray(item.values)) {
-      item.values.forEach((val) => {
-        if (val && val.key) {
-          valuesMap.set(val.key, val.value);
-        }
-      });
-    }
-
-    // Extract values with fallbacks
-    const title = valuesMap.get("title") || "";
-    const status = valuesMap.get("status") || "Draft";
-    const numOfOpenings = valuesMap.get("numOfOpenings") || 0;
-    const createdOn = item.createdOn || Date.now();
-
-    // Normalize status to lowercase
-    const statusLower = String(status).toLowerCase();
-    const normalizedStatus =
-      statusLower === "active"
-        ? "active"
-        : statusLower === "closed"
-        ? "closed"
-        : "draft";
-
-    // Parse number of openings
-    let noOfOpening = 0;
-    if (typeof numOfOpenings === "number") {
-      noOfOpening = numOfOpenings;
-    } else if (typeof numOfOpenings === "string") {
-      noOfOpening = parseInt(numOfOpenings, 10) || 0;
-    }
-
-    return {
-      id: item.id || `job-${Date.now()}-${Math.random()}`,
-      position: String(title),
-      status: normalizedStatus as "active" | "draft" | "closed",
-      noOfOpening,
-      applicants: 0, // Not available in API response
-      interviews: 0, // Not available in API response
-      created: formatRelativeTime(createdOn),
-    };
-  });
+  const jobs = data.map((item) => transformAPIJobItemToJob(item));
 
   return {
     jobs,
@@ -82,108 +113,103 @@ export const transformAPIResponseToJobs = (
 
 export const transformAPIResponseToJobDetail = (
   data: APIJobDetailSection[],
-  jobId: string
+  id: string
 ): JobDetail => {
-  if (!Array.isArray(data) || data.length === 0) {
+  if (!Array.isArray(data) || data?.length === 0) {
     return {
-      id: jobId,
+      id: String(id),
+      jobId: "",
       title: "",
       status: "draft",
-      department: "",
-      type: "",
-      postedDate: "",
+      industry: "",
+      createdOn: "",
       description: "",
-      skills: [],
+      requiredSkills: [],
       jobLevel: "",
-      userType: "",
-      experience: "",
+      jobType: "",
+      minExp: 0,
+      maxExp: 0,
+      numOfOpenings: 0,
+      applicants: 0,
+      interviews: 0,
+      formUser: "",
+      accessibility: "",
     };
   }
 
   // Create a map of all fields for easy lookup
   const fieldsMap = new Map<string, any>();
 
-  data.forEach((section) => {
-    if (Array.isArray(section.fields)) {
-      section.fields.forEach((field) => {
-        if (field.key) {
-          fieldsMap.set(field.key, field.value);
+  data?.forEach((section) => {
+    if (Array.isArray(section?.fields)) {
+      section?.fields?.forEach((field) => {
+        if (field?.key) {
+          fieldsMap.set(field?.key, field?.value);
         }
       });
     }
   });
 
-  // Extract values with fallbacks
+  // Extraction with fallback
+  const jobId = fieldsMap.get("jobId") || "";
   const title = fieldsMap.get("title") || "";
-  const status = fieldsMap.get("status") || "Draft";
-  const description = fieldsMap.get("description") || "";
+  const industry = fieldsMap.get("industry") || "";
   const jobLevel = fieldsMap.get("jobLevel") || "";
   const jobType = fieldsMap.get("jobType") || "";
-  const industry = fieldsMap.get("industry") || "";
-  const minExp = fieldsMap.get("minExp") || 0;
-  const maxExp = fieldsMap.get("maxExp") || 0;
-  const numOfOpenings = fieldsMap.get("numOfOpenings") || 0;
-  const jobIdValue = fieldsMap.get("jobId") || jobId;
-
-  // Normalize status to lowercase
-  const statusLower = String(status).toLowerCase();
-  const normalizedStatus =
-    statusLower === "active"
-      ? "active"
-      : statusLower === "closed"
-      ? "closed"
-      : "draft";
-
-  // Extract skills from nestedFieldArray
-  let skills: string[] = [];
-  const requiredSkills = fieldsMap.get("requiredSkills");
-  if (Array.isArray(requiredSkills)) {
-    skills = requiredSkills
-      .map((skillArray) => {
-        if (Array.isArray(skillArray) && skillArray.length > 0) {
-          const skillField = skillArray.find((item) => item.key === "skill");
-          return skillField?.value;
-        }
-        return null;
+  const minExp = fieldsMap.get("minExp") ?? 0;
+  const maxExp = fieldsMap.get("maxExp") ?? 0;
+  const description = fieldsMap.get("description") || "";
+  const numOfOpenings = fieldsMap.get("numOfOpenings") ?? 0;
+  const status = fieldsMap.get("status") || "draft";
+  const accessibility = fieldsMap.get("accessibility") || "";
+  const formUser = fieldsMap.get("formUser") || "";
+  // Required skills extraction (expecting nested array of [{ key: 'skill', value: ... }])
+  let requiredSkills: string[] = [];
+  const skillsValue = fieldsMap.get("requiredSkills");
+  if (Array.isArray(skillsValue) && skillsValue.length > 0) {
+    // The value is an array of arrays, each inner array might have an object with .value or "skill"
+    requiredSkills = skillsValue
+      .flat()
+      .map((sk: any) => {
+        if (sk && typeof sk === "object") return sk.value || sk.skill || "";
+        return "";
       })
-      .filter((skill): skill is string => Boolean(skill));
+      .filter((v) => !!v);
   }
 
-  // Format experience
-  const experience =
-    minExp && maxExp
-      ? `${minExp}-${maxExp} years`
-      : minExp
-      ? `${minExp}+ years`
-      : maxExp
-      ? `Up to ${maxExp} years`
-      : "";
+  let normalizedStatus: "active" | "draft" | "closed" =
+    typeof status === "string"
+      ? status.toLowerCase() === "active"
+        ? "active"
+        : status.toLowerCase() === "closed"
+        ? "closed"
+        : "draft"
+      : "draft";
 
-  // Format posted date (you might need to get this from createdOn/updatedOn if available)
-  const postedDate = "Nov 15, 2025"; // This should come from API if available
+  // createdOn default
+  const createdOnRaw = 1767074863801;
 
   return {
-    id: jobId,
-    jobId: jobIdValue,
+    id: String(id || ""),
+    jobId: String(jobId),
     title: String(title),
-    status: normalizedStatus as "active" | "draft" | "closed",
-    department: String(industry || ""),
-    type: String(jobType || ""),
-    postedDate,
+    status: normalizedStatus,
+    industry: String(industry),
+    jobLevel: String(jobLevel),
+    jobType: String(jobType),
+    minExp: typeof minExp === "string" ? parseInt(minExp, 10) || 0 : minExp,
+    maxExp: typeof maxExp === "string" ? parseInt(maxExp, 10) || 0 : maxExp,
     description: String(description),
-    skills,
-    jobLevel: String(jobLevel || ""),
-    userType: String(jobType || ""),
-    experience,
-    minExp:
-      typeof minExp === "number" ? minExp : parseInt(String(minExp), 10) || 0,
-    maxExp:
-      typeof maxExp === "number" ? maxExp : parseInt(String(maxExp), 10) || 0,
     numOfOpenings:
-      typeof numOfOpenings === "number"
-        ? numOfOpenings
-        : parseInt(String(numOfOpenings), 10) || 0,
-    industry: String(industry || ""),
+      typeof numOfOpenings === "string"
+        ? parseInt(numOfOpenings, 10) || 0
+        : numOfOpenings,
+    accessibility: String(accessibility),
+    applicants: 0,
+    interviews: 0,
+    formUser: formUser[0] || "",
+    requiredSkills,
+    createdOn: formatRelativeTime(createdOnRaw),
   };
 };
 
@@ -247,9 +273,12 @@ export const mapStatusToAPI = (status: string): string => {
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-export const transformToAPIPayload = (values: JobFormData) => {
-  // Generate a unique jobId (you might want to get this from the backend)
-  const jobId = Math.floor(Math.random() * 1000) + 100;
+export const transformToAPIPayload = (
+  values: JobFormData,
+  existingJobId?: string
+) => {
+  // Use existing jobId if provided (for edit), otherwise generate a new one
+  const jobId = existingJobId || Math.floor(Math.random() * 1000) + 100;
 
   // Transform skills to API format
   const requiredSkills = values.skills.map((skill) => [
@@ -414,4 +443,84 @@ export const validate = (values: JobFormData) => {
   }
 
   return errors;
+};
+
+// Reverse mapping functions for API to form data
+export const mapIndustryFromAPI = (industry: string): string => {
+  const industryMap: Record<string, string> = {
+    "IT/Software": "technical",
+    "it/software": "technical",
+    Engineering: "engineering",
+    engineering: "engineering",
+    Product: "product",
+    product: "product",
+    Design: "design",
+    design: "design",
+    Marketing: "marketing",
+    marketing: "marketing",
+    Sales: "sales",
+    sales: "sales",
+    "Human Resources": "hr",
+    "human resources": "hr",
+    HR: "hr",
+    hr: "hr",
+  };
+  return industryMap[industry] || "technical";
+};
+
+export const mapJobLevelFromAPI = (jobLevel: string): string => {
+  const levelMap: Record<string, string> = {
+    Entry: "junior",
+    entry: "junior",
+    Mid: "mid",
+    mid: "mid",
+    Senior: "senior",
+    senior: "senior",
+    Lead: "lead",
+    lead: "lead",
+    Manager: "manager",
+    manager: "manager",
+    Director: "director",
+    director: "director",
+  };
+  return levelMap[jobLevel] || "mid";
+};
+
+export const mapJobTypeFromAPI = (jobType: string): string => {
+  const typeMap: Record<string, string> = {
+    "Full-time": "full-time",
+    "full-time": "full-time",
+    "Part-time": "part-time",
+    "part-time": "part-time",
+    Contract: "contract",
+    contract: "contract",
+    Intern: "intern",
+    intern: "intern",
+  };
+  return typeMap[jobType] || "full-time";
+};
+
+export const mapStatusFromAPI = (status: string): string => {
+  return status.toLowerCase();
+};
+
+// Transform JobDetail to JobFormData for edit mode
+export const transformJobDetailToFormData = (
+  jobDetail: JobDetail
+): JobFormData => {
+  return {
+    title: jobDetail.title || "",
+    industry: jobDetail.industry ? mapIndustryFromAPI(jobDetail.industry) : "",
+    jobLevel: jobDetail.jobLevel ? mapJobLevelFromAPI(jobDetail.jobLevel) : "",
+    jobType: jobDetail.type ? mapJobTypeFromAPI(jobDetail.type) : "",
+    minExperience: jobDetail.minExp ? String(jobDetail.minExp) : "",
+    maxExperience: jobDetail.maxExp ? String(jobDetail.maxExp) : "",
+    description: jobDetail.description || "",
+    noOfOpenings: jobDetail.numOfOpenings
+      ? String(jobDetail.numOfOpenings)
+      : "",
+    attachment: null,
+    status: jobDetail.status ? mapStatusFromAPI(jobDetail.status) : "",
+    skills: jobDetail.skills || [],
+  };
 };

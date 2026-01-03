@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useFormik } from "formik";
+import { toast } from "sonner";
 
 import {
   Dialog,
@@ -36,9 +37,14 @@ import {
   statusOptions,
   userTypeOptions,
 } from "../constants/job.constants";
-import { toast } from "sonner";
 
-export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
+export function CreateJobModal({
+  open,
+  onOpenChange,
+  onSuccess,
+  isEditMode = false,
+  jobDetail,
+}: CreateJobModalProps) {
   const [skillInput, setSkillInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formik = useFormik<JobFormData>({
@@ -47,58 +53,79 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
       industry: "",
       jobLevel: "",
       jobType: "",
-      minExperience: "",
-      maxExperience: "",
+      minExperience: null,
+      maxExperience: null,
       description: "",
-      noOfOpenings: "",
+      noOfOpenings: null,
       attachment: null,
       status: "",
       skills: [],
     },
     validate: validate,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const payload = transformToAPIPayload(values);
-        const response = await jobService.createJobOpening({}, payload);
-        toast.success(
-          response?.message ? response?.message : "An unknown error occurred",
-          {
-            duration: 8000, // 8 seconds
-          }
-        );
+        if (isEditMode) {
+          // Edit mode - update existing job
+          // Use the jobId from job detail if available, otherwise use the record ID
+          // const payloadJobId = jobDetailJobId || jobId;
+          // const payload = transformToAPIPayload(values, payloadJobId);
+          // const response = await jobService.updateJobOpening(
+          //   jobId,
+          //   { appId: "69521cd1c9ba83a076aac3ae" },
+          //   payload
+          // );
+          // toast.success(response?.message || "Job updated successfully", {
+          //   duration: 8000,
+          // });
+        } else {
+          // Create mode - create new job
+          const payload = transformToAPIPayload(values);
+          const response = await jobService.createJobOpening({}, payload);
+          toast.success(response?.message || "Job created successfully", {
+            duration: 8000,
+          });
+        }
         formik.resetForm();
         setSkillInput("");
         onOpenChange(false);
+        if (onSuccess) {
+          onSuccess();
+        }
       } catch (error: any) {
         toast.error(
-          error ? error.response.data.message : "An unknown error occurred",
+          error?.response?.data?.message || "An unknown error occurred",
           {
-            duration: 8000, // 8 seconds
+            duration: 8000,
           }
         );
-        // You might want to show an error toast here
       } finally {
         setIsSubmitting(false);
       }
     },
   });
 
-  // Reset form when modal closes
+  // Fetch job data when in edit mode
   useEffect(() => {
-    if (!open) {
+    if (open && isEditMode) {
+      formik.setValues(jobDetail as JobFormData);
+    } else if (!open) {
+      // Reset form when modal closes
       formik.resetForm();
       setSkillInput("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, isEditMode]);
 
   const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && skillInput.trim()) {
+    if (e.key === "Enter" && skillInput?.trim()) {
       e.preventDefault();
-      const trimmedSkill = skillInput.trim();
-      if (!formik.values.skills.includes(trimmedSkill)) {
-        formik.setFieldValue("skills", [...formik.values.skills, trimmedSkill]);
+      const trimmedSkill = skillInput?.trim();
+      if (!formik?.values?.skills?.includes(trimmedSkill)) {
+        formik.setFieldValue("skills", [
+          ...formik?.values?.skills,
+          trimmedSkill,
+        ]);
       }
       setSkillInput("");
     }
@@ -116,12 +143,12 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
       <DialogContent className="sm:max-w-[779px] max-h-[90vh] overflow-y-auto p-6 gap-4">
         <DialogHeader className="gap-1.5">
           <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
-            Create new job opening
+            {isEditMode ? "Edit Job" : "Create New Job"}
           </DialogTitle>
           <DialogDescription className="sr-only"></DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <form onSubmit={formik?.handleSubmit} className="space-y-4">
           {/* Basic job details Section */}
           <div className="space-y-4">
             {/* Parse job documentation */}
@@ -266,9 +293,9 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                   Min experience <span className="text-red-700">*</span>
                 </Label>
                 <Select
-                  value={formik.values.minExperience}
+                  value={formik?.values?.minExperience?.toString() || ""}
                   onValueChange={(value) => {
-                    formik.setFieldValue("minExperience", value);
+                    formik.setFieldValue("minExperience", Number(value));
                     formik.setFieldTouched("minExperience", true);
                   }}
                 >
@@ -297,9 +324,9 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                   Max experience <span className="text-red-700">*</span>
                 </Label>
                 <Select
-                  value={formik.values.maxExperience}
+                  value={formik?.values?.maxExperience?.toString() || ""}
                   onValueChange={(value) => {
-                    formik.setFieldValue("maxExperience", value);
+                    formik.setFieldValue("maxExperience", Number(value));
                     formik.setFieldTouched("maxExperience", true);
                   }}
                 >
@@ -362,9 +389,9 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                   No. of openings
                 </Label>
                 <Select
-                  value={formik.values.noOfOpenings}
+                  value={formik?.values?.noOfOpenings?.toString() || ""}
                   onValueChange={(value) => {
-                    formik.setFieldValue("noOfOpenings", value);
+                    formik.setFieldValue("noOfOpenings", Number(value));
                     formik.setFieldTouched("noOfOpenings", true);
                   }}
                 >
@@ -476,9 +503,17 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
             <Button
               type="submit"
               className="bg-[#02563d] hover:bg-[#02563d]/90 text-white h-9 px-4 rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
-              disabled={isSubmitting || !formik.isValid || !formik.dirty}
+              disabled={
+                isSubmitting || !formik.isValid || (!formik.dirty && isEditMode)
+              }
             >
-              {isSubmitting ? "Creating..." : "Create job"}
+              {isSubmitting
+                ? isEditMode
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditMode
+                ? "Update job"
+                : "Create job"}
             </Button>
           </DialogFooter>
         </form>

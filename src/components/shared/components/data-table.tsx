@@ -177,7 +177,10 @@ function DataTablePagination({
     pagination.previousOffset < 0 ||
     isLoading;
 
-  const isNextDisabled = pagination.nextOffset === null || isLoading;
+  const isNextDisabled =
+    (pagination.nextOffset && pagination.nextOffset >= pagination.total) ||
+    pagination.nextOffset === null ||
+    isLoading;
 
   return (
     <div className="flex items-center justify-end gap-1 mt-2">

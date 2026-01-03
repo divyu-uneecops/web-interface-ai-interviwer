@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Job, JobFormData } from "../interfaces/job.interface";
+import { JobDetail, JobFormData } from "../interfaces/job.interface";
 import { CreateJobModal } from "./create-job-modal";
 import { jobService } from "../services/job.service";
 import { transformAPIResponseToJobs } from "../utils/job.utils";
@@ -36,16 +36,19 @@ import { toast } from "sonner";
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<JobDetail[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
     nextOffset: null as number | null,
     previousOffset: null as number | null,
     limit: 10,
   });
+  const PAGE_LIMIT = 10;
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const PAGE_LIMIT = 10;
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [jobDetail, setJobDetail] = useState<JobFormData | null>(null);
 
   useEffect(() => {
     fetchJobs();
@@ -54,6 +57,12 @@ export default function JobList() {
   const fetchJobs = async () => {
     setIsLoading(true);
     setJobs([]);
+    setPagination({
+      total: 0,
+      nextOffset: null,
+      previousOffset: null,
+      limit: PAGE_LIMIT,
+    });
     try {
       const params = {
         limit: PAGE_LIMIT,
@@ -83,32 +92,14 @@ export default function JobList() {
     }
   };
 
-  const handleDeleteJob = async (id: string) => {
-    if (isEmpty(id)) return;
-    try {
-      const response = await jobService.deleteJobOpening(id);
-      toast.success(response ? response : "An unknown error occurred", {
-        duration: 8000, // 8 seconds
-      });
-      setCurrentOffset(0);
-    } catch (error: any) {
-      toast.error(
-        error ? error.response.data.message : "An unknown error occurred",
-        {
-          duration: 8000, // 8 seconds
-        }
-      );
-    }
-  };
-
   // Define table columns
-  const columns: Column<Job>[] = useMemo(
+  const columns: Column<JobDetail>[] = useMemo(
     () => [
       {
         id: "position",
         header: "Position",
         align: "left",
-        accessor: (job) => job.position,
+        accessor: (job) => job?.title,
       },
       {
         id: "status",
@@ -136,32 +127,32 @@ export default function JobList() {
         id: "noOfOpening",
         header: "No. of opening",
         align: "center",
-        accessor: (job) => job.noOfOpening,
+        accessor: (job) => job?.numOfOpenings,
       },
       {
         id: "applicants",
         header: "Applicants",
         align: "center",
-        accessor: (job) => job.applicants,
+        accessor: (job) => job?.applicants,
       },
       {
         id: "interviews",
         header: "Interviews",
         align: "center",
-        accessor: (job) => job.interviews,
+        accessor: (job) => job?.interviews,
       },
       {
         id: "created",
         header: "Created",
         align: "center",
-        accessor: (job) => job.created,
+        accessor: (job) => job?.createdOn,
       },
     ],
     []
   );
 
   // Row actions renderer
-  const renderRowActions = (job: Job) => (
+  const renderRowActions = (job: JobDetail) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
@@ -171,19 +162,19 @@ export default function JobList() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/dashboard/jobs/${job.id}`}>
+          <Link href={`/dashboard/jobs/${job?.id}`}>
             <Eye className="h-4 text-[#737373]" />
             View details
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleEditJob(job)}>
           <Pencil className="h-4 text-[#737373]" />
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onClick={() => handleDeleteJob(job?.id)}
+          onClick={() => handleDeleteJob(job?.jobId)}
         >
           <Trash2 className="h-4" />
           Delete
@@ -191,6 +182,42 @@ export default function JobList() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
+
+  const handleDeleteJob = async (id: string) => {
+    if (isEmpty(id)) return;
+    try {
+      const response = await jobService.deleteJobOpening(id);
+      toast.success(response ? response : "An unknown error occurred", {
+        duration: 8000, // 8 seconds
+      });
+      setCurrentOffset(0);
+    } catch (error: any) {
+      toast.error(
+        error ? error.response.data.message : "An unknown error occurred",
+        {
+          duration: 8000, // 8 seconds
+        }
+      );
+    }
+  };
+
+  const handleEditJob = (job: JobDetail) => {
+    const JobFormData: JobFormData = {
+      title: job.title,
+      industry: job.industry,
+      jobLevel: job.jobLevel,
+      jobType: job.jobType,
+      minExperience: job.minExp,
+      maxExperience: job.maxExp,
+      description: job.description,
+      noOfOpenings: job.numOfOpenings,
+      attachment: null,
+      status: job.status,
+      skills: job.requiredSkills,
+    };
+    setJobDetail(JobFormData);
+    setIsEditModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -232,10 +259,10 @@ export default function JobList() {
       <JobStatsGrid stats={stats} />
 
       {/* Jobs Table */}
-      <DataTable<Job>
+      <DataTable<JobDetail>
         data={jobs}
         columns={columns}
-        getRowId={(job) => job?.id}
+        getRowId={(job) => job?.jobId}
         pagination={pagination}
         currentOffset={currentOffset}
         onPaginationChange={setCurrentOffset}
@@ -248,6 +275,20 @@ export default function JobList() {
       <CreateJobModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
+        onSuccess={() => {
+          fetchJobs();
+        }}
+      />
+
+      {/* Edit Job Modal */}
+      <CreateJobModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSuccess={() => {
+          fetchJobs();
+        }}
+        isEditMode={true}
+        jobDetail={jobDetail}
       />
     </div>
   );

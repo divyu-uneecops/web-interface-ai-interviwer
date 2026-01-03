@@ -39,4 +39,14 @@ export const jobService = {
       params,
       signal
     ),
+  updateJobOpening: (
+    id: string,
+    params: Record<string, any>,
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.put(
+      buildUrl(API_ENDPOINTS.JOB_OPENING.UPDATE, { id }),
+      { ...payload, ...params }
+    ),
 };

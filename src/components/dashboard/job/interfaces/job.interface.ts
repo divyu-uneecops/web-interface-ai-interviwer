@@ -3,6 +3,9 @@ import { ApplicantStatus } from "../types/job.types";
 export interface CreateJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess: () => void; // Callback after successful create/update
+  isEditMode?: boolean; // If provided, modal will be in edit mode
+  jobDetail?: JobFormData | null;
 }
 
 export interface JobFormData {
@@ -10,10 +13,10 @@ export interface JobFormData {
   industry: string;
   jobLevel: string;
   jobType: string;
-  minExperience: string;
-  maxExperience: string;
+  minExperience: number | null;
+  maxExperience: number | null;
   description: string;
-  noOfOpenings: string;
+  noOfOpenings: number | null;
   attachment: File | null;
   status: string;
   skills: string[];
@@ -74,7 +77,7 @@ export interface APIPaginationInfo {
 }
 
 export interface JobsWithPagination {
-  jobs: Job[];
+  jobs: JobDetail[];
   pagination: APIPaginationInfo;
 }
 
@@ -92,20 +95,20 @@ export interface APIJobDetailSection {
 
 export interface JobDetail {
   id: string;
+  jobId: string;
   title: string;
-  status: "active" | "draft" | "closed";
-  department: string;
-  type: string;
-  postedDate: string;
-  description: string;
-  skills: string[];
+  industry: string;
   jobLevel: string;
-  userType: string;
-  experience: string;
-  salaryRange?: string;
-  minExp?: number;
-  maxExp?: number;
-  numOfOpenings?: number;
-  industry?: string;
-  jobId?: string;
+  jobType: string;
+  minExp: number;
+  maxExp: number;
+  description: string;
+  numOfOpenings: number;
+  status: "active" | "draft" | "closed";
+  accessibility: string;
+  applicants: number;
+  interviews: number;
+  formUser: string;
+  requiredSkills: string[];
+  createdOn: string;
 }

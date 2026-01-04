@@ -32,6 +32,7 @@ import { transformAPIResponseToJobs } from "../utils/job.utils";
 import { stats, statusStyles } from "../constants/job.constants";
 import { isEmpty } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAppSelector } from "@/store/hooks";
 
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,6 +50,8 @@ export default function JobList() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [jobDetail, setJobDetail] = useState<JobFormData | null>(null);
+
+  const { mappingValues } = useAppSelector((state) => state.jobs);
 
   useEffect(() => {
     fetchJobs();
@@ -278,6 +281,7 @@ export default function JobList() {
         onSuccess={() => {
           fetchJobs();
         }}
+        mappingValues={mappingValues}
       />
 
       {/* Edit Job Modal */}
@@ -287,6 +291,7 @@ export default function JobList() {
         onSuccess={() => {
           fetchJobs();
         }}
+        mappingValues={mappingValues}
         isEditMode={true}
         jobDetail={jobDetail}
       />

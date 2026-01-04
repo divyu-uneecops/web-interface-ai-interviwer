@@ -42,6 +42,7 @@ export function CreateJobModal({
   open,
   onOpenChange,
   onSuccess,
+  mappingValues,
   isEditMode = false,
   jobDetail,
 }: CreateJobModalProps) {
@@ -216,9 +217,9 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {domainOptions?.map((option) => (
-                      <SelectItem key={option?.value} value={option?.value}>
-                        {option?.label}
+                    {mappingValues?.industry?.map((option, index) => (
+                      <SelectItem key={index} value={option}>
+                        {option}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -246,9 +247,9 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jobLevelOptions?.map((option) => (
-                      <SelectItem key={option?.value} value={option?.value}>
-                        {option?.label}
+                    {mappingValues?.jobLevel?.map((option, index) => (
+                      <SelectItem key={index} value={option}>
+                        {option}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -276,9 +277,9 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {userTypeOptions?.map((option) => (
-                      <SelectItem key={option?.value} value={option?.value}>
-                        {option?.label}
+                    {mappingValues?.jobType?.map((option, index) => (
+                      <SelectItem key={index} value={option}>
+                        {option}
                       </SelectItem>
                     ))}
                   </SelectContent>

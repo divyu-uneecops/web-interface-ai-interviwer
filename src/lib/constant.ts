@@ -14,5 +14,6 @@ export const API_ENDPOINTS = {
     DELETE: "/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     DETAIL: "/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     UPDATE: "/objects/69521d4cc9ba83a076aac3b8/records/{id}",
+    FORM_PROPERTIES: "/forms/69521d4cc9ba83a076aac3bb/properties",
   },
 };

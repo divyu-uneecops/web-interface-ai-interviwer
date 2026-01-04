@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Public_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import StoreProvider from "@/store/provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,8 +33,10 @@ export default function RootLayout({
         className={`${inter.variable} ${publicSans.variable} antialiased`}
         style={{ fontFamily: "var(--font-inter)" }}
       >
-        <Toaster position="top-center" />
-        {children}
+        <StoreProvider>
+          <Toaster position="top-center" />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

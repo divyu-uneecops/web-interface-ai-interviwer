@@ -63,6 +63,7 @@ import {
 import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
 import { jobService } from "@/components/dashboard/job/services/job.service";
 import { transformAPIResponseToJobDetail } from "@/components/dashboard/job/utils/job.utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { CreateJobModal } from "./create-job-modal";
 import { useAppSelector } from "@/store/hooks";
@@ -194,8 +195,103 @@ export default function JobDetails() {
 
   if (isLoadingJob) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-[#737373]">Loading job details...</p>
+      <div className="space-y-8">
+        {/* Job Header Skeleton */}
+        <div className="flex items-start justify-between">
+          <div className="space-y-2.5 flex-1">
+            {/* Title + Badge */}
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="h-7 w-64 bg-[#e5e5e5]" />
+              <Skeleton className="h-6 w-16 rounded-full bg-[#e5e5e5]" />
+            </div>
+            {/* Meta Info */}
+            <div className="flex items-center gap-4 h-5">
+              <Skeleton className="h-5 w-24 bg-[#e5e5e5]" />
+              <Skeleton className="h-5 w-20 bg-[#e5e5e5]" />
+              <Skeleton className="h-5 w-28 bg-[#e5e5e5]" />
+            </div>
+          </div>
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-10 bg-[#e5e5e5] rounded-full" />
+              <Skeleton className="h-5 w-32 bg-[#e5e5e5]" />
+            </div>
+            <Skeleton className="h-9 w-20 bg-[#e5e5e5] rounded-md" />
+          </div>
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-4 gap-4 h-[90px]">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 bg-white border border-[rgba(0,0,0,0.1)] rounded h-[90px] pl-[25px] pr-px"
+            >
+              <Skeleton className="w-10 h-10 rounded-[10px] bg-[#e5e5e5] shrink-0" />
+              <div className="flex flex-col h-12 gap-2">
+                <Skeleton className="h-8 w-16 bg-[#e5e5e5]" />
+                <Skeleton className="h-4 w-24 bg-[#e5e5e5]" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content Card Skeleton */}
+        <div className="bg-white border border-[#e5e5e5] p-4 space-y-4">
+          {/* Tabs Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-9 w-[551px] bg-[#f5f5f5] rounded-[10px]" />
+            <Skeleton className="h-9 w-32 bg-[#e5e5e5] rounded-md" />
+          </div>
+
+          {/* Tab Content Skeleton */}
+          <div className="mt-4 space-y-8">
+            <div className="flex gap-8">
+              {/* Left Column */}
+              <div className="flex-1 space-y-8">
+                <div className="bg-white rounded-lg shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] py-6 pl-6 pr-0">
+                  <Skeleton className="h-4 w-32 mb-3 bg-[#e5e5e5]" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full bg-[#e5e5e5]" />
+                    <Skeleton className="h-4 w-full bg-[#e5e5e5]" />
+                    <Skeleton className="h-4 w-3/4 bg-[#e5e5e5]" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] py-6 pl-6 pr-0">
+                  <Skeleton className="h-4 w-32 mb-3 bg-[#e5e5e5]" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div key={index} className="flex items-center gap-2 h-6">
+                        <Skeleton className="w-4 h-4 bg-[#e5e5e5] rounded-full" />
+                        <Skeleton className="h-4 w-32 bg-[#e5e5e5]" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Right Column */}
+              <div className="w-[372px] shrink-0">
+                <div className="bg-white rounded-lg shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] h-[329px]">
+                  <div className="px-6 pt-6 pb-0">
+                    <Skeleton className="h-4 w-32 bg-[#e5e5e5]" />
+                  </div>
+                  <div className="px-6 pt-[30px] space-y-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index}>
+                        <Skeleton className="h-4 w-20 mb-1 bg-[#e5e5e5]" />
+                        <Skeleton className="h-5 w-24 bg-[#e5e5e5]" />
+                        {index < 2 && (
+                          <div className="h-px bg-slate-200 mt-3" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

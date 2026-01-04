@@ -33,6 +33,7 @@ import { stats, statusStyles } from "../constants/job.constants";
 import { isEmpty } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
+import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,7 +47,7 @@ export default function JobList() {
   });
   const PAGE_LIMIT = 10;
   const [currentOffset, setCurrentOffset] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [jobDetail, setJobDetail] = useState<JobFormData | null>(null);
@@ -270,7 +271,12 @@ export default function JobList() {
         currentOffset={currentOffset}
         onPaginationChange={setCurrentOffset}
         isLoading={isLoading}
-        emptyMessage="No jobs found"
+        loadingState={<DataTableSkeleton columns={7} rows={11} />}
+        emptyState={
+          <div className="text-center py-12">
+            <p className="text-[#737373]">"No jobs found"</p>
+          </div>
+        }
         rowActions={renderRowActions}
       />
 

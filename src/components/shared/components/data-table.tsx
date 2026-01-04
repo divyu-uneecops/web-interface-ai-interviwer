@@ -60,13 +60,11 @@ export interface DataTableProps<T> {
   /** Callback when pagination changes */
   onPaginationChange?: (offset: number) => void;
   /** Loading state */
-  isLoading?: boolean;
-  /** Empty state message */
-  emptyMessage?: string;
-  /** Custom empty state component */
-  emptyState?: ReactNode;
+  isLoading: boolean;
   /** Custom loading state component */
-  loadingState?: ReactNode;
+  loadingState: ReactNode;
+  /** Custom empty state component */
+  emptyState: ReactNode;
   /** Custom row actions renderer */
   rowActions?: (row: T) => ReactNode;
   /** Additional className for table container */
@@ -281,7 +279,6 @@ export function DataTable<T>({
   currentOffset = 0,
   onPaginationChange,
   isLoading = false,
-  emptyMessage = "No data found",
   emptyState,
   loadingState,
   rowActions,
@@ -313,90 +310,84 @@ export function DataTable<T>({
 
   return (
     <div className={className}>
-      {/* Table */}
-      <div className="bg-white border border-[#e5e5e5] rounded-lg overflow-hidden px-4">
-        <table className={cn("w-full", tableClassName)}>
-          <thead>
-            <tr className="border-b border-[#e5e5e5] h-10">
-              {columns.map((column) => (
-                <th
-                  key={column.id}
-                  className={cn(
-                    "px-2 text-sm font-medium text-[#737373]",
-                    getAlignmentClass(column.align),
-                    column.width && `w-[${column.width}]`
-                  )}
-                  style={column.width ? { width: column.width } : undefined}
-                >
-                  {column.header}
-                </th>
-              ))}
-              {rowActions && <th className="w-16"></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {!isLoading &&
-              data?.map((row, index) => (
-                <tr
-                  key={getRowId(row)}
-                  className={cn(
-                    "border-b border-[#e5e5e5] last:border-b-0 hover:bg-[#fafafa] h-[66px]",
-                    onRowClick && "cursor-pointer"
-                  )}
-                  onClick={() => onRowClick?.(row)}
-                >
-                  {columns?.map((column) => (
-                    <td
-                      key={column?.id}
+      {!isLoading && data?.length > 0 && (
+        <div>
+          {/* Table */}
+          <div className="bg-white border border-[#e5e5e5] rounded-lg overflow-hidden px-4">
+            <table className={cn("w-full", tableClassName)}>
+              <thead>
+                <tr className="border-b border-[#e5e5e5] h-10">
+                  {columns.map((column) => (
+                    <th
+                      key={column.id}
                       className={cn(
-                        "px-2 text-sm font-normal text-[#0a0a0a]",
-                        getAlignmentClass(column?.align)
+                        "px-2 text-sm font-medium text-[#737373]",
+                        getAlignmentClass(column.align),
+                        column.width && `w-[${column.width}]`
                       )}
+                      style={column.width ? { width: column.width } : undefined}
                     >
-                      {getCellContent(column, row, index)}
-                    </td>
+                      {column.header}
+                    </th>
                   ))}
-                  {rowActions && (
-                    <td className="px-2" onClick={(e) => e.stopPropagation()}>
-                      {rowActions?.(row)}
-                    </td>
-                  )}
+                  {rowActions && <th className="w-16"></th>}
                 </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls - Bottom */}
-      {showPagination &&
-        pagination &&
-        onPaginationChange &&
-        pagination.total > 0 && (
-          <DataTablePagination
-            pagination={pagination}
-            currentOffset={currentOffset}
-            onPaginationChange={onPaginationChange}
-            isLoading={isLoading}
-            dataLength={data?.length}
-          />
-        )}
-
-      {/* Loading State */}
-      {isLoading &&
-        (loadingState || (
-          <div className="text-center py-12">
-            <p className="text-[#737373]">Loading...</p>
+              </thead>
+              <tbody>
+                {!isLoading &&
+                  data?.map((row, index) => (
+                    <tr
+                      key={getRowId(row)}
+                      className={cn(
+                        "border-b border-[#e5e5e5] last:border-b-0 hover:bg-[#fafafa] h-[66px]",
+                        onRowClick && "cursor-pointer"
+                      )}
+                      onClick={() => onRowClick?.(row)}
+                    >
+                      {columns?.map((column) => (
+                        <td
+                          key={column?.id}
+                          className={cn(
+                            "px-2 text-sm font-normal text-[#0a0a0a]",
+                            getAlignmentClass(column?.align)
+                          )}
+                        >
+                          {getCellContent(column, row, index)}
+                        </td>
+                      ))}
+                      {rowActions && (
+                        <td
+                          className="px-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {rowActions?.(row)}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
-        ))}
 
-      {/* Empty State */}
-      {!isLoading &&
-        data?.length === 0 &&
-        (emptyState || (
-          <div className="text-center py-12">
-            <p className="text-[#737373]">{emptyMessage}</p>
-          </div>
-        ))}
+          {/* Pagination Controls - Bottom */}
+          {showPagination &&
+            pagination &&
+            onPaginationChange &&
+            pagination.total > 0 && (
+              <DataTablePagination
+                pagination={pagination}
+                currentOffset={currentOffset}
+                onPaginationChange={onPaginationChange}
+                isLoading={isLoading}
+                dataLength={data?.length}
+              />
+            )}
+        </div>
+      )}
+
+      {isLoading && loadingState}
+
+      {!isLoading && data?.length === 0 && emptyState}
     </div>
   );
 }

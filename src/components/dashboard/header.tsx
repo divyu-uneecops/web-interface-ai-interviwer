@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Bell, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateInterviewDialog } from "@/components/dashboard/create-interview/create-interview-dialog";
+import { usePathname } from "next/navigation";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -16,14 +17,37 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
     <>
       <header className="h-[72px] bg-[rgba(255,255,255,0.8)] backdrop-blur-sm border-b border-[rgba(0,0,0,0.1)] flex items-center justify-between px-8">
         {/* Greeting */}
-        <div>
-          <h1 className="text-xl font-bold text-black leading-7">
-            Hello {userName} !
-          </h1>
-          <p className="text-xs text-black leading-4">
-            Manage your job openings and hiring pipeline
-          </p>
-        </div>
+        {/* Dynamically show header/subtitle based on route */}
+        {/* 
+          Use Next.js's usePathname hook from 'next/navigation' to avoid direct window access.
+          This works properly in both client and server components, is SSR safe, and no warning will appear.
+        */}
+        {(() => {
+          // Import usePathname at the top of your file:
+          // import { usePathname } from "next/navigation";
+          const pathname = usePathname();
+
+          let h1 = `Hello ${userName} !`;
+          let p = "Manage your job openings and hiring pipeline";
+
+          if (pathname && pathname.startsWith("/dashboard/jobs")) {
+            h1 = "Job Openings";
+            p = "Manage your job openings and hiring pipeline";
+          } else if (pathname && pathname.startsWith("/dashboard/interviews")) {
+            h1 = "Interviews";
+            p = "View and manage candidate interviews";
+          } else if (pathname && pathname.startsWith("/dashboard")) {
+            h1 = `Hello ${userName} !`;
+            p = "Manage your job openings and hiring pipeline";
+          }
+
+          return (
+            <div>
+              <h1 className="text-xl font-bold text-black leading-7">{h1}</h1>
+              <p className="text-xs text-black leading-4">{p}</p>
+            </div>
+          );
+        })()}
 
         {/* Actions */}
         <div className="flex items-center gap-3 h-9">

@@ -236,25 +236,21 @@ export const transformToAPIPayload = (values: JobFormData) => {
       key: "title",
       value: values.title,
     },
-
     {
       propertyId: "695257bfc9ba83a076aac41c",
       key: "industry",
       value: values.industry,
     },
-
     {
       propertyId: "695257f8c9ba83a076aac41f",
       key: "jobLevel",
       value: values.jobLevel,
     },
-
     {
       propertyId: "69525830c9ba83a076aac422",
       key: "jobType",
       value: values.jobType,
     },
-    ,
     {
       propertyId: "69525880c9ba83a076aac425",
       key: "minExp",

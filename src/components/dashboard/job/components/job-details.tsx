@@ -15,6 +15,7 @@ import {
   X,
   Eye,
   MoreVertical,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,6 +65,13 @@ import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
 import { jobService } from "@/components/dashboard/job/services/job.service";
 import { transformAPIResponseToJobDetail } from "@/components/dashboard/job/utils/job.utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
 import { CreateJobModal } from "./create-job-modal";
 import { useAppSelector } from "@/store/hooks";
@@ -298,9 +306,17 @@ export default function JobDetails() {
 
   if (!job) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-[#737373]">Job not found</p>
-      </div>
+      <Empty className="h-64">
+        <EmptyHeader>
+          <EmptyMedia>
+            <Briefcase className="w-8 h-8 text-[#737373]" />
+          </EmptyMedia>
+          <EmptyTitle>Job not found</EmptyTitle>
+          <EmptyDescription>
+            The job you're looking for doesn't exist or has been removed.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 

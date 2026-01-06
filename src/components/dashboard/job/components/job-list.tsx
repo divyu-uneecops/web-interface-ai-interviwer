@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/shared/components/data-table";
 import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
@@ -24,9 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  JobFilterDropdown,
-  JobFilterState,
-} from "@/components/shared/components/job-filter-dropdown";
+  FilterDropdown,
+  FilterState,
+  FilterGroup,
+} from "@/components/shared/components/filter-dropdown";
 
 import { JobDetail, JobFormData } from "../interfaces/job.interface";
 import { CreateJobModal } from "./create-job-modal";
@@ -51,9 +51,22 @@ export default function JobList() {
   const PAGE_LIMIT = 10;
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [appliedFilters, setAppliedFilters] = useState<JobFilterState>({
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
   });
+
+  // Define filter groups for jobs
+  const jobFilterGroups: FilterGroup[] = [
+    {
+      id: "status",
+      label: "Status",
+      options: [
+        { value: "Active", label: "Active" },
+        { value: "Closed", label: "Closed" },
+        { value: "Draft", label: "Draft" },
+      ],
+    },
+  ];
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [jobDetail, setJobDetail] = useState<JobFormData | null>(null);
@@ -80,7 +93,7 @@ export default function JobList() {
       };
 
       if (searchQuery) {
-        params["query"] = searchQuery;
+        // params["query"] = searchQuery;
       }
 
       const response = await jobService.getJobOpenings(params, {
@@ -245,7 +258,7 @@ export default function JobList() {
     setIsEditModalOpen(true);
   };
 
-  const handleApplyFilters = (filters: JobFilterState) => {
+  const handleApplyFilters = (filters: FilterState) => {
     setAppliedFilters(filters);
     setCurrentOffset(0); // Reset to first page when filters are applied
   };
@@ -268,7 +281,8 @@ export default function JobList() {
         {/* Search & Actions */}
         <div className="flex items-center gap-3">
           {/* Filters Button */}
-          <JobFilterDropdown
+          <FilterDropdown
+            filterGroups={jobFilterGroups}
             onApplyFilters={handleApplyFilters}
             initialFilters={appliedFilters}
           />

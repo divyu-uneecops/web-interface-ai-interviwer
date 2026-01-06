@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Column } from "./data-table";
 
 /**
  * Props for DataTableSkeleton component

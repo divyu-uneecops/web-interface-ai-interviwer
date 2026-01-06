@@ -11,30 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-export interface FilterGroup {
-  id: string;
-  label: string;
-  options: FilterOption[];
-}
-
-export interface FilterOption {
-  value: string;
-  label: string;
-}
-
-export interface FilterState {
-  [key: string]: string[];
-}
-
-interface FilterDropdownProps {
-  filterGroups: FilterGroup[];
-  onApplyFilters: (filters: FilterState) => void;
-  initialFilters: FilterState;
-  buttonLabel?: string;
-  buttonClassName?: string;
-  contentClassName?: string;
-}
+import {
+  FilterDropdownProps,
+  FilterState,
+} from "../interfaces/shared.interface";
 
 export function FilterDropdown({
   filterGroups,

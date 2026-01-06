@@ -31,15 +31,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +65,7 @@ import {
 } from "@/components/ui/empty";
 
 import { CreateJobModal } from "./create-job-modal";
+import { AddApplicantModal } from "./add-applicant-modal";
 import { useAppSelector } from "@/store/hooks";
 
 export const stats: JobStat[] = [
@@ -101,14 +93,6 @@ export default function JobDetails() {
     status: [],
     rounds: [],
     applied: [],
-  });
-  const [applicantTab, setApplicantTab] = useState<"single" | "bulk">("single");
-  const [applicantForm, setApplicantForm] = useState({
-    name: "",
-    email: "",
-    contact: "",
-    attachment: null as File | null,
-    jobTitle: "",
   });
   const [job, setJob] = useState<JobDetail | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(true);
@@ -999,214 +983,14 @@ export default function JobDetails() {
       />
 
       {/* Add Applicant Modal */}
-      <Dialog
+      <AddApplicantModal
         open={isAddApplicantModalOpen}
         onOpenChange={setIsAddApplicantModalOpen}
-      >
-        <DialogContent className="sm:max-w-[779px] max-h-[90vh] overflow-y-auto p-6 gap-4 shadow-lg">
-          <DialogHeader className="gap-1.5 items-start">
-            <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
-              Create Applicant
-            </DialogTitle>
-            <p className="text-sm text-[#737373] leading-5">
-              Add Applicant details
-            </p>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Tabs */}
-            <div className="bg-[#f5f5f5] h-9 p-[3px] rounded-[10px] flex">
-              <button
-                type="button"
-                onClick={() => setApplicantTab("single")}
-                className={`flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center ${
-                  applicantTab === "single"
-                    ? "bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] border border-transparent"
-                    : "text-[#0a0a0a]"
-                }`}
-              >
-                Single Applicant
-              </button>
-              <button
-                type="button"
-                onClick={() => setApplicantTab("bulk")}
-                className={`flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center ${
-                  applicantTab === "bulk"
-                    ? "bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] border border-transparent"
-                    : "text-[#0a0a0a]"
-                }`}
-              >
-                Bulk Applicants
-              </button>
-            </div>
-
-            {applicantTab === "single" ? (
-              <div className="space-y-5">
-                {/* Parse resume */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-[#000000]">
-                    Parse resume
-                  </Label>
-                  <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-                      <p className="text-sm text-[#02563d] leading-5">
-                        Drag and drop files here or click to upload
-                      </p>
-                      <p className="text-xs text-[#747474] leading-none">
-                        Max file size is 500kb. Supported file types are .jpg
-                        and .png.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Or divider */}
-                <div className="flex items-center gap-2.5">
-                  <div className="flex-1 h-px bg-[#e5e5e5]" />
-                  <span className="text-sm text-[#737373] leading-none">
-                    or
-                  </span>
-                  <div className="flex-1 h-px bg-[#e5e5e5]" />
-                </div>
-
-                {/* Applicant name */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-[#0a0a0a]">
-                    Applicant name <span className="text-red-700">*</span>
-                  </Label>
-                  <Input
-                    value={applicantForm.name}
-                    onChange={(e) =>
-                      setApplicantForm((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    placeholder="Mohan kuman"
-                    className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
-                  />
-                </div>
-
-                {/* Email and Contact */}
-                <div className="flex gap-2.5">
-                  <div className="flex-1 space-y-2">
-                    <Label className="text-sm font-medium text-[#0a0a0a]">
-                      Applicant email <span className="text-red-700">*</span>
-                    </Label>
-                    <Input
-                      value={applicantForm.email}
-                      onChange={(e) =>
-                        setApplicantForm((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      }
-                      placeholder="mohankumar@gmail.com"
-                      className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <Label className="text-sm font-medium text-[#0a0a0a]">
-                      Contact number <span className="text-neutral-950">*</span>
-                    </Label>
-                    <Input
-                      value={applicantForm.contact}
-                      onChange={(e) =>
-                        setApplicantForm((prev) => ({
-                          ...prev,
-                          contact: e.target.value,
-                        }))
-                      }
-                      placeholder="+91 9876543210"
-                      className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
-                    />
-                  </div>
-                </div>
-
-                {/* Attachment and Job title */}
-                <div className="flex gap-2.5">
-                  <div className="flex-1 space-y-2">
-                    <Label className="text-sm font-medium text-[#0a0a0a]">
-                      Attachment
-                    </Label>
-                    <div className="h-9 border border-[#e5e5e5] rounded-md shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] bg-white px-3 flex items-center">
-                      <button
-                        type="button"
-                        className="text-sm font-medium text-[#0a0a0a] px-1.5 py-px"
-                      >
-                        Choose file
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <Label className="text-sm font-medium text-[#0a0a0a]">
-                      Job title
-                    </Label>
-                    <Select
-                      value={applicantForm.jobTitle}
-                      onValueChange={(value) =>
-                        setApplicantForm((prev) => ({
-                          ...prev,
-                          jobTitle: value,
-                        }))
-                      }
-                    >
-                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50">
-                        <SelectValue placeholder="Product manager" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="product-manager">
-                          Product manager
-                        </SelectItem>
-                        <SelectItem value="senior-pm">Senior PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-[#000000]">
-                  Upload resumes or import data excel{" "}
-                  <span className="text-red-700">*</span>
-                </Label>
-                <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-                    <p className="text-sm text-[#02563d] leading-5">
-                      Drag and drop files here or click to upload
-                    </p>
-                    <p className="text-xs text-[#747474] leading-none">
-                      Max file size is 500kb. Supported file types are .jpg and
-                      .png.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="gap-2 justify-end">
-            <Button
-              type="button"
-              variant="default"
-              className="h-9 px-4 bg-[#02563d] hover:bg-[#02563d]/90 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
-              onClick={() => {
-                console.log("Applicant added:", applicantForm);
-                setIsAddApplicantModalOpen(false);
-                setApplicantForm({
-                  name: "",
-                  email: "",
-                  contact: "",
-                  attachment: null,
-                  jobTitle: "",
-                });
-              }}
-            >
-              Next
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onSubmit={(form) => {
+          console.log("Applicant added:", form);
+          // Handle applicant submission here
+        }}
+      />
     </div>
   );
 }

@@ -103,3 +103,18 @@ export interface JobDetail {
   requiredSkills: string[];
   createdOn: string;
 }
+
+export interface ApplicantForm {
+  name: string;
+  email: string;
+  contact: string;
+  attachment: File | null;
+  resume?: File | null;
+  jobTitle: string;
+}
+
+export interface AddApplicantModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit?: (form: ApplicantForm) => void;
+}

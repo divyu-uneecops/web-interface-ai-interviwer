@@ -110,11 +110,14 @@ export interface ApplicantForm {
   contact: string;
   attachment: File | null;
   resume?: File | null;
-  jobTitle: string;
 }
 
 export interface AddApplicantModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  jobInfo: {
+    jobId: string;
+    jobTitle: string;
+  };
   onSubmit?: (form: ApplicantForm) => void;
 }

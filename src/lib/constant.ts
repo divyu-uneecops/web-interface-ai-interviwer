@@ -16,4 +16,7 @@ export const API_ENDPOINTS = {
     UPDATE: "/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     FORM_PROPERTIES: "/forms/69521d4cc9ba83a076aac3bb/properties",
   },
+  APPLICANT: {
+    CREATE: "/objects/69521d7dc9ba83a076aac3c8/records",
+  },
 };

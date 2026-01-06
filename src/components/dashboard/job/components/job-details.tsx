@@ -986,6 +986,7 @@ export default function JobDetails() {
       <AddApplicantModal
         open={isAddApplicantModalOpen}
         onOpenChange={setIsAddApplicantModalOpen}
+        jobInfo={{ jobId: job?.jobId || "", jobTitle: job?.title || "" }}
         onSubmit={(form) => {
           console.log("Applicant added:", form);
           // Handle applicant submission here

@@ -5,6 +5,7 @@ import {
   JobsWithPagination,
   APIJobDetailSection,
   JobDetail,
+  ApplicantForm,
 } from "../interfaces/job.interface";
 
 export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
@@ -382,4 +383,76 @@ export const validate = (values: JobFormData) => {
   }
 
   return errors;
+};
+
+export const transformApplicantToAPIPayload = (
+  values: ApplicantForm,
+  jobId: string,
+  attachmentPath?: string
+) => {
+  // Generate applicantId (you may want to use a proper ID generation method)
+  const applicantId = Math.floor(Math.random() * 1000) + 1;
+
+  const valuesArray = [
+    {
+      propertyId: "69525912c9ba83a076aac42d",
+      key: "applicantId",
+      value: String(applicantId),
+    },
+    {
+      propertyId: "69525952c9ba83a076aac430",
+      key: "jobId",
+      value: jobId,
+    },
+    {
+      propertyId: "695766c0c9ba83a076aac598",
+      key: "formUser",
+      value: ["6936a4d92276e3fc3ac7b13b"],
+      //TODO: Needs to Change in future
+    },
+    {
+      propertyId: "695c91fec9ba83a076aac6c8",
+      key: "name",
+      value: values.name,
+    },
+    {
+      propertyId: "695c9244c9ba83a076aac6c9",
+      key: "email",
+      value: values.email,
+    },
+    {
+      propertyId: "695c9276c9ba83a076aac6ca",
+      key: "phone",
+      value: values.contact,
+    },
+  ];
+
+  // Add attachment if provided
+  if (attachmentPath) {
+    valuesArray.push({
+      propertyId: "695c928dc9ba83a076aac6cd",
+      key: "attachment",
+      value: [`695c928dc9ba83a076aac6cd//${attachmentPath}`],
+    });
+  }
+
+  const propertyIds = [
+    "69525912c9ba83a076aac42d",
+    "69525952c9ba83a076aac430",
+    "695259a6c9ba83a076aac433",
+    "695766c0c9ba83a076aac598",
+    "695c91fec9ba83a076aac6c8",
+    "695c9244c9ba83a076aac6c9",
+    "695c9276c9ba83a076aac6ca",
+  ];
+
+  // Add attachment propertyId if attachment exists
+  if (attachmentPath) {
+    propertyIds.push("695c928dc9ba83a076aac6cd");
+  }
+
+  return {
+    values: valuesArray,
+    propertyIds: propertyIds,
+  };
 };

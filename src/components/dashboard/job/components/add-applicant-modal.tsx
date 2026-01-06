@@ -25,6 +25,8 @@ import {
   AddApplicantModalProps,
   ApplicantForm,
 } from "../interfaces/job.interface";
+import { jobService } from "../services/job.service";
+import { transformApplicantToAPIPayload } from "../utils/job.utils";
 
 const validate = (values: ApplicantForm) => {
   const errors: Partial<Record<keyof ApplicantForm, string>> = {};
@@ -49,6 +51,7 @@ const validate = (values: ApplicantForm) => {
 export function AddApplicantModal({
   open,
   onOpenChange,
+  jobInfo,
   onSubmit,
 }: AddApplicantModalProps) {
   const [applicantTab, setApplicantTab] = useState<"single" | "bulk">("single");
@@ -60,21 +63,39 @@ export function AddApplicantModal({
       email: "",
       contact: "",
       attachment: null,
-      jobTitle: "",
     },
     validate: validate,
     enableReinitialize: true,
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
+        // Handle file upload if attachment exists
+        let attachmentPath: string | undefined;
+        if (values.attachment) {
+          // Use the filename for now
+          // TODO: Implement actual file upload to get the proper file path
+          // The API expects format: propertyId//filename
+          attachmentPath = values.attachment.name;
+        }
+
+        // Transform form data to API payload
+        const payload = transformApplicantToAPIPayload(
+          values,
+          jobInfo.jobId,
+          attachmentPath
+        );
+
+        // Call API to create applicant
+        const response = await jobService.createApplicant(payload);
+
+        // Call custom onSubmit if provided
         if (onSubmit) {
           onSubmit(values);
-        } else {
-          console.log("Applicant added:", values);
         }
+
         formik.resetForm();
         onOpenChange(false);
-        toast.success("Applicant added successfully", {
+        toast.success(response?.message || "Applicant added successfully", {
           duration: 8000,
         });
       } catch (error: any) {
@@ -291,21 +312,14 @@ export function AddApplicantModal({
                     <Label className="text-sm font-medium text-[#0a0a0a]">
                       Job title
                     </Label>
-                    <Select
-                      value={formik.values.jobTitle}
-                      onValueChange={(value) => {
-                        formik.setFieldValue("jobTitle", value);
-                        formik.setFieldTouched("jobTitle", true);
-                      }}
-                    >
+                    <Select disabled={true}>
                       <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50 border-[#e5e5e5]">
-                        <SelectValue placeholder="Product manager" />
+                        <SelectValue placeholder={jobInfo?.jobTitle} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="product-manager">
-                          Product manager
+                        <SelectItem value={jobInfo?.jobTitle}>
+                          {jobInfo?.jobTitle}
                         </SelectItem>
-                        <SelectItem value="senior-pm">Senior PM</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

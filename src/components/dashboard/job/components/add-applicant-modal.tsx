@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AddApplicantModalProps,
   ApplicantForm,
@@ -123,44 +124,200 @@ export function AddApplicantModal({
           <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
             Create Applicant
           </DialogTitle>
-          <p className="text-sm text-[#737373] leading-5">
-            Add Applicant details
-          </p>
         </DialogHeader>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Tabs */}
-          <div className="bg-[#f5f5f5] h-9 p-[3px] rounded-[10px] flex">
-            <button
-              type="button"
-              onClick={() => setApplicantTab("single")}
-              className={`flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center ${
-                applicantTab === "single"
-                  ? "bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] border border-transparent"
-                  : "text-[#0a0a0a]"
-              }`}
-            >
-              Single Applicant
-            </button>
-            <button
-              type="button"
-              onClick={() => setApplicantTab("bulk")}
-              className={`flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center ${
-                applicantTab === "bulk"
-                  ? "bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] border border-transparent"
-                  : "text-[#0a0a0a]"
-              }`}
-            >
-              Bulk Applicants
-            </button>
-          </div>
+          <Tabs
+            value={applicantTab}
+            onValueChange={(value) =>
+              setApplicantTab(value as "single" | "bulk")
+            }
+            className="w-full"
+          >
+            <TabsList className="bg-[#f5f5f5] h-9 p-[3px] rounded-[10px] flex w-full">
+              <TabsTrigger
+                value="single"
+                className="flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center text-[#0a0a0a] data-[state=active]:bg-white data-[state=active]:shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] data-[state=active]:border data-[state=active]:border-transparent"
+              >
+                Single Applicant
+              </TabsTrigger>
+              <TabsTrigger
+                value="bulk"
+                className="flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center text-[#0a0a0a] data-[state=active]:bg-white data-[state=active]:shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] data-[state=active]:border data-[state=active]:border-transparent"
+              >
+                Bulk Applicants
+              </TabsTrigger>
+            </TabsList>
 
-          {applicantTab === "single" ? (
-            <div className="space-y-5">
-              {/* Parse resume */}
+            <TabsContent value="single" className="mt-0">
+              <div className="space-y-5">
+                {/* Parse resume */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-[#000000]">
+                    Parse resume
+                  </Label>
+                  <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+                      <p className="text-sm text-[#02563d] leading-5">
+                        Drag and drop files here or click to upload
+                      </p>
+                      <p className="text-xs text-[#747474] leading-none">
+                        Max file size is 5MB. Supported file type is .pdf
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Or divider */}
+                <div className="flex items-center gap-2.5">
+                  <div className="flex-1 h-px bg-[#e5e5e5]" />
+                  <span className="text-sm text-[#737373] leading-none">
+                    or
+                  </span>
+                  <div className="flex-1 h-px bg-[#e5e5e5]" />
+                </div>
+
+                {/* Applicant name */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="name"
+                    className="text-sm font-medium text-[#0a0a0a]"
+                  >
+                    Applicant name <span className="text-red-700">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formik.values.name}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    placeholder="Mohan kuman"
+                    className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
+                      formik.touched.name && formik.errors.name
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  {formik.touched.name && formik.errors.name && (
+                    <p className="text-xs text-red-500">{formik.errors.name}</p>
+                  )}
+                </div>
+
+                {/* Email and Contact */}
+                <div className="flex gap-2.5">
+                  <div className="flex-1 space-y-2">
+                    <Label
+                      htmlFor="email"
+                      className="text-sm font-medium text-[#0a0a0a]"
+                    >
+                      Applicant email <span className="text-red-700">*</span>
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formik.values.email}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="mohankumar@gmail.com"
+                      className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
+                        formik.touched.email && formik.errors.email
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                    />
+                    {formik.touched.email && formik.errors.email && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.email}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label
+                      htmlFor="contact"
+                      className="text-sm font-medium text-[#0a0a0a]"
+                    >
+                      Contact number <span className="text-neutral-950">*</span>
+                    </Label>
+                    <Input
+                      id="contact"
+                      name="contact"
+                      value={formik.values.contact}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="+91 9876543210"
+                      className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
+                        formik.touched.contact && formik.errors.contact
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                    />
+                    {formik.touched.contact && formik.errors.contact && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.contact}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Attachment and Job title */}
+                <div className="flex gap-2.5">
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-[#0a0a0a]">
+                      Attachment
+                    </Label>
+                    <div className="h-9 border border-[#e5e5e5] rounded-md shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] bg-white px-3 flex items-center justify-between">
+                      <span className="text-sm text-[#0a0a0a] truncate flex-1">
+                        {formik.values.attachment
+                          ? formik.values.attachment.name
+                          : "No file chosen"}
+                      </span>
+                      <label className="text-sm font-medium text-[#0a0a0a] px-1.5 py-px cursor-pointer hover:text-[#02563d]">
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e?.target?.files?.[0];
+                            handleFileChange(file || null);
+                          }}
+                        />
+                        Choose file
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-[#0a0a0a]">
+                      Job title
+                    </Label>
+                    <Select
+                      value={formik.values.jobTitle}
+                      onValueChange={(value) => {
+                        formik.setFieldValue("jobTitle", value);
+                        formik.setFieldTouched("jobTitle", true);
+                      }}
+                    >
+                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50 border-[#e5e5e5]">
+                        <SelectValue placeholder="Product manager" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="product-manager">
+                          Product manager
+                        </SelectItem>
+                        <SelectItem value="senior-pm">Senior PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="bulk" className="mt-0">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-[#000000]">
-                  Parse resume
+                  Upload resumes or import data excel{" "}
+                  <span className="text-red-700">*</span>
                 </Label>
                 <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
                   <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
@@ -173,165 +330,8 @@ export function AddApplicantModal({
                   </div>
                 </div>
               </div>
-
-              {/* Or divider */}
-              <div className="flex items-center gap-2.5">
-                <div className="flex-1 h-px bg-[#e5e5e5]" />
-                <span className="text-sm text-[#737373] leading-none">or</span>
-                <div className="flex-1 h-px bg-[#e5e5e5]" />
-              </div>
-
-              {/* Applicant name */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="name"
-                  className="text-sm font-medium text-[#0a0a0a]"
-                >
-                  Applicant name <span className="text-red-700">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="Mohan kuman"
-                  className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
-                    formik.touched.name && formik.errors.name
-                      ? "border-red-500"
-                      : ""
-                  }`}
-                />
-                {formik.touched.name && formik.errors.name && (
-                  <p className="text-xs text-red-500">{formik.errors.name}</p>
-                )}
-              </div>
-
-              {/* Email and Contact */}
-              <div className="flex gap-2.5">
-                <div className="flex-1 space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-medium text-[#0a0a0a]"
-                  >
-                    Applicant email <span className="text-red-700">*</span>
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="mohankumar@gmail.com"
-                    className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
-                      formik.touched.email && formik.errors.email
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                  />
-                  {formik.touched.email && formik.errors.email && (
-                    <p className="text-xs text-red-500">
-                      {formik.errors.email}
-                    </p>
-                  )}
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Label
-                    htmlFor="contact"
-                    className="text-sm font-medium text-[#0a0a0a]"
-                  >
-                    Contact number <span className="text-neutral-950">*</span>
-                  </Label>
-                  <Input
-                    id="contact"
-                    name="contact"
-                    value={formik.values.contact}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="+91 9876543210"
-                    className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
-                      formik.touched.contact && formik.errors.contact
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                  />
-                  {formik.touched.contact && formik.errors.contact && (
-                    <p className="text-xs text-red-500">
-                      {formik.errors.contact}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Attachment and Job title */}
-              <div className="flex gap-2.5">
-                <div className="flex-1 space-y-2">
-                  <Label className="text-sm font-medium text-[#0a0a0a]">
-                    Attachment
-                  </Label>
-                  <div className="h-9 border border-[#e5e5e5] rounded-md shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] bg-white px-3 flex items-center justify-between">
-                    <span className="text-sm text-[#0a0a0a] truncate flex-1">
-                      {formik.values.attachment
-                        ? formik.values.attachment.name
-                        : "No file chosen"}
-                    </span>
-                    <label className="text-sm font-medium text-[#0a0a0a] px-1.5 py-px cursor-pointer hover:text-[#02563d]">
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e?.target?.files?.[0];
-                          handleFileChange(file || null);
-                        }}
-                      />
-                      Choose file
-                    </label>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Label className="text-sm font-medium text-[#0a0a0a]">
-                    Job title
-                  </Label>
-                  <Select
-                    value={formik.values.jobTitle}
-                    onValueChange={(value) => {
-                      formik.setFieldValue("jobTitle", value);
-                      formik.setFieldTouched("jobTitle", true);
-                    }}
-                  >
-                    <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50 border-[#e5e5e5]">
-                      <SelectValue placeholder="Product manager" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="product-manager">
-                        Product manager
-                      </SelectItem>
-                      <SelectItem value="senior-pm">Senior PM</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-[#000000]">
-                Upload resumes or import data excel{" "}
-                <span className="text-red-700">*</span>
-              </Label>
-              <div className="border border-dashed border-[#d1d1d1] rounded bg-transparent h-[114px] flex items-center justify-center">
-                <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-                  <p className="text-sm text-[#02563d] leading-5">
-                    Drag and drop files here or click to upload
-                  </p>
-                  <p className="text-xs text-[#747474] leading-none">
-                    Max file size is 5MB. Supported file type is .pdf
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
 
           <DialogFooter className="gap-2 justify-end">
             <Button

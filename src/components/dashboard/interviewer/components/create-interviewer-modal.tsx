@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useFormik } from "formik";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { interviewerService } from "../services/interviewer.services";
+import { transformToAPIPayload } from "../utils/interviewer.utils";
 
 interface CreateInterviewerModalProps {
   open: boolean;
@@ -32,7 +35,7 @@ interface CreateInterviewerModalProps {
 export interface InterviewerFormData {
   name: string;
   voice: string;
-  about: string;
+  description: string;
   skills: string;
   roundType: string;
   language: string;
@@ -45,26 +48,18 @@ export interface InterviewerFormData {
 }
 
 const voiceOptions = [
-  { value: "maya", label: "Maya" },
-  { value: "alex", label: "Alex" },
-  { value: "sam", label: "Sam" },
-  { value: "jordan", label: "Jordan" },
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
 ];
 
 const roundTypeOptions = [
-  { value: "behavioural", label: "Behavioural" },
-  { value: "technical", label: "Technical" },
-  { value: "cultural", label: "Cultural Fit" },
-  { value: "hr", label: "HR Round" },
+  { value: "Technical", label: "Technical" },
+  { value: "Behavioral", label: "Behavioral" },
+  { value: "HR Round", label: "HR Round" },
+  { value: "Screening", label: "Screening" },
 ];
 
-const languageOptions = [
-  { value: "english", label: "English" },
-  { value: "spanish", label: "Spanish" },
-  { value: "french", label: "French" },
-  { value: "german", label: "German" },
-  { value: "hindi", label: "Hindi" },
-];
+const languageOptions = [{ value: "English", label: "English" }];
 
 const validate = (values: InterviewerFormData) => {
   const errors: Partial<Record<keyof InterviewerFormData, string>> = {};
@@ -93,13 +88,15 @@ export function CreateInterviewerModal({
   onOpenChange,
   onSubmit,
 }: CreateInterviewerModalProps) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const formik = useFormik<InterviewerFormData>({
     initialValues: {
       name: "",
       voice: "",
-      about: "",
+      description: "",
       skills: "",
-      roundType: "behavioural",
+      roundType: "",
       language: "",
       personality: {
         empathy: 100,
@@ -109,10 +106,30 @@ export function CreateInterviewerModal({
       },
     },
     validate,
-    onSubmit: (values, { resetForm }) => {
-      onSubmit?.(values);
-      resetForm();
-      onOpenChange(false);
+    onSubmit: async (values, { resetForm }) => {
+      setIsSubmitting(true);
+      try {
+        const payload = transformToAPIPayload(values);
+        const response = await interviewerService.createInterviewer(
+          {},
+          payload
+        );
+        toast.success(response?.message || "Interviewer created successfully", {
+          duration: 8000,
+        });
+        onSubmit?.(values);
+        resetForm();
+        onOpenChange(false);
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.message || "An unknown error occurred",
+          {
+            duration: 8000,
+          }
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
 
@@ -193,10 +210,10 @@ export function CreateInterviewerModal({
                 </button>
               </div>
               <Textarea
-                id="about"
-                name="about"
+                id="description"
+                name="description"
                 placeholder="Write about interviewer...."
-                value={formik.values.about}
+                value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 className="min-h-[103px] shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
@@ -234,7 +251,6 @@ export function CreateInterviewerModal({
                   onValueChange={(value) =>
                     formik.setFieldValue("roundType", value)
                   }
-                  disabled
                 >
                   <SelectTrigger className="w-full shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50">
                     <SelectValue placeholder="Behavioural" />
@@ -347,7 +363,9 @@ export function CreateInterviewerModal({
           </div>
 
           <DialogFooter>
-            <Button type="submit">Create interviewer</Button>
+            <Button type="submit" disabled={isSubmitting || !formik.isValid}>
+              {isSubmitting ? "Creating..." : "Create interviewer"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -22,4 +22,7 @@ export const API_ENDPOINTS = {
     DELETE: "/objects/69521d71c9ba83a076aac3c4/records/{id}",
     UPDATE: "/objects/69521d71c9ba83a076aac3c4/records/{id}",
   },
+  INTERVIEWER: {
+    CREATE: "/v2/forminstances",
+  },
 };

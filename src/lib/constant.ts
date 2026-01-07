@@ -19,5 +19,7 @@ export const API_ENDPOINTS = {
   APPLICANT: {
     CREATE: "/objects/69521d7dc9ba83a076aac3c8/records",
     LIST: "/objects/69521d7dc9ba83a076aac3c8/views/69521d7dc9ba83a076aac3c9/records",
+    DELETE: "/objects/69521d71c9ba83a076aac3c4/records/{id}",
+    UPDATE: "/objects/69521d71c9ba83a076aac3c4/records/{id}",
   },
 };

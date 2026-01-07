@@ -119,4 +119,7 @@ export interface AddApplicantModalProps {
     jobTitle: string;
   };
   onSubmit?: (form: ApplicantForm) => void;
+  isEditMode?: boolean;
+  applicantDetail?: ApplicantForm | null;
+  applicantId?: string;
 }

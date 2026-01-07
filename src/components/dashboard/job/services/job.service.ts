@@ -67,4 +67,18 @@ export const jobService = {
       payload,
       signal
     ),
+  deleteApplicant: (id: string) =>
+    serverInterfaceService.delete(
+      buildUrl(API_ENDPOINTS.APPLICANT.DELETE, { id })
+    ),
+  updateApplicant: (
+    id: string,
+    params: Record<string, any>,
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.put(
+      buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, { id }),
+      { ...payload, ...params }
+    ),
 };

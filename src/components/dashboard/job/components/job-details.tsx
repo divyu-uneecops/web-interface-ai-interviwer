@@ -78,6 +78,7 @@ import {
 import { CreateJobModal } from "./create-job-modal";
 import { AddApplicantModal } from "./add-applicant-modal";
 import { useAppSelector } from "@/store/hooks";
+import { isEmpty } from "@/lib/utils";
 
 export const stats: JobStat[] = [
   { label: "Total Applicants", value: 143, icon: "applicants" },
@@ -91,6 +92,8 @@ export default function JobDetails() {
   const [whatsappReminder, setWhatsappReminder] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
+  const [isEditApplicantModalOpen, setIsEditApplicantModalOpen] =
+    useState(false);
   const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("details");
@@ -111,6 +114,9 @@ export default function JobDetails() {
     limit: 10,
   });
   const [currentApplicantsOffset, setCurrentApplicantsOffset] = useState(0);
+  const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(
+    null
+  );
   const PAGE_LIMIT = 10;
 
   const { mappingValues } = useAppSelector((state) => state.jobs);
@@ -324,6 +330,30 @@ export default function JobDetails() {
     []
   );
 
+  const handleDeleteApplicant = async (id: string) => {
+    if (isEmpty(id)) return;
+    try {
+      const response = await jobService.deleteApplicant(id);
+      toast.success(response ? response : "Applicant deleted successfully", {
+        duration: 8000, // 8 seconds
+      });
+      // Refresh applicants list
+      fetchApplicants();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to delete applicant",
+        {
+          duration: 8000, // 8 seconds
+        }
+      );
+    }
+  };
+
+  const handleEditApplicant = (applicant: Applicant) => {
+    setEditingApplicant(applicant);
+    setIsEditApplicantModalOpen(true);
+  };
+
   // Row actions renderer for applicants
   const renderApplicantRowActions = (applicant: Applicant) => (
     <DropdownMenu>
@@ -338,12 +368,15 @@ export default function JobDetails() {
           <Download className="h-4 text-[#737373] mr-2" />
           Download
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleEditApplicant(applicant)}>
           <Pencil className="h-4 text-[#737373] mr-2" />
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => handleDeleteApplicant(applicant?.id)}
+        >
           <Trash2 className="h-4 mr-2" />
           Delete
         </DropdownMenuItem>
@@ -924,6 +957,34 @@ export default function JobDetails() {
         jobInfo={{ jobId: job?.jobId || "", jobTitle: job?.title || "" }}
         onSubmit={(form) => {
           // Handle applicant submission here
+          fetchApplicants();
+        }}
+      />
+
+      {/* Edit Applicant Modal */}
+      <AddApplicantModal
+        open={isEditApplicantModalOpen}
+        onOpenChange={(open) => {
+          setIsEditApplicantModalOpen(open);
+          if (!open) {
+            setEditingApplicant(null);
+          }
+        }}
+        jobInfo={{ jobId: job?.jobId || "", jobTitle: job?.title || "" }}
+        isEditMode={true}
+        applicantId={editingApplicant?.id}
+        applicantDetail={
+          editingApplicant
+            ? {
+                name: editingApplicant.name,
+                email: editingApplicant.email,
+                contact: editingApplicant.contact,
+                attachment: null,
+              }
+            : null
+        }
+        onSubmit={(form) => {
+          // Handle applicant update here
           fetchApplicants();
         }}
       />

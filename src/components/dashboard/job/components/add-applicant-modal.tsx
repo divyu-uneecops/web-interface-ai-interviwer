@@ -53,16 +53,19 @@ export function AddApplicantModal({
   onOpenChange,
   jobInfo,
   onSubmit,
+  isEditMode = false,
+  applicantDetail,
+  applicantId,
 }: AddApplicantModalProps) {
   const [applicantTab, setApplicantTab] = useState<"single" | "bulk">("single");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formik = useFormik<ApplicantForm>({
     initialValues: {
-      name: "",
-      email: "",
-      contact: "",
-      attachment: null,
+      name: applicantDetail?.name || "",
+      email: applicantDetail?.email || "",
+      contact: applicantDetail?.contact || "",
+      attachment: applicantDetail?.attachment || null,
     },
     validate: validate,
     enableReinitialize: true,
@@ -85,8 +88,23 @@ export function AddApplicantModal({
           attachmentPath
         );
 
-        // Call API to create applicant
-        const response = await jobService.createApplicant(payload);
+        if (isEditMode && applicantId) {
+          // Update existing applicant
+          const response = await jobService.updateApplicant(
+            applicantId,
+            {},
+            payload
+          );
+          toast.success(response?.message || "Applicant updated successfully", {
+            duration: 8000,
+          });
+        } else {
+          // Create new applicant
+          const response = await jobService.createApplicant(payload);
+          toast.success(response?.message || "Applicant added successfully", {
+            duration: 8000,
+          });
+        }
 
         // Call custom onSubmit if provided
         if (onSubmit) {
@@ -95,9 +113,6 @@ export function AddApplicantModal({
 
         formik.resetForm();
         onOpenChange(false);
-        toast.success(response?.message || "Applicant added successfully", {
-          duration: 8000,
-        });
       } catch (error: any) {
         toast.error(
           error?.response?.data?.message || "An unknown error occurred",
@@ -115,8 +130,15 @@ export function AddApplicantModal({
     if (!open) {
       formik.resetForm();
       setApplicantTab("single");
+    } else if (isEditMode && applicantDetail) {
+      formik.setValues({
+        name: applicantDetail.name || "",
+        email: applicantDetail.email || "",
+        contact: applicantDetail.contact || "",
+        attachment: applicantDetail.attachment || null,
+      });
     }
-  }, [open]);
+  }, [open, isEditMode, applicantDetail]);
 
   const handleFileChange = (file: File | null) => {
     if (!file) return;
@@ -143,7 +165,7 @@ export function AddApplicantModal({
       <DialogContent className="sm:max-w-[779px] max-h-[90vh] overflow-y-auto p-6 gap-4 shadow-lg">
         <DialogHeader className="gap-1.5 items-start">
           <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
-            Create Applicant
+            {isEditMode ? "Edit Applicant" : "Create Applicant"}
           </DialogTitle>
         </DialogHeader>
 
@@ -354,7 +376,13 @@ export function AddApplicantModal({
               className="h-9 px-4 bg-[#02563d] hover:bg-[#02563d]/90 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
               disabled={isSubmitting || !formik.isValid}
             >
-              {isSubmitting ? "Adding..." : "Next"}
+              {isSubmitting
+                ? isEditMode
+                  ? "Updating..."
+                  : "Adding..."
+                : isEditMode
+                ? "Update"
+                : "Next"}
             </Button>
           </DialogFooter>
         </form>

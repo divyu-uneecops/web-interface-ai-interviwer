@@ -4,19 +4,7 @@ import Image from "next/image";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-export interface Interviewer {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  roundType: string;
-}
-
-interface InterviewerCardProps {
-  interviewer: Interviewer;
-  onEdit?: (id: string) => void;
-}
+import { InterviewerCardProps } from "../interfaces/interviewer.interfaces";
 
 export function InterviewerCard({ interviewer, onEdit }: InterviewerCardProps) {
   return (

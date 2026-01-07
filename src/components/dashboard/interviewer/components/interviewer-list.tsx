@@ -8,22 +8,20 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  InterviewerCard,
-  type Interviewer,
-} from "@/components/dashboard/interviewer/components/interviewer-card";
-import {
-  CreateInterviewerModal,
-  type InterviewerFormData,
-} from "@/components/dashboard/interviewer/components/create-interviewer-modal";
 import { interviewerService } from "../services/interviewer.services";
 import {
   transformAPIResponseToInterviewers,
   type APIPaginationInfo,
 } from "../utils/interviewer.utils";
-import { toast } from "sonner";
+import {
+  Interviewer,
+  InterviewerFormData,
+} from "../interfaces/interviewer.interfaces";
+import { CreateInterviewerModal } from "./create-interviewer-modal";
+import { InterviewerCard } from "./interviewer-card";
 
 const PAGE_LIMIT = 12; // 4 columns x 3 rows
 
@@ -129,21 +127,20 @@ export function InterviewerList() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-black">AI Interviewers</h2>
+        {/* Search Input */}
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#e5e5e5] w-[245px]">
+          <Search className="w-4 h-4 text-[#737373]" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
+          />
+        </div>
 
         {/* Search & Actions */}
         <div className="flex items-center gap-3">
-          {/* Search Input */}
-          <div className="relative w-[245px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-[10.667px] w-[10.667px] text-[#737373]" />
-            <Input
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e?.target?.value)}
-              className="pl-8 border-0 border-b border-[#e5e5e5] rounded-none focus-visible:ring-0 focus-visible:border-[#02563d] shadow-none"
-            />
-          </div>
-
           {/* Filters Button */}
           <Button variant="secondary" size="default">
             <ListFilter className="w-4 h-4" />
@@ -180,37 +177,40 @@ export function InterviewerList() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-4 gap-6">
-            {filteredInterviewers?.map((interviewer) => (
-              <InterviewerCard
-                key={interviewer.id}
-                interviewer={interviewer}
-                onEdit={handleEditInterviewer}
-              />
-            ))}
-          </div>
+          {interviewers?.length > 0 && !isLoading && (
+            <>
+              <div className="grid grid-cols-4 gap-6">
+                {interviewers?.map((interviewer) => (
+                  <InterviewerCard
+                    key={interviewer.id}
+                    interviewer={interviewer}
+                    onEdit={handleEditInterviewer}
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Empty State */}
-          {filteredInterviewers?.length === 0 && !isLoading && (
+          {interviewers?.length === 0 && !isLoading && (
             <div className="text-center py-12">
               <p className="text-[#737373]">No interviewers found</p>
             </div>
           )}
 
           {/* Pagination Controls */}
-          {pagination.total > 0 && (
-            <div className="flex items-center justify-between mt-6">
-              <div className="text-sm text-[#737373]">
-                Showing {currentOffset + 1} to{" "}
-                {Math.min(currentOffset + PAGE_LIMIT, pagination.total)} of{" "}
-                {pagination.total} interviewers
-              </div>
+          {pagination.total > 0 && !isLoading && (
+            <div className="flex items-center justify-end mt-6">
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handlePreviousPage}
-                  disabled={pagination.previousOffset === null || isLoading}
+                  disabled={
+                    pagination?.previousOffset === null ||
+                    pagination?.previousOffset < 0 ||
+                    isLoading
+                  }
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous
@@ -222,7 +222,12 @@ export function InterviewerList() {
                   variant="outline"
                   size="sm"
                   onClick={handleNextPage}
-                  disabled={pagination.nextOffset === null || isLoading}
+                  disabled={
+                    (pagination?.nextOffset &&
+                      pagination?.nextOffset >= pagination?.total) ||
+                    pagination?.nextOffset === null ||
+                    isLoading
+                  }
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />

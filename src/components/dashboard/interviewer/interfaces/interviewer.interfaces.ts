@@ -18,3 +18,16 @@ export interface InterviewerFormData {
     speed: number;
   };
 }
+
+export interface Interviewer {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  roundType: string;
+}
+
+export interface InterviewerCardProps {
+  interviewer: Interviewer;
+  onEdit?: (id: string) => void;
+}

@@ -146,7 +146,7 @@ export function CreateInterviewerModal({
       <DialogContent className="sm:max-w-[779px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create interviewer</DialogTitle>
-          <DialogDescription></DialogDescription>
+          <DialogDescription className="sr-only"></DialogDescription>
         </DialogHeader>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
@@ -337,7 +337,7 @@ export function CreateInterviewerModal({
                   onValueChange={(value) =>
                     formik.setFieldValue("personality.empathy", value[0])
                   }
-                  max={100}
+                  max={10}
                   step={1}
                   className="flex-1"
                 />
@@ -353,7 +353,7 @@ export function CreateInterviewerModal({
                   onValueChange={(value) =>
                     formik.setFieldValue("personality.rapport", value[0])
                   }
-                  max={100}
+                  max={10}
                   step={1}
                   className="flex-1"
                 />
@@ -369,7 +369,7 @@ export function CreateInterviewerModal({
                   onValueChange={(value) =>
                     formik.setFieldValue("personality.exploration", value[0])
                   }
-                  max={100}
+                  max={10}
                   step={1}
                   className="flex-1"
                 />
@@ -385,7 +385,7 @@ export function CreateInterviewerModal({
                   onValueChange={(value) =>
                     formik.setFieldValue("personality.speed", value[0])
                   }
-                  max={100}
+                  max={10}
                   step={1}
                   className="flex-1"
                 />

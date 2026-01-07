@@ -1,5 +1,7 @@
-import { InterviewerFormData } from "../components/create-interviewer-modal";
-import { Interviewer } from "../components/interviewer-card";
+import {
+  Interviewer,
+  InterviewerFormData,
+} from "../interfaces/interviewer.interfaces";
 
 export interface APIInterviewerValue {
   propertyId: string;
@@ -72,11 +74,6 @@ export const transformAPIInterviewerItemToInterviewer = (
   if (voice === "Female") {
     imageUrl = "/interviewer-female.jpg";
   }
-  // If avatar exists and has a value, use it (future implementation)
-  if (avatar && Array.isArray(avatar) && avatar.length > 0) {
-    // TODO: Implement avatar URL construction when file upload is ready
-    // imageUrl = constructAvatarUrl(avatar[0]);
-  }
 
   // Format round type for display
   const formattedRoundType =
@@ -136,8 +133,8 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
 
   // Transform skills to API format (array of arrays)
   const interviewerSkills = values.skills
-    .filter((skill) => skill.trim().length > 0)
-    .map((skill) => [
+    .filter((skill: string) => skill.trim().length > 0)
+    .map((skill: string) => [
       {
         propertyId: "69525680c9ba83a076aac417",
         key: "skill",
@@ -150,33 +147,24 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     {
       propertyId: "695257cdc9ba83a076aac41d",
       key: "empathy",
-      value: Math.round(values.personality.empathy / 50), // Convert 0-100 to 0-2 scale
+      value: values.personality.empathy,
     },
     {
       propertyId: "695257e4c9ba83a076aac41e",
       key: "rapport",
-      value: Math.round(values.personality.rapport / 50),
+      value: values.personality.rapport,
     },
     {
       propertyId: "69525807c9ba83a076aac420",
       key: "exploration",
-      value: Math.round(values.personality.exploration / 50),
+      value: values.personality.exploration,
     },
     {
       propertyId: "69525827c9ba83a076aac421",
       key: "speed",
-      value: Math.round(values.personality.speed / 50),
+      value: values.personality.speed,
     },
   ];
-
-  // Map language to API format (e.g., "English" -> "en-US")
-  const languageMap: Record<string, string> = {
-    English: "en-US",
-  };
-  const languageValue =
-    values.language && languageMap[values.language]
-      ? languageMap[values.language]
-      : values.language || "en-US";
 
   const valuesArray = [
     {
@@ -187,7 +175,7 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     {
       propertyId: "6952562ac9ba83a076aac413",
       key: "name",
-      value: values.name,
+      value: values.name || "",
     },
     {
       propertyId: "69525663c9ba83a076aac416",
@@ -197,22 +185,22 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     {
       propertyId: "695256aac9ba83a076aac418",
       key: "interviewerSkills",
-      value: interviewerSkills,
+      value: interviewerSkills || [],
     },
     {
       propertyId: "69525713c9ba83a076aac419",
       key: "roundType",
-      value: values.roundType,
+      value: values.roundType || "",
     },
     {
       propertyId: "6952577bc9ba83a076aac41a",
       key: "language",
-      value: languageValue,
+      value: values.language || "",
     },
     {
       propertyId: "695257b4c9ba83a076aac41b",
       key: "voice",
-      value: values.voice,
+      value: values.voice || "",
     },
     {
       propertyId: "69525848c9ba83a076aac423",

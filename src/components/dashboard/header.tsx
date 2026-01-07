@@ -33,6 +33,12 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
           if (pathname && pathname.startsWith("/dashboard/jobs")) {
             h1 = "Job Openings";
             p = "Manage your job openings and hiring pipeline";
+          } else if (
+            pathname &&
+            pathname.startsWith("/dashboard/interviewers")
+          ) {
+            h1 = "AI Interviewers";
+            p = "Manage your job openings and hiring pipeline";
           } else if (pathname && pathname.startsWith("/dashboard/interviews")) {
             h1 = "Interviews";
             p = "View and manage candidate interviews";

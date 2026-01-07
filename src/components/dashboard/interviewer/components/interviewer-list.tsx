@@ -13,7 +13,9 @@ import {
 import { interviewerService } from "../services/interviewer.services";
 import {
   transformAPIResponseToInterviewers,
+  transformAPIInterviewerItemToFormData,
   type APIPaginationInfo,
+  type APIInterviewerItem,
 } from "../utils/interviewer.utils";
 import {
   Interviewer,
@@ -46,6 +48,12 @@ export function InterviewerList() {
     language: [],
     voice: [],
   });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [interviewerDetail, setInterviewerDetail] =
+    useState<InterviewerFormData | null>(null);
+  const [editingInterviewerId, setEditingInterviewerId] = useState<
+    string | null
+  >(null);
 
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
@@ -156,21 +164,40 @@ export function InterviewerList() {
     fetchInterviewers();
   };
 
-  const handleEditInterviewer = (id: string) => {
-    console.log("Edit interviewer:", id);
-    // TODO: Implement edit functionality
+  const handleUpdateInterviewer = (data: InterviewerFormData) => {
+    // Refresh the list after updating
+    setCurrentOffset(0);
+    fetchInterviewers();
+    setIsEditModalOpen(false);
+    setInterviewerDetail(null);
+    setEditingInterviewerId(null);
+  };
+
+  const handleEditInterviewer = async (id: string) => {
+    try {
+      setEditingInterviewerId(id);
+      const response = await interviewerService.getInterviewerDetail(id, {
+        appId: "69521cd1c9ba83a076aac3ae",
+      });
+      const formData = transformAPIInterviewerItemToFormData(
+        response as APIInterviewerItem
+      );
+      setInterviewerDetail(formData);
+      setIsEditModalOpen(true);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch interviewer details",
+        {
+          duration: 8000,
+        }
+      );
+    }
   };
 
   const handleApplyFilters = (filters: FilterState) => {
     setAppliedFilters(filters);
     setCurrentOffset(0); // Reset to first page when filters are applied
   };
-
-  const filteredInterviewers = interviewers.filter(
-    (interviewer) =>
-      interviewer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      interviewer.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handlePreviousPage = () => {
     if (pagination.previousOffset !== null) {
@@ -308,6 +335,22 @@ export function InterviewerList() {
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onSubmit={handleCreateInterviewer}
+      />
+
+      {/* Edit Interviewer Modal */}
+      <CreateInterviewerModal
+        open={isEditModalOpen}
+        onOpenChange={(open) => {
+          setIsEditModalOpen(open);
+          if (!open) {
+            setInterviewerDetail(null);
+            setEditingInterviewerId(null);
+          }
+        }}
+        onSubmit={handleUpdateInterviewer}
+        isEditMode={true}
+        interviewerDetail={interviewerDetail}
+        interviewerId={editingInterviewerId || undefined}
       />
     </div>
   );

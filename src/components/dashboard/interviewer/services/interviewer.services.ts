@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/lib/constant";
 import serverInterfaceService from "../../../../services/server-interface.service";
+import { buildUrl } from "@/lib/utils";
 
 export const interviewerService = {
   createInterviewer: (
@@ -23,5 +24,24 @@ export const interviewerService = {
       params,
       payload,
       signal
+    ),
+  getInterviewerDetail: (
+    id: string,
+    params?: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.get(
+      buildUrl(API_ENDPOINTS.INTERVIEWER.DETAIL, { id }),
+      params,
+      signal
+    ),
+  updateInterviewer: (
+    id: string,
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.patch(
+      buildUrl(API_ENDPOINTS.INTERVIEWER.UPDATE, { id }),
+      payload
     ),
 };

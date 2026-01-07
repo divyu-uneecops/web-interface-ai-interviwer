@@ -246,3 +246,168 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     formId: "69521d56c9ba83a076aac3bf",
   };
 };
+
+export const transformToUpdatePayload = (values: InterviewerFormData) => {
+  // Transform skills to API format (array of arrays)
+  const interviewerSkills = values.skills
+    .filter((skill: string) => skill.trim().length > 0)
+    .map((skill: string) => [
+      {
+        propertyId: "69525680c9ba83a076aac417",
+        key: "skill",
+        value: skill.trim(),
+      },
+    ]);
+
+  // Transform personality traits to API format
+  const personalityTraits = [
+    {
+      propertyId: "695257cdc9ba83a076aac41d",
+      key: "empathy",
+      value: values.personality.empathy,
+    },
+    {
+      propertyId: "695257e4c9ba83a076aac41e",
+      key: "rapport",
+      value: values.personality.rapport,
+    },
+    {
+      propertyId: "69525807c9ba83a076aac420",
+      key: "exploration",
+      value: values.personality.exploration,
+    },
+    {
+      propertyId: "69525827c9ba83a076aac421",
+      key: "speed",
+      value: values.personality.speed,
+    },
+  ];
+
+  const valuesArray = [
+    {
+      propertyId: "6952562ac9ba83a076aac413",
+      key: "name",
+      value: values.name || "",
+    },
+    {
+      propertyId: "69525663c9ba83a076aac416",
+      key: "description",
+      value: values.description || "",
+    },
+    {
+      propertyId: "695256aac9ba83a076aac418",
+      key: "interviewerSkills",
+      value: interviewerSkills || [],
+    },
+    {
+      propertyId: "69525713c9ba83a076aac419",
+      key: "roundType",
+      value: values.roundType || "",
+    },
+    {
+      propertyId: "6952577bc9ba83a076aac41a",
+      key: "language",
+      value: values.language || "",
+    },
+    {
+      propertyId: "695257b4c9ba83a076aac41b",
+      key: "voice",
+      value: values.voice || "",
+    },
+    {
+      propertyId: "69525848c9ba83a076aac423",
+      key: "personalityTraits",
+      value: personalityTraits,
+    },
+  ];
+
+  return {
+    values: valuesArray,
+    propertyIds: [
+      "6952562ac9ba83a076aac413",
+      "69525663c9ba83a076aac416",
+      "695256aac9ba83a076aac418",
+      "69525713c9ba83a076aac419",
+      "6952577bc9ba83a076aac41a",
+      "695257b4c9ba83a076aac41b",
+      "69525848c9ba83a076aac423",
+    ],
+  };
+};
+
+export const transformAPIInterviewerItemToFormData = (
+  item: APIInterviewerItem
+): InterviewerFormData => {
+  // Create a map of values for easy lookup
+  const valuesMap = new Map<string, any>();
+  if (Array.isArray(item.values)) {
+    item.values.forEach((val) => {
+      if (val && val.key) {
+        valuesMap.set(val.key, val.value);
+      }
+    });
+  }
+
+  // Extract values with fallbacks
+  const name = valuesMap.get("name") || "";
+  const description = valuesMap.get("description") || "";
+  const roundType = valuesMap.get("roundType") || "";
+  const voice = valuesMap.get("voice") || "";
+  const language = valuesMap.get("language") || "";
+
+  // Extract skills
+  let skills: string[] = [];
+  const skillsValue = valuesMap.get("interviewerSkills");
+  if (Array.isArray(skillsValue) && skillsValue.length > 0) {
+    skills = skillsValue
+      .flat()
+      .map((sk: any) => {
+        if (sk && typeof sk === "object") return sk.value || sk.skill || "";
+        return "";
+      })
+      .filter((v: string) => !!v);
+  }
+
+  // Extract personality traits
+  const personalityTraits = valuesMap.get("personalityTraits") || [];
+  let empathy = 0;
+  let rapport = 0;
+  let exploration = 0;
+  let speed = 0;
+
+  if (Array.isArray(personalityTraits)) {
+    personalityTraits.forEach((trait: any) => {
+      if (trait && trait.key) {
+        switch (trait.key) {
+          case "empathy":
+            empathy = trait.value || 0;
+            break;
+          case "rapport":
+            rapport = trait.value || 0;
+            break;
+          case "exploration":
+            exploration = trait.value || 0;
+            break;
+          case "speed":
+            speed = trait.value || 0;
+            break;
+        }
+      }
+    });
+  }
+
+  return {
+    name: String(name),
+    voice: String(voice),
+    description: String(description),
+    skills,
+    roundType: String(roundType),
+    language: String(language),
+    personality: {
+      empathy,
+      rapport,
+      exploration,
+      speed,
+    },
+  };
+};

@@ -28,7 +28,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { interviewerService } from "../services/interviewer.services";
-import { transformToAPIPayload } from "../utils/interviewer.utils";
+import {
+  transformToAPIPayload,
+  transformToUpdatePayload,
+} from "../utils/interviewer.utils";
 import {
   CreateInterviewerModalProps,
   InterviewerFormData,
@@ -65,6 +68,9 @@ export function CreateInterviewerModal({
   open,
   onOpenChange,
   onSubmit,
+  isEditMode = false,
+  interviewerDetail,
+  interviewerId,
 }: CreateInterviewerModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [skillInput, setSkillInput] = useState("");
@@ -85,17 +91,37 @@ export function CreateInterviewerModal({
       },
     },
     validate,
+    enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       setIsSubmitting(true);
       try {
-        const payload = transformToAPIPayload(values);
-        const response = await interviewerService.createInterviewer(
-          {},
-          payload
-        );
-        toast.success(response?.message || "Interviewer created successfully", {
-          duration: 8000,
-        });
+        if (isEditMode && interviewerId) {
+          // Edit mode - update existing interviewer
+          const payload = transformToUpdatePayload(values);
+          const response = await interviewerService.updateInterviewer(
+            interviewerId,
+            payload
+          );
+          toast.success(
+            response?.message || "Interviewer updated successfully",
+            {
+              duration: 8000,
+            }
+          );
+        } else {
+          // Create mode - create new interviewer
+          const payload = transformToAPIPayload(values);
+          const response = await interviewerService.createInterviewer(
+            {},
+            payload
+          );
+          toast.success(
+            response?.message || "Interviewer created successfully",
+            {
+              duration: 8000,
+            }
+          );
+        }
         onSubmit?.(values);
         resetForm();
         setSkillInput("");
@@ -114,11 +140,14 @@ export function CreateInterviewerModal({
   });
 
   useEffect(() => {
-    if (!open) {
+    if (open && isEditMode && interviewerDetail) {
+      formik.setValues(interviewerDetail);
+    } else if (!open) {
+      // Reset form when modal closes
       formik.resetForm();
       setSkillInput("");
     }
-  }, [open]);
+  }, [open, isEditMode, interviewerDetail]);
 
   const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && skillInput?.trim()) {
@@ -145,7 +174,9 @@ export function CreateInterviewerModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[779px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create interviewer</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Edit interviewer" : "Create interviewer"}
+          </DialogTitle>
           <DialogDescription className="sr-only"></DialogDescription>
         </DialogHeader>
 
@@ -394,8 +425,19 @@ export function CreateInterviewerModal({
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting || !formik.isValid}>
-              {isSubmitting ? "Creating..." : "Create interviewer"}
+            <Button
+              type="submit"
+              disabled={
+                isSubmitting || !formik.isValid || (!formik.dirty && isEditMode)
+              }
+            >
+              {isSubmitting
+                ? isEditMode
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditMode
+                ? "Update interviewer"
+                : "Create interviewer"}
             </Button>
           </DialogFooter>
         </form>

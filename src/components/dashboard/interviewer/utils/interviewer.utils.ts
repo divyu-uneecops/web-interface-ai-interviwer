@@ -136,14 +136,12 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
 
   // Transform skills to API format (array of arrays)
   const interviewerSkills = values.skills
-    .split(",")
-    .map((skill) => skill.trim())
-    .filter((skill) => skill.length > 0)
+    .filter((skill) => skill.trim().length > 0)
     .map((skill) => [
       {
         propertyId: "69525680c9ba83a076aac417",
         key: "skill",
-        value: skill,
+        value: skill.trim(),
       },
     ]);
 

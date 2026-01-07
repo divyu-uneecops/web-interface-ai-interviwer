@@ -1,8 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { useFormik } from "formik";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -23,43 +25,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+
 import { interviewerService } from "../services/interviewer.services";
 import { transformToAPIPayload } from "../utils/interviewer.utils";
-
-interface CreateInterviewerModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: InterviewerFormData) => void;
-}
-
-export interface InterviewerFormData {
-  name: string;
-  voice: string;
-  description: string;
-  skills: string;
-  roundType: string;
-  language: string;
-  personality: {
-    empathy: number;
-    rapport: number;
-    exploration: number;
-    speed: number;
-  };
-}
-
-const voiceOptions = [
-  { value: "Male", label: "Male" },
-  { value: "Female", label: "Female" },
-];
-
-const roundTypeOptions = [
-  { value: "Technical", label: "Technical" },
-  { value: "Behavioral", label: "Behavioral" },
-  { value: "HR Round", label: "HR Round" },
-  { value: "Screening", label: "Screening" },
-];
-
-const languageOptions = [{ value: "English", label: "English" }];
+import {
+  CreateInterviewerModalProps,
+  InterviewerFormData,
+} from "../interfaces/interviewer.interfaces";
+import {
+  voiceOptions,
+  roundTypeOptions,
+  languageOptions,
+} from "../constants/interviewer.constants";
 
 const validate = (values: InterviewerFormData) => {
   const errors: Partial<Record<keyof InterviewerFormData, string>> = {};
@@ -72,8 +50,8 @@ const validate = (values: InterviewerFormData) => {
     errors.voice = "Voice is required";
   }
 
-  if (!values.skills || values.skills.trim() === "") {
-    errors.skills = "Interviewer skills are required";
+  if (!values.skills || values.skills.length === 0) {
+    errors.skills = "At least one skill is required";
   }
 
   if (!values.roundType || values.roundType.trim() === "") {
@@ -88,21 +66,22 @@ export function CreateInterviewerModal({
   onOpenChange,
   onSubmit,
 }: CreateInterviewerModalProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skillInput, setSkillInput] = useState("");
 
   const formik = useFormik<InterviewerFormData>({
     initialValues: {
       name: "",
       voice: "",
       description: "",
-      skills: "",
+      skills: [],
       roundType: "",
       language: "",
       personality: {
-        empathy: 100,
-        rapport: 100,
-        exploration: 100,
-        speed: 100,
+        empathy: 0,
+        rapport: 0,
+        exploration: 0,
+        speed: 0,
       },
     },
     validate,
@@ -119,6 +98,7 @@ export function CreateInterviewerModal({
         });
         onSubmit?.(values);
         resetForm();
+        setSkillInput("");
         onOpenChange(false);
       } catch (error: any) {
         toast.error(
@@ -133,11 +113,33 @@ export function CreateInterviewerModal({
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       formik.resetForm();
+      setSkillInput("");
     }
   }, [open]);
+
+  const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && skillInput?.trim()) {
+      e.preventDefault();
+      const trimmedSkill = skillInput?.trim();
+      if (!formik?.values?.skills?.includes(trimmedSkill)) {
+        formik.setFieldValue("skills", [
+          ...formik?.values?.skills,
+          trimmedSkill,
+        ]);
+      }
+      setSkillInput("");
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    formik.setFieldValue(
+      "skills",
+      formik.values.skills.filter((skill) => skill !== skillToRemove)
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -222,18 +224,47 @@ export function CreateInterviewerModal({
 
             {/* Interviewer Skills */}
             <div className="space-y-2">
-              <Label htmlFor="skills">
-                Interviewer skills <span className="text-neutral-950">*</span>
+              <Label
+                htmlFor="skills"
+                className="text-sm font-medium text-[#0a0a0a] leading-none"
+              >
+                Interviewer skills <span className="text-red-700">*</span>
               </Label>
-              <Input
-                id="skills"
-                name="skills"
-                placeholder="Add skills"
-                value={formik.values.skills}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
-              />
+              <div
+                className={`flex flex-wrap gap-1 p-3 border rounded-lg shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] min-h-[36px] bg-white items-center ${
+                  formik.touched.skills && formik.errors.skills
+                    ? "border-red-500"
+                    : "border-[#e5e5e5]"
+                }`}
+              >
+                {formik.values.skills?.map((skill) => (
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="flex items-center gap-0.5 h-[18px] bg-[#e5e5e5] text-[#000000] text-xs font-normal tracking-[0.3px] rounded-full px-2 border-0"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="ml-0.5 hover:bg-[rgba(0,0,0,0.1)] rounded-full"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+                <Input
+                  id="skills"
+                  placeholder={
+                    formik.values.skills.length === 0 ? "Add skills" : ""
+                  }
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e?.target?.value)}
+                  onBlur={() => formik.setFieldTouched("skills", true)}
+                  onKeyDown={handleAddSkill}
+                  className="flex-1 min-w-[120px] border-0 shadow-none focus-visible:ring-0 p-0 h-auto text-sm"
+                />
+              </div>
               {formik.touched.skills && formik.errors.skills && (
                 <p className="text-sm text-red-500">{formik.errors.skills}</p>
               )}
@@ -252,8 +283,8 @@ export function CreateInterviewerModal({
                     formik.setFieldValue("roundType", value)
                   }
                 >
-                  <SelectTrigger className="w-full shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] opacity-50">
-                    <SelectValue placeholder="Behavioural" />
+                  <SelectTrigger className="w-full shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {roundTypeOptions.map((option) => (

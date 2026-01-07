@@ -13,4 +13,15 @@ export const interviewerService = {
       payload,
       signal
     ),
+  getInterviewers: (
+    params: Record<string, any>,
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.post(
+      API_ENDPOINTS.INTERVIEWER.LIST,
+      params,
+      payload,
+      signal
+    ),
 };

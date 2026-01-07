@@ -1,4 +1,134 @@
 import { InterviewerFormData } from "../components/create-interviewer-modal";
+import { Interviewer } from "../components/interviewer-card";
+
+export interface APIInterviewerValue {
+  propertyId: string;
+  key: string;
+  value: any;
+}
+
+export interface APIInterviewerItem {
+  values: APIInterviewerValue[];
+  createdOn: number;
+  updatedOn: number;
+  id: string;
+}
+
+export interface APIPaginationInfo {
+  total: number;
+  nextOffset: number | null;
+  previousOffset: number | null;
+  limit: number;
+}
+
+export interface InterviewersWithPagination {
+  interviewers: Interviewer[];
+  pagination: APIPaginationInfo;
+}
+
+// Format timestamp to relative time (e.g., "2d ago", "1h ago")
+const formatRelativeTime = (timestamp: number): string => {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (years > 0) return `${years}y ago`;
+  if (months > 0) return `${months}mo ago`;
+  if (weeks > 0) return `${weeks}w ago`;
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
+  return "Just now";
+};
+
+export const transformAPIInterviewerItemToInterviewer = (
+  item: APIInterviewerItem
+): Interviewer => {
+  // Create a map of values for easy lookup
+  const valuesMap = new Map<string, any>();
+  if (Array.isArray(item.values)) {
+    item.values.forEach((val) => {
+      if (val && val.key) {
+        valuesMap.set(val.key, val.value);
+      }
+    });
+  }
+
+  // Extract values with fallbacks
+  const name = valuesMap.get("name") || "Unnamed Interviewer";
+  const description = valuesMap.get("description") || "";
+  const roundType = valuesMap.get("roundType") || "Behavioral";
+  const voice = valuesMap.get("voice") || "Male";
+  const avatar = valuesMap.get("avatar");
+
+  // Determine image URL based on voice or avatar
+  let imageUrl = "/interviewer-male.jpg"; // default
+  if (voice === "Female") {
+    imageUrl = "/interviewer-female.jpg";
+  }
+  // If avatar exists and has a value, use it (future implementation)
+  if (avatar && Array.isArray(avatar) && avatar.length > 0) {
+    // TODO: Implement avatar URL construction when file upload is ready
+    // imageUrl = constructAvatarUrl(avatar[0]);
+  }
+
+  // Format round type for display
+  const formattedRoundType =
+    roundType === "Behavioral"
+      ? "Behavioural round"
+      : roundType === "Technical"
+      ? "Technical round"
+      : roundType === "HR Round"
+      ? "HR round"
+      : roundType === "Screening"
+      ? "Screening round"
+      : `${roundType} round`;
+
+  return {
+    id: String(item?.id || ""),
+    name: String(name),
+    description: String(description),
+    imageUrl,
+    roundType: formattedRoundType,
+  };
+};
+
+export const transformAPIResponseToInterviewers = (
+  data: APIInterviewerItem[],
+  pagination?: APIPaginationInfo
+): InterviewersWithPagination => {
+  if (!Array.isArray(data)) {
+    return {
+      interviewers: [],
+      pagination: {
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: 10,
+      },
+    };
+  }
+
+  const interviewers = data.map((item) =>
+    transformAPIInterviewerItemToInterviewer(item)
+  );
+
+  return {
+    interviewers,
+    pagination: pagination || {
+      total: interviewers.length,
+      nextOffset: null,
+      previousOffset: null,
+      limit: 10,
+    },
+  };
+};
 
 export const transformToAPIPayload = (values: InterviewerFormData) => {
   // Generate interviewerId

@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Search, ListFilter } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Search,
+  ListFilter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,86 +18,85 @@ import {
   CreateInterviewerModal,
   type InterviewerFormData,
 } from "@/components/dashboard/interviewer/components/create-interviewer-modal";
+import { interviewerService } from "../services/interviewer.services";
+import {
+  transformAPIResponseToInterviewers,
+  type APIPaginationInfo,
+} from "../utils/interviewer.utils";
+import { toast } from "sonner";
 
-// Sample data - in real app this would come from an API
-const sampleInterviewers: Interviewer[] = [
-  {
-    id: "1",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-male.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "2",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-female.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "3",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-female.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "4",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-male.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "5",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-female.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "6",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-male.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "7",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-female.jpg",
-    roundType: "Behavioural round",
-  },
-  {
-    id: "8",
-    name: "Alex Mitchell",
-    description: "Creates comfortable environment for early-career Applicants.",
-    imageUrl: "/interviewer-male.jpg",
-    roundType: "Behavioural round",
-  },
-];
+const PAGE_LIMIT = 12; // 4 columns x 3 rows
 
 export function InterviewerList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [interviewers, setInterviewers] =
-    useState<Interviewer[]>(sampleInterviewers);
+  const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
+  const [pagination, setPagination] = useState<APIPaginationInfo>({
+    total: 0,
+    nextOffset: null,
+    previousOffset: null,
+    limit: PAGE_LIMIT,
+  });
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchInterviewers();
+  }, [currentOffset, searchQuery]);
+
+  const fetchInterviewers = async () => {
+    setIsLoading(true);
+    setInterviewers([]);
+    setPagination({
+      total: 0,
+      nextOffset: null,
+      previousOffset: null,
+      limit: PAGE_LIMIT,
+    });
+    try {
+      const params: Record<string, any> = {
+        limit: PAGE_LIMIT,
+        offset: currentOffset,
+      };
+
+      const response = await interviewerService.getInterviewers(params, {
+        filters: {
+          $and: [],
+        },
+        appId: "69521cd1c9ba83a076aac3ae",
+      });
+
+      const result = transformAPIResponseToInterviewers(
+        response.data,
+        response.page
+      );
+      setInterviewers(result.interviewers);
+      setPagination(result.pagination);
+      // Scroll to top when page changes
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error: any) {
+      setInterviewers([]);
+      setPagination({
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: PAGE_LIMIT,
+      });
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch interviewers",
+        {
+          duration: 8000,
+        }
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateInterviewer = (data: InterviewerFormData) => {
-    // Create new interviewer - in real app this would call an API
-    const newInterviewer: Interviewer = {
-      id: `new-${Date.now()}`,
-      name: data.name || "New Interviewer",
-      description: data.about || "AI Interviewer",
-      imageUrl: "/interviewer-male.jpg",
-      roundType:
-        data.roundType === "behavioural" ? "Behavioural round" : data.roundType,
-    };
-
-    setInterviewers((prev) => [newInterviewer, ...prev]);
-    console.log("New interviewer created:", data);
+    // Refresh the list after creating
+    setCurrentOffset(0);
+    fetchInterviewers();
   };
 
   const handleEditInterviewer = (id: string) => {
@@ -104,6 +109,21 @@ export function InterviewerList() {
       interviewer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       interviewer.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handlePreviousPage = () => {
+    if (pagination.previousOffset !== null) {
+      setCurrentOffset(pagination.previousOffset);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination.nextOffset !== null) {
+      setCurrentOffset(pagination.nextOffset);
+    }
+  };
+
+  const totalPages = Math.ceil(pagination.total / PAGE_LIMIT);
+  const currentPage = Math.floor(currentOffset / PAGE_LIMIT) + 1;
 
   return (
     <div className="space-y-6">
@@ -143,21 +163,74 @@ export function InterviewerList() {
       </div>
 
       {/* Interviewers Grid */}
-      <div className="grid grid-cols-4 gap-6">
-        {filteredInterviewers?.map((interviewer) => (
-          <InterviewerCard
-            key={interviewer.id}
-            interviewer={interviewer}
-            onEdit={handleEditInterviewer}
-          />
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {filteredInterviewers?.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-[#737373]">No interviewers found</p>
+      {isLoading ? (
+        <div className="grid grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
+            >
+              <div className="w-full aspect-square rounded bg-gray-200 mb-1" />
+              <div className="h-4 bg-gray-200 rounded mb-2" />
+              <div className="h-3 bg-gray-200 rounded mb-1" />
+              <div className="h-3 bg-gray-200 rounded mb-4" />
+              <div className="h-9 bg-gray-200 rounded" />
+            </div>
+          ))}
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-4 gap-6">
+            {filteredInterviewers?.map((interviewer) => (
+              <InterviewerCard
+                key={interviewer.id}
+                interviewer={interviewer}
+                onEdit={handleEditInterviewer}
+              />
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredInterviewers?.length === 0 && !isLoading && (
+            <div className="text-center py-12">
+              <p className="text-[#737373]">No interviewers found</p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {pagination.total > 0 && (
+            <div className="flex items-center justify-between mt-6">
+              <div className="text-sm text-[#737373]">
+                Showing {currentOffset + 1} to{" "}
+                {Math.min(currentOffset + PAGE_LIMIT, pagination.total)} of{" "}
+                {pagination.total} interviewers
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={pagination.previousOffset === null || isLoading}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                <div className="text-sm text-[#737373] px-4">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={pagination.nextOffset === null || isLoading}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Create Interviewer Modal */}

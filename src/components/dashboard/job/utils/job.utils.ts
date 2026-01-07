@@ -480,6 +480,11 @@ export const transformApplicantToAPIPayload = (
       value: jobId,
     },
     {
+      propertyId: "695259a6c9ba83a076aac433",
+      key: "status",
+      value: "Applied",
+    },
+    {
       propertyId: "695766c0c9ba83a076aac598",
       key: "formUser",
       value: ["6936a4d92276e3fc3ac7b13b"],
@@ -514,6 +519,7 @@ export const transformApplicantToAPIPayload = (
   const propertyIds = [
     "69525912c9ba83a076aac42d",
     "69525952c9ba83a076aac430",
+    "695259a6c9ba83a076aac433",
     "695259a6c9ba83a076aac433",
     "695766c0c9ba83a076aac598",
     "695c91fec9ba83a076aac6c8",

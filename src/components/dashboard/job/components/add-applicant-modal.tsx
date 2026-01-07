@@ -31,7 +31,7 @@ import { transformApplicantToAPIPayload } from "../utils/job.utils";
 const validate = (values: ApplicantForm) => {
   const errors: Partial<Record<keyof ApplicantForm, string>> = {};
 
-  if (!values.name || values.name.trim() === "") {
+  if (!values.name || values?.name?.trim() === "") {
     errors.name = "Applicant name is required";
   }
 

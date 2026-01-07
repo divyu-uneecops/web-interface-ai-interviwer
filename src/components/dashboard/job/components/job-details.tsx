@@ -182,13 +182,17 @@ export default function JobDetails() {
         offset: currentApplicantsOffset,
       };
 
+      if (searchQuery) {
+        // params_query["query"] = searchQuery;
+      }
+
       const response = await jobService.getApplicants(params_query, {
         filters: {
           $and: [
             {
               key: "#.records.jobId",
               operator: "$eq",
-              value: job.jobId,
+              value: job?.jobId,
               type: "text",
             },
             ...(appliedFilters.status.length > 0
@@ -228,7 +232,13 @@ export default function JobDetails() {
     } finally {
       setIsLoadingApplicants(false);
     }
-  }, [params.id, job?.jobId, currentApplicantsOffset, appliedFilters]);
+  }, [
+    params.id,
+    job?.jobId,
+    currentApplicantsOffset,
+    appliedFilters,
+    searchQuery,
+  ]);
 
   // Fetch job detail
   useEffect(() => {
@@ -913,7 +923,6 @@ export default function JobDetails() {
         onOpenChange={setIsAddApplicantModalOpen}
         jobInfo={{ jobId: job?.jobId || "", jobTitle: job?.title || "" }}
         onSubmit={(form) => {
-          console.log("Applicant added:", form);
           // Handle applicant submission here
           fetchApplicants();
         }}

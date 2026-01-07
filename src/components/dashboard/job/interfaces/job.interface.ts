@@ -109,7 +109,6 @@ export interface ApplicantForm {
   email: string;
   contact: string;
   attachment: File | null;
-  resume?: File | null;
 }
 
 export interface AddApplicantModalProps {

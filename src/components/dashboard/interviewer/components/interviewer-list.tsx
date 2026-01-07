@@ -4,13 +4,17 @@ import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
-  ListFilter,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
+import {
+  FilterState,
+  FilterGroup,
+} from "@/components/shared/interfaces/shared.interface";
 import { interviewerService } from "../services/interviewer.services";
 import {
   transformAPIResponseToInterviewers,
@@ -22,6 +26,11 @@ import {
 } from "../interfaces/interviewer.interfaces";
 import { CreateInterviewerModal } from "./create-interviewer-modal";
 import { InterviewerCard } from "./interviewer-card";
+import {
+  roundTypeOptions,
+  languageOptions,
+  voiceOptions,
+} from "../constants/interviewer.constants";
 
 const PAGE_LIMIT = 12; // 4 columns x 3 rows
 
@@ -37,10 +46,34 @@ export function InterviewerList() {
   });
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>({
+    roundType: [],
+    language: [],
+    voice: [],
+  });
+
+  // Define filter groups for interviewers
+  const interviewerFilterGroups: FilterGroup[] = [
+    {
+      id: "roundType",
+      label: "Round Type",
+      options: roundTypeOptions,
+    },
+    {
+      id: "language",
+      label: "Language",
+      options: languageOptions,
+    },
+    {
+      id: "voice",
+      label: "Voice",
+      options: voiceOptions,
+    },
+  ];
 
   useEffect(() => {
     fetchInterviewers();
-  }, [currentOffset, searchQuery]);
+  }, [currentOffset, searchQuery, appliedFilters]);
 
   const fetchInterviewers = async () => {
     setIsLoading(true);
@@ -59,7 +92,38 @@ export function InterviewerList() {
 
       const response = await interviewerService.getInterviewers(params, {
         filters: {
-          $and: [],
+          $and: [
+            ...(appliedFilters.roundType.length > 0
+              ? [
+                  {
+                    key: "#.records.roundType",
+                    operator: "$in",
+                    value: appliedFilters.roundType,
+                    type: "select",
+                  },
+                ]
+              : []),
+            ...(appliedFilters.language.length > 0
+              ? [
+                  {
+                    key: "#.records.language",
+                    operator: "$in",
+                    value: appliedFilters.language,
+                    type: "select",
+                  },
+                ]
+              : []),
+            ...(appliedFilters.voice.length > 0
+              ? [
+                  {
+                    key: "#.records.voice",
+                    operator: "$in",
+                    value: appliedFilters.voice,
+                    type: "select",
+                  },
+                ]
+              : []),
+          ],
         },
         appId: "69521cd1c9ba83a076aac3ae",
       });
@@ -102,6 +166,11 @@ export function InterviewerList() {
     // TODO: Implement edit functionality
   };
 
+  const handleApplyFilters = (filters: FilterState) => {
+    setAppliedFilters(filters);
+    setCurrentOffset(0); // Reset to first page when filters are applied
+  };
+
   const filteredInterviewers = interviewers.filter(
     (interviewer) =>
       interviewer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -142,10 +211,11 @@ export function InterviewerList() {
         {/* Search & Actions */}
         <div className="flex items-center gap-3">
           {/* Filters Button */}
-          <Button variant="secondary" size="default">
-            <ListFilter className="w-4 h-4" />
-            Filters
-          </Button>
+          <FilterDropdown
+            filterGroups={interviewerFilterGroups}
+            onApplyFilters={handleApplyFilters}
+            initialFilters={appliedFilters}
+          />
 
           {/* Create AI Interviewer Button */}
           <Button

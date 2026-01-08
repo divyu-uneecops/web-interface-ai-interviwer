@@ -96,7 +96,7 @@ export function FilterDropdown({
                       handleFilterChange(group?.id, option?.value)
                     }
                     onSelect={(e) => e.preventDefault()}
-                    className="pl-[32px] pr-[8px] py-[6px] text-sm text-[#0a0a0a] leading-[20px] hover:bg-[#f5f5f5] rounded-sm cursor-pointer data-highlighted:bg-[#f5f5f5] focus:bg-[#f5f5f5] [&>span]:size-4"
+                    className="w-full pl-[32px] pr-[8px] py-[6px] text-sm text-[#0a0a0a] leading-[20px] hover:bg-[#f5f5f5] rounded-sm cursor-pointer data-highlighted:bg-[#f5f5f5] focus:bg-[#f5f5f5] [&>span]:size-4"
                   >
                     {option?.label}
                   </DropdownMenuCheckboxItem>

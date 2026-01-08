@@ -28,6 +28,15 @@ export interface Interviewer {
   description: string;
   imageUrl: string;
   roundType: string;
+  skills: string[];
+  voice: string;
+  language: string;
+  personality: {
+    empathy: number;
+    rapport: number;
+    exploration: number;
+    speed: number;
+  };
 }
 
 export interface InterviewerCardProps {

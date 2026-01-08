@@ -67,7 +67,31 @@ export const transformAPIInterviewerItemToInterviewer = (
   const description = valuesMap.get("description") || "";
   const roundType = valuesMap.get("roundType") || "Behavioral";
   const voice = valuesMap.get("voice") || "Male";
-  const avatar = valuesMap.get("avatar");
+  const language = valuesMap.get("language") || "English";
+
+  let requiredSkills: string[] = [];
+  const skillsValue = valuesMap.get("interviewerSkills");
+  if (Array.isArray(skillsValue) && skillsValue.length > 0) {
+    // The value is an array of arrays, each inner array might have an object with .value or "skill"
+    requiredSkills = skillsValue
+      .flat()
+      .map((sk: any) => {
+        if (sk && typeof sk === "object") return sk.value || sk.skill || "";
+        return "";
+      })
+      .filter((v) => !!v);
+  }
+  console.log(requiredSkills);
+  const personalityTraits = valuesMap.get("personalityTraits") || [];
+  const empathy =
+    personalityTraits.find((trait: any) => trait.key === "empathy")?.value || 0;
+  const rapport =
+    personalityTraits.find((trait: any) => trait.key === "rapport")?.value || 0;
+  const exploration =
+    personalityTraits.find((trait: any) => trait.key === "exploration")
+      ?.value || 0;
+  const speed =
+    personalityTraits.find((trait: any) => trait.key === "speed")?.value || 0;
 
   // Determine image URL based on voice or avatar
   let imageUrl = "/interviewer-male.jpg"; // default
@@ -75,24 +99,21 @@ export const transformAPIInterviewerItemToInterviewer = (
     imageUrl = "/interviewer-female.jpg";
   }
 
-  // Format round type for display
-  const formattedRoundType =
-    roundType === "Behavioral"
-      ? "Behavioural round"
-      : roundType === "Technical"
-      ? "Technical round"
-      : roundType === "HR Round"
-      ? "HR round"
-      : roundType === "Screening"
-      ? "Screening round"
-      : `${roundType} round`;
-
   return {
-    id: String(item?.id || ""),
-    name: String(name),
-    description: String(description),
+    id: item?.id || "",
+    name: name,
+    voice: voice,
+    language: language,
+    description: description,
     imageUrl,
-    roundType: formattedRoundType,
+    roundType: roundType,
+    skills: requiredSkills,
+    personality: {
+      empathy: empathy,
+      rapport: rapport,
+      exploration: exploration,
+      speed: speed,
+    },
   };
 };
 

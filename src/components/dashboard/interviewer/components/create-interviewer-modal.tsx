@@ -268,9 +268,9 @@ export function CreateInterviewerModal({
                     : "border-[#e5e5e5]"
                 }`}
               >
-                {formik.values.skills?.map((skill) => (
+                {formik.values.skills?.map((skill, index) => (
                   <Badge
-                    key={skill}
+                    key={index}
                     variant="secondary"
                     className="flex items-center gap-0.5 h-[18px] bg-[#e5e5e5] text-[#000000] text-xs font-normal tracking-[0.3px] rounded-full px-2 border-0"
                   >

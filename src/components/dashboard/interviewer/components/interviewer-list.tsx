@@ -173,16 +173,9 @@ export function InterviewerList() {
     setEditingInterviewerId(null);
   };
 
-  const handleEditInterviewer = async (id: string) => {
+  const handleEditInterviewer = async (interviewer: any) => {
     try {
-      setEditingInterviewerId(id);
-      const response = await interviewerService.getInterviewerDetail(id, {
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
-      const formData = transformAPIInterviewerItemToFormData(
-        response as APIInterviewerItem
-      );
-      setInterviewerDetail(formData);
+      setInterviewerDetail(interviewer);
       setIsEditModalOpen(true);
     } catch (error: any) {
       toast.error(
@@ -276,7 +269,9 @@ export function InterviewerList() {
                   <InterviewerCard
                     key={interviewer.id}
                     interviewer={interviewer}
-                    onEdit={handleEditInterviewer}
+                    onEdit={() => {
+                      handleEditInterviewer(interviewer);
+                    }}
                   />
                 ))}
               </div>
@@ -349,7 +344,22 @@ export function InterviewerList() {
         }}
         onSubmit={handleUpdateInterviewer}
         isEditMode={true}
-        interviewerDetail={interviewerDetail}
+        interviewerDetail={
+          {
+            name: interviewerDetail?.name || "",
+            voice: interviewerDetail?.voice || "",
+            description: interviewerDetail?.description || "",
+            skills: interviewerDetail?.skills || [],
+            roundType: interviewerDetail?.roundType || "",
+            language: interviewerDetail?.language || "",
+            personality: interviewerDetail?.personality || {
+              empathy: 0,
+              rapport: 0,
+              exploration: 0,
+              speed: 0,
+            },
+          } as InterviewerFormData
+        }
         interviewerId={editingInterviewerId || undefined}
       />
     </div>

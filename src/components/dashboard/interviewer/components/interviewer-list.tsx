@@ -162,9 +162,8 @@ export function InterviewerList() {
   };
 
   const handleUpdateInterviewer = () => {
-    setCurrentOffset(0);
-    fetchInterviewers();
     setInterviewerDetail(null);
+    setCurrentOffset(0);
   };
 
   const handleEditInterviewer = async (interviewer: Interviewer) => {
@@ -320,12 +319,7 @@ export function InterviewerList() {
       {/* Edit Interviewer Modal */}
       <CreateInterviewerModal
         open={isEditModalOpen}
-        onOpenChange={(open) => {
-          setIsEditModalOpen(open);
-          if (!open) {
-            setInterviewerDetail(null);
-          }
-        }}
+        onOpenChange={setIsEditModalOpen}
         onSubmit={() => handleUpdateInterviewer}
         isEditMode={true}
         interviewerDetail={

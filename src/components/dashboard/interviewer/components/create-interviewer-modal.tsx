@@ -140,19 +140,15 @@ export function CreateInterviewerModal({
   });
 
   useEffect(() => {
-    if (open && isEditMode && interviewerDetail) {
+    if (isEditMode && interviewerDetail) {
       formik.setValues(interviewerDetail);
-    } else if (!open) {
-      // Reset form when modal closes
-      formik.resetForm();
-      setSkillInput("");
     }
-  }, [open, isEditMode, interviewerDetail]);
+  }, []);
 
   const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && skillInput?.trim()) {
-      e.preventDefault();
-      const trimmedSkill = skillInput?.trim();
+    if (e?.key === "Enter" && skillInput?.trim()) {
+      e?.preventDefault();
+      const trimmedSkill = skillInput?.trim() || "";
       if (!formik?.values?.skills?.includes(trimmedSkill)) {
         formik.setFieldValue("skills", [
           ...formik?.values?.skills,
@@ -166,7 +162,7 @@ export function CreateInterviewerModal({
   const handleRemoveSkill = (skillToRemove: string) => {
     formik.setFieldValue(
       "skills",
-      formik.values.skills.filter((skill) => skill !== skillToRemove)
+      formik.values?.skills?.filter((skill: string) => skill !== skillToRemove)
     );
   };
 

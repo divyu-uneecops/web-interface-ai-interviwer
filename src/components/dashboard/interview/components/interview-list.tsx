@@ -30,7 +30,11 @@ import {
 } from "@/components/shared/interfaces/shared.interface";
 
 import { InterviewDetail } from "../interfaces/interview.interface";
-import { formatDateTime, getStatusText } from "../utils/interview.utils";
+import {
+  formatDateTime,
+  getStatusText,
+  formatInterviewDate,
+} from "../utils/interview.utils";
 import {
   stats,
   statusStyles,
@@ -117,20 +121,6 @@ export default function InterviewList() {
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, 300);
-  };
-
-  // Format date as MM/DD/YYYY
-  const formatInterviewDate = (date: string) => {
-    if (!date) return "-";
-    try {
-      const dateObj = new Date(date);
-      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-      const day = String(dateObj.getDate()).padStart(2, "0");
-      const year = dateObj.getFullYear();
-      return `${month}/${day}/${year}`;
-    } catch {
-      return date;
-    }
   };
 
   // Define table columns - matching Figma design exactly
@@ -238,14 +228,12 @@ export default function InterviewList() {
         align="end"
         className="w-[171px] p-1 bg-white border border-[#e5e5e5] rounded-md shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]"
       >
-        {interview.token && (
-          <DropdownMenuItem asChild>
-            <Link href={`/interviews/${interview.token}/instructions`}>
-              <Eye className="h-4 w-4 text-[#737373]" />
-              View details
-            </Link>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem asChild>
+          <Link href={`/dashboard/interviews/${interview.id}`}>
+            <Eye className="h-4 w-4 text-[#737373]" />
+            View details
+          </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

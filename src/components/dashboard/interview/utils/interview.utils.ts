@@ -100,3 +100,19 @@ export function getStatusText(status: string): string {
   };
   return statusMap[status] || status;
 }
+
+/**
+ * Format date as MM/DD/YYYY
+ */
+export function formatInterviewDate(date: string): string {
+  if (!date) return "-";
+  try {
+    const dateObj = new Date(date);
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const year = dateObj.getFullYear();
+    return `${month}/${day}/${year}`;
+  } catch {
+    return date;
+  }
+}

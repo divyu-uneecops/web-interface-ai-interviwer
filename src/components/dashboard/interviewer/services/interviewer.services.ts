@@ -25,16 +25,6 @@ export const interviewerService = {
       payload,
       signal
     ),
-  getInterviewerDetail: (
-    id: string,
-    params?: Record<string, any>,
-    signal?: AbortSignal
-  ) =>
-    serverInterfaceService.get(
-      buildUrl(API_ENDPOINTS.INTERVIEWER.DETAIL, { id }),
-      params,
-      signal
-    ),
   updateInterviewer: (
     id: string,
     payload: Record<string, any>,

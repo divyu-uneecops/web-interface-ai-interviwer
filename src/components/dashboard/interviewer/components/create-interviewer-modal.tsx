@@ -67,7 +67,7 @@ const validate = (values: InterviewerFormData) => {
 export function CreateInterviewerModal({
   open,
   onOpenChange,
-  onSubmit,
+  onSubmit: onSubmitCallback,
   isEditMode = false,
   interviewerDetail,
   interviewerId,
@@ -124,8 +124,8 @@ export function CreateInterviewerModal({
         }
         resetForm();
         setSkillInput("");
+        onSubmitCallback?.();
         onOpenChange(false);
-        onSubmit?.();
       } catch (error: any) {
         toast.error(
           error?.response?.data?.message || "An unknown error occurred",

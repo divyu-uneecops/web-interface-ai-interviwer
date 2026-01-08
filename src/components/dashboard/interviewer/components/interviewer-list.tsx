@@ -314,7 +314,7 @@ export function InterviewerList() {
         <CreateInterviewerModal
           open={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
-          onSubmit={() => handleCreateInterviewer}
+          onSubmit={handleCreateInterviewer}
         />
       )}
 
@@ -323,7 +323,7 @@ export function InterviewerList() {
         <CreateInterviewerModal
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
-          onSubmit={() => handleUpdateInterviewer}
+          onSubmit={handleUpdateInterviewer}
           isEditMode={true}
           interviewerDetail={
             {

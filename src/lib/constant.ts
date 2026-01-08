@@ -28,4 +28,12 @@ export const API_ENDPOINTS = {
     UPDATE: "/objects/69521d56c9ba83a076aac3bc/records/{id}",
     DETAIL: "/objects/69521d56c9ba83a076aac3bc/records/{id}",
   },
+  INTERVIEW: {
+    CREATE: "/v2/forminstances",
+    LIST: "/objects/interviews/views/interviews/records",
+    UPDATE: "/objects/interviews/records/{id}",
+    DETAIL: "/objects/interviews/records/{id}",
+    DELETE: "/objects/interviews/records/{id}",
+    CANCEL: "/objects/interviews/records/{id}/cancel",
+  },
 };

@@ -51,9 +51,6 @@ export function InterviewerList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [interviewerDetail, setInterviewerDetail] =
     useState<Interviewer | null>(null);
-  const [editingInterviewerId, setEditingInterviewerId] = useState<
-    string | null
-  >(null);
 
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
@@ -158,19 +155,16 @@ export function InterviewerList() {
     }
   };
 
-  const handleCreateInterviewer = (data: InterviewerFormData) => {
-    // Refresh the list after creating
+  const handleCreateInterviewer = () => {
     setCurrentOffset(0);
     fetchInterviewers();
   };
 
-  const handleUpdateInterviewer = (data: InterviewerFormData) => {
-    // Refresh the list after updating
+  const handleUpdateInterviewer = () => {
     setCurrentOffset(0);
     fetchInterviewers();
     setIsEditModalOpen(false);
     setInterviewerDetail(null);
-    setEditingInterviewerId(null);
   };
 
   const handleEditInterviewer = async (interviewer: any) => {
@@ -339,7 +333,6 @@ export function InterviewerList() {
           setIsEditModalOpen(open);
           if (!open) {
             setInterviewerDetail(null);
-            setEditingInterviewerId(null);
           }
         }}
         onSubmit={handleUpdateInterviewer}

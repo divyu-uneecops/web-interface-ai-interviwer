@@ -6,6 +6,7 @@ import {
   InterviewerFormData,
   InterviewersWithPagination,
 } from "../interfaces/interviewer.interfaces";
+import { v4 as uuidv4 } from "uuid";
 
 // Format timestamp to relative time (e.g., "2d ago", "1h ago")
 const formatRelativeTime = (timestamp: number): string => {
@@ -133,12 +134,12 @@ export const transformAPIResponseToInterviewers = (
 
 export const transformToAPIPayload = (values: InterviewerFormData) => {
   // Generate interviewerId
-  const interviewerId = Math.floor(Math.random() * 10000) + 10000;
+  const interviewerId = uuidv4() || "";
 
   // Transform skills to API format (array of arrays)
-  const interviewerSkills = values.skills
-    .filter((skill: string) => skill.trim().length > 0)
-    .map((skill: string) => [
+  const interviewerSkills = values?.skills
+    ?.filter((skill: string) => skill?.trim()?.length > 0)
+    ?.map((skill: string) => [
       {
         propertyId: "69525680c9ba83a076aac417",
         key: "skill",
@@ -151,22 +152,22 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     {
       propertyId: "695257cdc9ba83a076aac41d",
       key: "empathy",
-      value: values.personality.empathy,
+      value: values?.personality?.empathy || 0,
     },
     {
       propertyId: "695257e4c9ba83a076aac41e",
       key: "rapport",
-      value: values.personality.rapport,
+      value: values?.personality?.rapport || 0,
     },
     {
       propertyId: "69525807c9ba83a076aac420",
       key: "exploration",
-      value: values.personality.exploration,
+      value: values?.personality?.exploration || 0,
     },
     {
       propertyId: "69525827c9ba83a076aac421",
       key: "speed",
-      value: values.personality.speed,
+      value: values?.personality?.speed || 0,
     },
   ];
 
@@ -174,17 +175,17 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     {
       propertyId: "69525606c9ba83a076aac411",
       key: "interviewerId",
-      value: String(interviewerId),
+      value: interviewerId,
     },
     {
       propertyId: "6952562ac9ba83a076aac413",
       key: "name",
-      value: values.name || "",
+      value: values?.name || "",
     },
     {
       propertyId: "69525663c9ba83a076aac416",
       key: "description",
-      value: values.description || "",
+      value: values?.description || "",
     },
     {
       propertyId: "695256aac9ba83a076aac418",
@@ -194,17 +195,17 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
     {
       propertyId: "69525713c9ba83a076aac419",
       key: "roundType",
-      value: values.roundType || "",
+      value: values?.roundType || "",
     },
     {
       propertyId: "6952577bc9ba83a076aac41a",
       key: "language",
-      value: values.language || "",
+      value: values?.language || "",
     },
     {
       propertyId: "695257b4c9ba83a076aac41b",
       key: "voice",
-      value: values.voice || "",
+      value: values?.voice || "",
     },
     {
       propertyId: "69525848c9ba83a076aac423",

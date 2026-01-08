@@ -169,18 +169,9 @@ export function InterviewerList() {
     setInterviewerDetail(null);
   };
 
-  const handleEditInterviewer = async (interviewer: any) => {
-    try {
-      setInterviewerDetail(interviewer);
-      setIsEditModalOpen(true);
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Failed to fetch interviewer details",
-        {
-          duration: 8000,
-        }
-      );
-    }
+  const handleEditInterviewer = async (interviewer: Interviewer) => {
+    setInterviewerDetail(interviewer);
+    setIsEditModalOpen(true);
   };
 
   const handleApplyFilters = (filters: FilterState) => {

@@ -1,7 +1,7 @@
 export interface CreateInterviewerModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: InterviewerFormData) => void;
+  onSubmit: (data: InterviewerFormData) => void;
   isEditMode?: boolean;
   interviewerDetail?: InterviewerFormData | null;
   interviewerId?: string;

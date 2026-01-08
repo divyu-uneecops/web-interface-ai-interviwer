@@ -81,7 +81,7 @@ export const transformAPIInterviewerItemToInterviewer = (
       })
       .filter((v) => !!v);
   }
-  console.log(requiredSkills);
+
   const personalityTraits = valuesMap.get("personalityTraits") || [];
   const empathy =
     personalityTraits.find((trait: any) => trait.key === "empathy")?.value || 0;
@@ -268,91 +268,137 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
   };
 };
 
-export const transformToUpdatePayload = (values: InterviewerFormData) => {
-  // Transform skills to API format (array of arrays)
-  const interviewerSkills = values.skills
-    .filter((skill: string) => skill.trim().length > 0)
-    .map((skill: string) => [
-      {
-        propertyId: "69525680c9ba83a076aac417",
-        key: "skill",
-        value: skill.trim(),
-      },
-    ]);
+export const transformToUpdatePayload = (
+  values: InterviewerFormData,
+  touched?: any
+) => {
+  const valuesArray: any[] = [];
+  const propertyIds: string[] = [];
 
-  // Transform personality traits to API format
-  const personalityTraits = [
-    {
-      propertyId: "695257cdc9ba83a076aac41d",
-      key: "empathy",
-      value: values.personality.empathy,
-    },
-    {
-      propertyId: "695257e4c9ba83a076aac41e",
-      key: "rapport",
-      value: values.personality.rapport,
-    },
-    {
-      propertyId: "69525807c9ba83a076aac420",
-      key: "exploration",
-      value: values.personality.exploration,
-    },
-    {
-      propertyId: "69525827c9ba83a076aac421",
-      key: "speed",
-      value: values.personality.speed,
-    },
-  ];
+  // Helper to check if a field is touched
+  const isTouched = (field: string) => {
+    if (!touched) return true; // If no touched object provided, include all fields
+    return touched[field] === true;
+  };
 
-  const valuesArray = [
-    {
+  // Helper to check if any personality trait is touched
+  const isPersonalityTouched = () => {
+    if (!touched) return true;
+    return (
+      touched.personality === true ||
+      (touched.personality &&
+        (touched.personality.empathy ||
+          touched.personality.rapport ||
+          touched.personality.exploration ||
+          touched.personality.speed))
+    );
+  };
+
+  // Name
+  if (isTouched("name")) {
+    valuesArray.push({
       propertyId: "6952562ac9ba83a076aac413",
       key: "name",
       value: values.name || "",
-    },
-    {
+    });
+    propertyIds.push("6952562ac9ba83a076aac413");
+  }
+
+  // Description
+  if (isTouched("description")) {
+    valuesArray.push({
       propertyId: "69525663c9ba83a076aac416",
       key: "description",
       value: values.description || "",
-    },
-    {
+    });
+    propertyIds.push("69525663c9ba83a076aac416");
+  }
+
+  // Skills
+  if (isTouched("skills")) {
+    const interviewerSkills = values.skills
+      .filter((skill: string) => skill.trim().length > 0)
+      .map((skill: string) => [
+        {
+          propertyId: "69525680c9ba83a076aac417",
+          key: "skill",
+          value: skill.trim(),
+        },
+      ]);
+    valuesArray.push({
       propertyId: "695256aac9ba83a076aac418",
       key: "interviewerSkills",
       value: interviewerSkills || [],
-    },
-    {
+    });
+    propertyIds.push("695256aac9ba83a076aac418");
+  }
+
+  // Round Type
+  if (isTouched("roundType")) {
+    valuesArray.push({
       propertyId: "69525713c9ba83a076aac419",
       key: "roundType",
       value: values.roundType || "",
-    },
-    {
+    });
+    propertyIds.push("69525713c9ba83a076aac419");
+  }
+
+  // Language
+  if (isTouched("language")) {
+    valuesArray.push({
       propertyId: "6952577bc9ba83a076aac41a",
       key: "language",
       value: values.language || "",
-    },
-    {
+    });
+    propertyIds.push("6952577bc9ba83a076aac41a");
+  }
+
+  // Voice
+  if (isTouched("voice")) {
+    valuesArray.push({
       propertyId: "695257b4c9ba83a076aac41b",
       key: "voice",
       value: values.voice || "",
-    },
-    {
+    });
+    propertyIds.push("695257b4c9ba83a076aac41b");
+  }
+
+  // Personality Traits - if any trait is touched, include all traits
+  if (isPersonalityTouched()) {
+    const personalityTraits = [
+      {
+        propertyId: "695257cdc9ba83a076aac41d",
+        key: "empathy",
+        value: values.personality.empathy,
+      },
+      {
+        propertyId: "695257e4c9ba83a076aac41e",
+        key: "rapport",
+        value: values.personality.rapport,
+      },
+      {
+        propertyId: "69525807c9ba83a076aac420",
+        key: "exploration",
+        value: values.personality.exploration,
+      },
+      {
+        propertyId: "69525827c9ba83a076aac421",
+        key: "speed",
+        value: values.personality.speed,
+      },
+    ];
+
+    valuesArray.push({
       propertyId: "69525848c9ba83a076aac423",
       key: "personalityTraits",
       value: personalityTraits,
-    },
-  ];
+    });
+    propertyIds.push("69525848c9ba83a076aac423");
+  }
 
   return {
     values: valuesArray,
-    propertyIds: [
-      "6952562ac9ba83a076aac413",
-      "69525663c9ba83a076aac416",
-      "695256aac9ba83a076aac418",
-      "69525713c9ba83a076aac419",
-      "6952577bc9ba83a076aac41a",
-      "695257b4c9ba83a076aac41b",
-      "69525848c9ba83a076aac423",
-    ],
+    propertyIds,
   };
 };
 
@@ -418,6 +464,7 @@ export const transformAPIInterviewerItemToFormData = (
   }
 
   return {
+    
     name: String(name),
     voice: String(voice),
     description: String(description),

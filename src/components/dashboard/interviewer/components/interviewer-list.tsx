@@ -50,7 +50,7 @@ export function InterviewerList() {
   });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [interviewerDetail, setInterviewerDetail] =
-    useState<InterviewerFormData | null>(null);
+    useState<Interviewer | null>(null);
   const [editingInterviewerId, setEditingInterviewerId] = useState<
     string | null
   >(null);
@@ -360,7 +360,7 @@ export function InterviewerList() {
             },
           } as InterviewerFormData
         }
-        interviewerId={editingInterviewerId || undefined}
+        interviewerId={interviewerDetail?.id || undefined}
       />
     </div>
   );

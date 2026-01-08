@@ -97,7 +97,7 @@ export function CreateInterviewerModal({
       try {
         if (isEditMode && interviewerId) {
           // Edit mode - update existing interviewer
-          const payload = transformToUpdatePayload(values);
+          const payload = transformToUpdatePayload(values, formik.touched);
           const response = await interviewerService.updateInterviewer(
             interviewerId,
             payload

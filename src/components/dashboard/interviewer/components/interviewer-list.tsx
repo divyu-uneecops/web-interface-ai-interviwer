@@ -159,11 +159,19 @@ export function InterviewerList() {
 
   const handleCreateInterviewer = () => {
     setCurrentOffset(0);
+
+    if (currentOffset === 0) {
+      fetchInterviewers();
+    }
   };
 
   const handleUpdateInterviewer = () => {
     setInterviewerDetail(null);
     setCurrentOffset(0);
+
+    if (currentOffset === 0) {
+      fetchInterviewers();
+    }
   };
 
   const handleEditInterviewer = async (interviewer: Interviewer) => {

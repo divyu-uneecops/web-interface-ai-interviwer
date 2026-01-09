@@ -285,7 +285,7 @@ export default function JobDetails() {
             {
               key: "#.records.jobName",
               operator: "$eq",
-              value: job?.jobId,
+              value: "69576a84c9ba83a076aac5a0",
               type: "text",
             },
           ],
@@ -466,7 +466,10 @@ export default function JobDetails() {
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => handleDeleteRound(round?.id)}
+        >
           <Trash2 className="h-4 mr-2" />
           Delete
         </DropdownMenuItem>
@@ -490,6 +493,22 @@ export default function JobDetails() {
           duration: 8000, // 8 seconds
         }
       );
+    }
+  };
+
+  const handleDeleteRound = async (id: string) => {
+    if (isEmpty(id)) return;
+    try {
+      const response = await jobService.deleteRound(id);
+      toast.success(response ? response : "Round deleted successfully", {
+        duration: 8000, // 8 seconds
+      });
+      // Refresh rounds list
+      fetchRounds();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to delete round", {
+        duration: 8000, // 8 seconds
+      });
     }
   };
 

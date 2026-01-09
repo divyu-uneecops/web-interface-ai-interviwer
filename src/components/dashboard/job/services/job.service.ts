@@ -91,4 +91,8 @@ export const jobService = {
       payload,
       signal
     ),
+  deleteRound: (id: string) =>
+    serverInterfaceService.delete(
+      buildUrl("/objects/69521d61c9ba83a076aac3c0/records/{id}", { id })
+    ),
 };

@@ -45,26 +45,24 @@ import { StatusTag } from "@/components/ui/status-tag";
 import { CreateRoundModal } from "@/components/dashboard/create-round-modal";
 import { DataTable, Column } from "@/components/shared/components/data-table";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
+import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
 import {
-  FilterDropdown,
   FilterState,
   FilterGroup,
-} from "@/components/shared/components/filter-dropdown";
+} from "@/components/shared/interfaces/shared.interface";
 import {
   Applicant,
   JobDetail,
   JobStat,
   Round,
 } from "@/components/dashboard/job/interfaces/job.interface";
-import {
-  mockApplicants,
-  mockRounds,
-} from "@/components/dashboard/job/constants/job.constants";
+import { mockApplicants } from "@/components/dashboard/job/constants/job.constants";
 import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
 import { jobService } from "@/components/dashboard/job/services/job.service";
 import {
   transformAPIResponseToJobDetail,
   transformAPIResponseToApplicants,
+  transformAPIResponseToRounds,
 } from "@/components/dashboard/job/utils/job.utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -98,7 +96,7 @@ export default function JobDetails() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("details");
   const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [rounds, setRounds] = useState<Round[]>(mockRounds);
+  const [rounds, setRounds] = useState<Round[]>([]);
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
     rounds: [],
@@ -107,13 +105,21 @@ export default function JobDetails() {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(true);
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
+  const [isLoadingRounds, setIsLoadingRounds] = useState(false);
   const [applicantsPagination, setApplicantsPagination] = useState({
     total: 0,
     nextOffset: null as number | null,
     previousOffset: null as number | null,
     limit: 10,
   });
+  const [roundsPagination, setRoundsPagination] = useState({
+    total: 0,
+    nextOffset: null as number | null,
+    previousOffset: null as number | null,
+    limit: 10,
+  });
   const [currentApplicantsOffset, setCurrentApplicantsOffset] = useState(0);
+  const [currentRoundsOffset, setCurrentRoundsOffset] = useState(0);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(
     null
   );
@@ -247,12 +253,77 @@ export default function JobDetails() {
     fetchJobDetail();
   }, [params.id]);
 
+  const fetchRounds = useCallback(async () => {
+    if (!params.id || typeof params.id !== "string") {
+      setIsLoadingRounds(false);
+      return;
+    }
+
+    // Wait for job to be loaded to get jobId
+    if (!job?.jobId) {
+      setIsLoadingRounds(false);
+      return;
+    }
+
+    setIsLoadingRounds(true);
+    setRounds([]);
+    setRoundsPagination({
+      total: 0,
+      nextOffset: null,
+      previousOffset: null,
+      limit: PAGE_LIMIT,
+    });
+    try {
+      const params_query: Record<string, any> = {
+        limit: PAGE_LIMIT,
+        offset: currentRoundsOffset,
+      };
+
+      const response = await jobService.getRounds(params_query, {
+        filters: {
+          $and: [
+            {
+              key: "#.records.jobName",
+              operator: "$eq",
+              value: job?.jobId,
+              type: "text",
+            },
+          ],
+        },
+        appId: "69521cd1c9ba83a076aac3ae",
+      });
+      const result = transformAPIResponseToRounds(response.data, response.page);
+      setRounds(result.rounds);
+      setRoundsPagination(result.pagination);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to fetch rounds", {
+        duration: 8000,
+      });
+      setRounds([]);
+      setRoundsPagination({
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: PAGE_LIMIT,
+      });
+    } finally {
+      setIsLoadingRounds(false);
+    }
+  }, [params.id, job?.jobId, currentRoundsOffset]);
+
   // Fetch applicants when on applicants tab
   useEffect(() => {
     if (activeTab === "applicants" && params.id && job?.jobId) {
       fetchApplicants();
     }
   }, [activeTab, fetchApplicants, params.id, job?.jobId]);
+
+  // Fetch rounds when on rounds tab
+  useEffect(() => {
+    if (activeTab === "rounds" && params.id && job?.jobId) {
+      fetchRounds();
+    }
+  }, [activeTab, fetchRounds, params.id, job?.jobId]);
 
   const handleApplyFilters = (filters: FilterState) => {
     setAppliedFilters(filters);
@@ -324,6 +395,83 @@ export default function JobDetails() {
       },
     ],
     []
+  );
+
+  // Define table columns for rounds
+  const roundColumns: Column<Round>[] = useMemo(
+    () => [
+      {
+        id: "name",
+        header: "Round name",
+        align: "left",
+        accessor: (round) => round?.name,
+      },
+      {
+        id: "duration",
+        header: "Duration",
+        align: "center",
+        accessor: (round) => round?.duration,
+      },
+      {
+        id: "questions",
+        header: "Questions",
+        align: "center",
+        accessor: (round) => round?.questions,
+      },
+      {
+        id: "applicants",
+        header: "Applicants",
+        align: "center",
+        accessor: (round) => round?.applicants,
+      },
+      {
+        id: "created",
+        header: "Created",
+        align: "center",
+        accessor: (round) => round?.created,
+      },
+      {
+        id: "quickAction",
+        header: "Quick action",
+        align: "center",
+        cell: () => (
+          <Button
+            variant="outline"
+            className="h-9 px-4 py-2 text-sm font-medium bg-[#f5f5f5] border-0 text-[#171717] hover:bg-[#f5f5f5] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] rounded-md"
+          >
+            Schedule interview
+          </Button>
+        ),
+      },
+    ],
+    []
+  );
+
+  // Row actions renderer for rounds
+  const renderRoundRowActions = (round: Round) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+          <MoreVertical className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Eye className="h-4 text-[#737373] mr-2" />
+          View details
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Pencil className="h-4 text-[#737373] mr-2" />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive">
+          <Trash2 className="h-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   const handleDeleteApplicant = async (id: string) => {
@@ -718,140 +866,27 @@ export default function JobDetails() {
           </TabsContent>
 
           {/* Rounds Tab Content */}
-          <TabsContent value="rounds" className="mt-4">
-            <div className="bg-white border border-[#e5e5e5] rounded-md overflow-hidden">
-              {/* Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#e5e5e5] h-10">
-                      <th className="text-left py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Round name
-                      </th>
-                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Duration
-                      </th>
-                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Questions
-                      </th>
-                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Applicants
-                      </th>
-                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Created
-                      </th>
-                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Quick action
-                      </th>
-                      <th className="text-center py-0 px-2 h-10 text-sm font-medium text-[#737373]">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-[#e5e5e5]">
-                    {rounds.map((round, index) => (
-                      <tr
-                        key={round.id}
-                        className="hover:bg-[#fafafa] transition-colors"
-                        style={{
-                          height:
-                            index === 0
-                              ? "78px"
-                              : index === 1
-                              ? "77px"
-                              : "78px",
-                        }}
-                      >
-                        <td className="p-2 whitespace-nowrap">
-                          <span className="text-sm font-medium text-[#0a0a0a] leading-5">
-                            {round.name}
-                          </span>
-                        </td>
-                        <td className="p-2 whitespace-nowrap text-center">
-                          <span className="text-sm text-[#0a0a0a] leading-5">
-                            {round.duration}
-                          </span>
-                        </td>
-                        <td className="p-2 whitespace-nowrap text-center">
-                          <span className="text-sm text-[#0a0a0a] leading-5">
-                            {round.questions}
-                          </span>
-                        </td>
-                        <td className="p-2 whitespace-nowrap text-center">
-                          <span className="text-sm text-[#0a0a0a] leading-5">
-                            {round.applicants}
-                          </span>
-                        </td>
-                        <td className="p-2 whitespace-nowrap text-center">
-                          <span className="text-sm text-[#0a0a0a] leading-5">
-                            {round.created}
-                          </span>
-                        </td>
-                        <td className="p-2 whitespace-nowrap text-center">
-                          <Button
-                            variant="outline"
-                            className="h-9 px-4 py-2 text-sm font-medium bg-[#f5f5f5] border-0 text-[#171717] hover:bg-[#f5f5f5] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] rounded-md"
-                          >
-                            Schedule interview
-                          </Button>
-                        </td>
-                        <td className="p-2 whitespace-nowrap text-center">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#f5f5f5] transition-colors text-[#0a0a0a] p-[10px]"
-                                title="Actions"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-[171px] p-1 border border-[#e5e5e5] rounded-md shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]"
-                            >
-                              <DropdownMenuItem className="gap-2 pl-2 pr-2 py-1.5 cursor-pointer rounded-sm hover:bg-[#f5f5f5]">
-                                <Eye className="w-4 h-4 text-[#737373]" />
-                                <span className="text-sm text-[#0a0a0a] leading-5">
-                                  View details
-                                </span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="gap-2 pl-8 pr-2 py-1.5 cursor-pointer rounded-sm hover:bg-[#f5f5f5] relative"
-                                inset
-                              >
-                                <Pencil className="w-4 h-4 text-[#737373] absolute left-2" />
-                                <span className="text-sm text-[#0a0a0a] leading-5">
-                                  Edit
-                                </span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator className="h-px bg-[#e5e5e5] my-1" />
-                              <DropdownMenuItem
-                                variant="destructive"
-                                className="gap-2 pl-8 pr-2 py-1.5 cursor-pointer rounded-sm hover:bg-[#f5f5f5] relative"
-                                inset
-                              >
-                                <Trash2 className="w-4 h-4 text-[#b91c1c] absolute left-2" />
-                                <span className="text-sm text-[#b91c1c] leading-5">
-                                  Delete
-                                </span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {rounds.length === 0 && (
-                <div className="p-12 text-center">
+          <TabsContent value="rounds" className="mt-4 space-y-4">
+            {/* Rounds Table */}
+            <DataTable<Round>
+              data={rounds}
+              columns={roundColumns}
+              getRowId={(round) => round?.id}
+              pagination={roundsPagination}
+              currentOffset={currentRoundsOffset}
+              onPaginationChange={setCurrentRoundsOffset}
+              isLoading={isLoadingRounds}
+              loadingState={<DataTableSkeleton columns={6} rows={10} />}
+              emptyState={
+                <div className="text-center py-12">
                   <p className="text-sm text-[#737373]">
                     No rounds created yet. Click "Add round" to create your
                     first round.
                   </p>
                 </div>
-              )}
-            </div>
+              }
+              rowActions={renderRoundRowActions}
+            />
           </TabsContent>
 
           {/* Applicants Tab Content */}
@@ -927,21 +962,8 @@ export default function JobDetails() {
         open={isCreateRoundModalOpen}
         onOpenChange={setIsCreateRoundModalOpen}
         onSubmit={(data) => {
-          // Handle round creation
-          const newRound: Round = {
-            id: Date.now().toString(),
-            name: data.roundName,
-            duration: `${data.duration} min`,
-            questions:
-              data.questionType === "ai"
-                ? data.aiGeneratedQuestions
-                : data.questionType === "hybrid"
-                ? data.aiGeneratedQuestions + data.customQuestions
-                : data.customQuestions,
-            applicants: 0,
-            created: "Just now",
-          };
-          setRounds((prev) => [...prev, newRound]);
+          // Handle round creation - refresh rounds list
+          fetchRounds();
           setIsCreateRoundModalOpen(false);
         }}
       />

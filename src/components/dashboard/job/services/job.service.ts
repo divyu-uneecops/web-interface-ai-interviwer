@@ -80,4 +80,15 @@ export const jobService = {
       buildUrl("/objects/69521d7dc9ba83a076aac3c8/records/{id}", { id }),
       payload
     ),
+  getRounds: (
+    params: Record<string, any>,
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.post(
+      "/objects/69521d61c9ba83a076aac3c0/views/69521d61c9ba83a076aac3c1/records",
+      params,
+      payload,
+      signal
+    ),
 };

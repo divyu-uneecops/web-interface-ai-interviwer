@@ -7,8 +7,10 @@ import {
   JobDetail,
   ApplicantForm,
   Applicant,
+  Round,
 } from "../interfaces/job.interface";
 import { ApplicantStatus } from "../types/job.types";
+import { Round } from "../interfaces/job.interface";
 
 export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
   // Create a map of values for easy lookup
@@ -610,5 +612,64 @@ export const transformApplicantToUpdatePayload = (
   return {
     values: valuesArray,
     propertyIds,
+  };
+};
+
+export const transformAPIRoundItemToRound = (item: APIJobItem): Round => {
+  // Create a map of values for easy lookup
+  const valuesMap = new Map<string, any>();
+  if (Array.isArray(item.values)) {
+    item.values.forEach((val) => {
+      if (val && val.key) {
+        valuesMap.set(val.key, val.value);
+      }
+    });
+  }
+
+  // Extraction with fallback
+  const roundName = valuesMap.get("roundName") || "";
+  const duration = valuesMap.get("duration") || "";
+  const numOfAiQuestions = valuesMap.get("numOfAiQuestions") || 0;
+  const numOfCustomQuestions = valuesMap.get("numOfCustomQuestions") || 0;
+  const questions = numOfAiQuestions + numOfCustomQuestions;
+  const applicants = 0; // TODO: Get from API if available
+  const createdOnRaw = item.createdOn;
+
+  return {
+    id: String(item?.id || ""),
+    name: String(roundName),
+    duration: String(duration),
+    questions: Number(questions),
+    applicants: Number(applicants),
+    created: formatRelativeTime(createdOnRaw),
+  };
+};
+
+export const transformAPIResponseToRounds = (
+  data: APIJobItem[],
+  pagination?: APIPaginationInfo
+): { rounds: Round[]; pagination: APIPaginationInfo } => {
+  if (!Array.isArray(data)) {
+    return {
+      rounds: [],
+      pagination: {
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: 10,
+      },
+    };
+  }
+
+  const rounds = data.map((item) => transformAPIRoundItemToRound(item));
+
+  return {
+    rounds,
+    pagination: pagination || {
+      total: rounds.length,
+      nextOffset: null,
+      previousOffset: null,
+      limit: 10,
+    },
   };
 };

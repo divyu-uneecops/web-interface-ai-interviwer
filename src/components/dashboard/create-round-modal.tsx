@@ -87,6 +87,7 @@ const reminderTimeOptions = [
   { value: "120", label: "2 hours before" },
   { value: "1440", label: "1 day before" },
   { value: "2880", label: "2 days" },
+  { value: "4320", label: "3 days" },
 ];
 
 const mockInterviewers = [

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Plus, X } from "lucide-react";
+import { useFormik } from "formik";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +27,12 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
+import serverInterfaceService from "@/services/server-interface.service";
+import {
+  transformToAPIPayload,
+  validate,
+  isStepValid,
+} from "./round/utils/round.utils";
 
 interface CreateRoundModalProps {
   open: boolean;
@@ -108,27 +116,10 @@ export function CreateRoundModal({
   onSubmit,
 }: CreateRoundModalProps) {
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
-  const [formData, setFormData] = React.useState<RoundFormData>({
-    roundName: "",
-    roundType: "",
-    roundObjective: "",
-    duration: "",
-    language: "",
-    interviewer: "",
-    skills: [],
-    questionType: "ai",
-    aiGeneratedQuestions: 5,
-    customQuestions: 0,
-    customQuestionTexts: [],
-    interviewInstructions: "",
-    allowSkip: false,
-    sendReminder: false,
-    reminderTime: "30",
-  });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleClose = () => {
-    setStep(1);
-    setFormData({
+  const formik = useFormik<RoundFormData>({
+    initialValues: {
       roundName: "",
       roundType: "",
       roundObjective: "",
@@ -144,7 +135,51 @@ export function CreateRoundModal({
       allowSkip: false,
       sendReminder: false,
       reminderTime: "30",
-    });
+    },
+    validate,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      setIsSubmitting(true);
+      try {
+        const payload = transformToAPIPayload(values);
+        const response = await serverInterfaceService.post(
+          "/v2/forminstances",
+          {},
+          payload
+        );
+        toast.success(response?.message || "Round created successfully", {
+          duration: 8000,
+        });
+        formik.resetForm();
+        setStep(1);
+        onOpenChange(false);
+        if (onSubmit) {
+          onSubmit(values);
+        }
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.message || "An unknown error occurred",
+          {
+            duration: 8000,
+          }
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+  });
+
+  // Reset form when modal closes
+  React.useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+      setStep(1);
+    }
+  }, [open]);
+
+  const handleClose = () => {
+    setStep(1);
+    formik.resetForm();
     onOpenChange(false);
   };
 
@@ -157,8 +192,33 @@ export function CreateRoundModal({
   };
 
   const handleNext = () => {
-    if (step < 3) {
-      setStep((prev) => (prev + 1) as 1 | 2 | 3);
+    // Validate current step before proceeding
+    if (isStepValid(step, formik.values)) {
+      if (step < 3) {
+        setStep((prev) => (prev + 1) as 1 | 2 | 3);
+      }
+    } else {
+      // Mark all fields in current step as touched to show errors
+      if (step === 1) {
+        formik.setFieldTouched("roundName", true);
+        formik.setFieldTouched("roundType", true);
+        formik.setFieldTouched("roundObjective", true);
+        formik.setFieldTouched("duration", true);
+        formik.setFieldTouched("language", true);
+        formik.setFieldTouched("skills", true);
+      } else if (step === 2) {
+        formik.setFieldTouched("questionType", true);
+        formik.setFieldTouched("aiGeneratedQuestions", true);
+        if (
+          formik.values.questionType === "hybrid" ||
+          formik.values.questionType === "custom"
+        ) {
+          formik.setFieldTouched("customQuestions", true);
+          formik.setFieldTouched("customQuestionTexts", true);
+        }
+      } else if (step === 3) {
+        formik.setFieldTouched("interviewInstructions", true);
+      }
     }
   };
 
@@ -169,32 +229,25 @@ export function CreateRoundModal({
   };
 
   const handleSubmit = () => {
-    if (onSubmit) {
-      onSubmit(formData);
-    }
-    handleClose();
+    formik.handleSubmit();
   };
 
   const toggleSkill = (skill: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.includes(skill)
-        ? prev.skills.filter((s) => s !== skill)
-        : [...prev.skills, skill],
-    }));
+    const currentSkills = formik.values.skills;
+    const newSkills = currentSkills.includes(skill)
+      ? currentSkills.filter((s) => s !== skill)
+      : [...currentSkills, skill];
+    formik.setFieldValue("skills", newSkills);
   };
 
   const updateCustomQuestion = (index: number, value: string) => {
-    const newQuestions = [...formData.customQuestionTexts];
+    const newQuestions = [...formik.values.customQuestionTexts];
     newQuestions[index] = value;
-    setFormData((prev) => ({
-      ...prev,
-      customQuestionTexts: newQuestions,
-    }));
+    formik.setFieldValue("customQuestionTexts", newQuestions);
   };
 
   const selectInterviewer = (id: string) => {
-    setFormData((prev) => ({ ...prev, interviewer: id }));
+    formik.setFieldValue("interviewer", id);
   };
 
   return (
@@ -227,28 +280,41 @@ export function CreateRoundModal({
                       Round name <span className="text-[#0a0a0a]">*</span>
                     </Label>
                     <Input
-                      value={formData.roundName}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          roundName: e.target.value,
-                        }))
-                      }
+                      name="roundName"
+                      value={formik.values.roundName}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       placeholder="Behavioural round"
-                      className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
+                      className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                        formik.touched.roundName && formik.errors.roundName
+                          ? "border-red-500"
+                          : ""
+                      }`}
                     />
+                    {formik.touched.roundName && formik.errors.roundName && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.roundName}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1 flex flex-col gap-2">
                     <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
                       Round type <span className="text-[#0a0a0a]">*</span>
                     </Label>
                     <Select
-                      value={formData.roundType}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, roundType: value }))
-                      }
+                      value={formik.values.roundType}
+                      onValueChange={(value) => {
+                        formik.setFieldValue("roundType", value);
+                        formik.setFieldTouched("roundType", true);
+                      }}
                     >
-                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger
+                        className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                          formik.touched.roundType && formik.errors.roundType
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                      >
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -259,6 +325,11 @@ export function CreateRoundModal({
                         ))}
                       </SelectContent>
                     </Select>
+                    {formik.touched.roundType && formik.errors.roundType && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.roundType}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -269,15 +340,17 @@ export function CreateRoundModal({
                   </Label>
                   <div className="relative">
                     <Textarea
-                      value={formData.roundObjective}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          roundObjective: e.target.value,
-                        }))
-                      }
+                      name="roundObjective"
+                      value={formik.values.roundObjective}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       placeholder="Describe what you want to assess in this round..."
-                      className="min-h-[103px] shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] pr-24"
+                      className={`min-h-[103px] shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] pr-24 ${
+                        formik.touched.roundObjective &&
+                        formik.errors.roundObjective
+                          ? "border-red-500"
+                          : ""
+                      }`}
                     />
                     <button
                       type="button"
@@ -286,6 +359,12 @@ export function CreateRoundModal({
                       Generate from AI
                     </button>
                   </div>
+                  {formik.touched.roundObjective &&
+                    formik.errors.roundObjective && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.roundObjective}
+                      </p>
+                    )}
                   <p className="text-xs text-[#737373] leading-none">
                     This helps AI generate relevant questions
                   </p>
@@ -298,12 +377,19 @@ export function CreateRoundModal({
                       Duration <span className="text-[#0a0a0a]">*</span>
                     </Label>
                     <Select
-                      value={formData.duration}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, duration: value }))
-                      }
+                      value={formik.values.duration}
+                      onValueChange={(value) => {
+                        formik.setFieldValue("duration", value);
+                        formik.setFieldTouched("duration", true);
+                      }}
                     >
-                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger
+                        className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                          formik.touched.duration && formik.errors.duration
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                      >
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -314,18 +400,30 @@ export function CreateRoundModal({
                         ))}
                       </SelectContent>
                     </Select>
+                    {formik.touched.duration && formik.errors.duration && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.duration}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1 flex flex-col gap-2">
                     <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
                       Language <span className="text-[#0a0a0a]">*</span>
                     </Label>
                     <Select
-                      value={formData.language}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, language: value }))
-                      }
+                      value={formik.values.language}
+                      onValueChange={(value) => {
+                        formik.setFieldValue("language", value);
+                        formik.setFieldTouched("language", true);
+                      }}
                     >
-                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger
+                        className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                          formik.touched.language && formik.errors.language
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                      >
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -336,6 +434,11 @@ export function CreateRoundModal({
                         ))}
                       </SelectContent>
                     </Select>
+                    {formik.touched.language && formik.errors.language && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.language}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -365,7 +468,7 @@ export function CreateRoundModal({
                         type="button"
                         onClick={() => selectInterviewer(interviewer.id)}
                         className={`border rounded p-1 flex flex-col items-center gap-1 w-[70px] h-[98px] transition-all ${
-                          formData.interviewer === interviewer.id
+                          formik.values.interviewer === interviewer.id
                             ? "border-[#02563d] bg-[#f0f5f2] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]"
                             : "border-[#d1d1d1]"
                         }`}
@@ -392,9 +495,15 @@ export function CreateRoundModal({
                   <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
                     Skills for round <span className="text-[#b91c1c]">*</span>
                   </Label>
-                  <div className="border border-[#e5e5e5] rounded-md h-9 px-3 py-1 flex items-center gap-1 flex-wrap shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] min-h-[36px]">
-                    {formData.skills.length > 0 ? (
-                      formData.skills.map((skill) => (
+                  <div
+                    className={`border rounded-md h-9 px-3 py-1 flex items-center gap-1 flex-wrap shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] min-h-[36px] ${
+                      formik.touched.skills && formik.errors.skills
+                        ? "border-red-500"
+                        : "border-[#e5e5e5]"
+                    }`}
+                  >
+                    {formik.values.skills.length > 0 ? (
+                      formik.values.skills.map((skill) => (
                         <Badge
                           key={skill}
                           className="bg-[#e5e5e5] text-[#0a0a0a] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#e5e5e5] flex items-center gap-0.5"
@@ -418,17 +527,22 @@ export function CreateRoundModal({
                       </span>
                     )}
                   </div>
+                  {formik.touched.skills && formik.errors.skills && (
+                    <p className="text-xs text-red-500">
+                      {formik.errors.skills}
+                    </p>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     {skillOptions.map((skill) => (
                       <Badge
                         key={skill}
                         variant={
-                          formData.skills.includes(skill)
+                          formik.values.skills.includes(skill)
                             ? "default"
                             : "outline"
                         }
                         className={`cursor-pointer h-6 px-2 text-xs font-normal rounded-md border ${
-                          formData.skills.includes(skill)
+                          formik.values.skills.includes(skill)
                             ? "bg-[#02563d] text-white border-transparent hover:bg-[#02563d]"
                             : "bg-white border-[#e5e5e5] text-[#0a0a0a] hover:bg-[#f5f5f5]"
                         }`}
@@ -455,28 +569,24 @@ export function CreateRoundModal({
                     Questions type
                   </Label>
                   <RadioGroup
-                    value={formData.questionType}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        questionType: value as "ai" | "hybrid" | "custom",
-                        // Reset custom questions when switching away from hybrid/custom
-                        customQuestions:
-                          value === "hybrid" || value === "custom"
-                            ? prev.customQuestions
-                            : 0,
-                        customQuestionTexts:
-                          value === "hybrid" || value === "custom"
-                            ? prev.customQuestionTexts
-                            : [],
-                      }))
-                    }
+                    value={formik.values.questionType}
+                    onValueChange={(value) => {
+                      formik.setFieldValue(
+                        "questionType",
+                        value as "ai" | "hybrid" | "custom"
+                      );
+                      // Reset custom questions when switching away from hybrid/custom
+                      if (value !== "hybrid" && value !== "custom") {
+                        formik.setFieldValue("customQuestions", 0);
+                        formik.setFieldValue("customQuestionTexts", []);
+                      }
+                    }}
                     className="flex gap-3"
                   >
                     {/* AI generated questions */}
                     <label
                       className={`flex-1 flex gap-3 p-3 rounded border cursor-pointer transition-all ${
-                        formData.questionType === "ai"
+                        formik.values.questionType === "ai"
                           ? "bg-[#f0f5f2] border-[#02563d]"
                           : "border-[#e5e5e5]"
                       }`}
@@ -500,7 +610,7 @@ export function CreateRoundModal({
                     {/* Hybrid mode */}
                     <label
                       className={`flex-1 flex gap-3 p-3 rounded border cursor-pointer transition-all ${
-                        formData.questionType === "hybrid"
+                        formik.values.questionType === "hybrid"
                           ? "bg-[#f0f5f2] border-[#02563d]"
                           : "border-[#e5e5e5]"
                       }`}
@@ -523,22 +633,30 @@ export function CreateRoundModal({
                 </div>
 
                 {/* AI Generated Questions - AI mode only */}
-                {formData.questionType === "ai" && (
+                {formik.values.questionType === "ai" && (
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
                       No. of AI generated questions{" "}
                       <span className="text-[#0a0a0a]">*</span>
                     </Label>
                     <Select
-                      value={formData.aiGeneratedQuestions.toString()}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          aiGeneratedQuestions: parseInt(value),
-                        }))
-                      }
+                      value={formik.values.aiGeneratedQuestions.toString()}
+                      onValueChange={(value) => {
+                        formik.setFieldValue(
+                          "aiGeneratedQuestions",
+                          parseInt(value)
+                        );
+                        formik.setFieldTouched("aiGeneratedQuestions", true);
+                      }}
                     >
-                      <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                      <SelectTrigger
+                        className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                          formik.touched.aiGeneratedQuestions &&
+                          formik.errors.aiGeneratedQuestions
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -549,11 +667,17 @@ export function CreateRoundModal({
                         ))}
                       </SelectContent>
                     </Select>
+                    {formik.touched.aiGeneratedQuestions &&
+                      formik.errors.aiGeneratedQuestions && (
+                        <p className="text-xs text-red-500">
+                          {formik.errors.aiGeneratedQuestions}
+                        </p>
+                      )}
                   </div>
                 )}
 
                 {/* Hybrid mode - AI and Custom questions side by side */}
-                {formData.questionType === "hybrid" && (
+                {formik.values.questionType === "hybrid" && (
                   <div className="flex flex-col gap-5">
                     {/* No. of AI and Custom questions side by side */}
                     <div className="flex gap-5">
@@ -563,15 +687,26 @@ export function CreateRoundModal({
                           <span className="text-[#0a0a0a]">*</span>
                         </Label>
                         <Select
-                          value={formData.aiGeneratedQuestions.toString()}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              aiGeneratedQuestions: parseInt(value),
-                            }))
-                          }
+                          value={formik.values.aiGeneratedQuestions.toString()}
+                          onValueChange={(value) => {
+                            formik.setFieldValue(
+                              "aiGeneratedQuestions",
+                              parseInt(value)
+                            );
+                            formik.setFieldTouched(
+                              "aiGeneratedQuestions",
+                              true
+                            );
+                          }}
                         >
-                          <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                          <SelectTrigger
+                            className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                              formik.touched.aiGeneratedQuestions &&
+                              formik.errors.aiGeneratedQuestions
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -582,6 +717,12 @@ export function CreateRoundModal({
                             ))}
                           </SelectContent>
                         </Select>
+                        {formik.touched.aiGeneratedQuestions &&
+                          formik.errors.aiGeneratedQuestions && (
+                            <p className="text-xs text-red-500">
+                              {formik.errors.aiGeneratedQuestions}
+                            </p>
+                          )}
                       </div>
                       <div className="flex-1 flex flex-col gap-2">
                         <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
@@ -589,31 +730,39 @@ export function CreateRoundModal({
                           <span className="text-[#0a0a0a]">*</span>
                         </Label>
                         <Select
-                          value={formData.customQuestions.toString()}
+                          value={formik.values.customQuestions.toString()}
                           onValueChange={(value) => {
                             const num = parseInt(value);
-                            setFormData((prev) => {
-                              const currentCount =
-                                prev.customQuestionTexts.length;
-                              const newTexts = [...prev.customQuestionTexts];
-                              if (num > currentCount) {
-                                // Add empty questions
-                                for (let i = currentCount; i < num; i++) {
-                                  newTexts.push("");
-                                }
-                              } else if (num < currentCount) {
-                                // Remove questions
-                                newTexts.splice(num);
+                            const currentCount =
+                              formik.values.customQuestionTexts.length;
+                            const newTexts = [
+                              ...formik.values.customQuestionTexts,
+                            ];
+                            if (num > currentCount) {
+                              // Add empty questions
+                              for (let i = currentCount; i < num; i++) {
+                                newTexts.push("");
                               }
-                              return {
-                                ...prev,
-                                customQuestions: num,
-                                customQuestionTexts: newTexts,
-                              };
-                            });
+                            } else if (num < currentCount) {
+                              // Remove questions
+                              newTexts.splice(num);
+                            }
+                            formik.setFieldValue("customQuestions", num);
+                            formik.setFieldValue(
+                              "customQuestionTexts",
+                              newTexts
+                            );
+                            formik.setFieldTouched("customQuestions", true);
                           }}
                         >
-                          <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
+                          <SelectTrigger
+                            className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                              formik.touched.customQuestions &&
+                              formik.errors.customQuestions
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -624,26 +773,51 @@ export function CreateRoundModal({
                             ))}
                           </SelectContent>
                         </Select>
+                        {formik.touched.customQuestions &&
+                          formik.errors.customQuestions && (
+                            <p className="text-xs text-red-500">
+                              {formik.errors.customQuestions}
+                            </p>
+                          )}
                       </div>
                     </div>
 
                     {/* Custom question inputs */}
-                    {formData.customQuestionTexts.map((question, index) => (
-                      <div key={index} className="flex flex-col gap-2">
-                        <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
-                          Question {index + 1}.{" "}
-                          <span className="text-[#0a0a0a]">*</span>
-                        </Label>
-                        <Input
-                          value={question}
-                          onChange={(e) =>
-                            updateCustomQuestion(index, e.target.value)
-                          }
-                          placeholder="Write your question here"
-                          className="h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
-                        />
-                      </div>
-                    ))}
+                    {formik.values.customQuestionTexts.map(
+                      (question, index) => (
+                        <div key={index} className="flex flex-col gap-2">
+                          <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
+                            Question {index + 1}.{" "}
+                            <span className="text-[#0a0a0a]">*</span>
+                          </Label>
+                          <Input
+                            value={question}
+                            onChange={(e) =>
+                              updateCustomQuestion(index, e.target.value)
+                            }
+                            onBlur={() =>
+                              formik.setFieldTouched(
+                                "customQuestionTexts",
+                                true
+                              )
+                            }
+                            placeholder="Write your question here"
+                            className={`h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                              formik.touched.customQuestionTexts &&
+                              formik.errors.customQuestionTexts
+                                ? "border-red-500"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                      )
+                    )}
+                    {formik.touched.customQuestionTexts &&
+                      formik.errors.customQuestionTexts && (
+                        <p className="text-xs text-red-500">
+                          {formik.errors.customQuestionTexts}
+                        </p>
+                      )}
                   </div>
                 )}
               </div>
@@ -663,16 +837,24 @@ export function CreateRoundModal({
                     <span className="text-[#b91c1c]">*</span>
                   </Label>
                   <Textarea
-                    value={formData.interviewInstructions}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        interviewInstructions: e.target.value,
-                      }))
-                    }
+                    name="interviewInstructions"
+                    value={formik.values.interviewInstructions}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     placeholder="Write interview instructions here"
-                    className="min-h-[103px] shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]"
+                    className={`min-h-[103px] shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] ${
+                      formik.touched.interviewInstructions &&
+                      formik.errors.interviewInstructions
+                        ? "border-red-500"
+                        : ""
+                    }`}
                   />
+                  {formik.touched.interviewInstructions &&
+                    formik.errors.interviewInstructions && (
+                      <p className="text-xs text-red-500">
+                        {formik.errors.interviewInstructions}
+                      </p>
+                    )}
                 </div>
 
                 {/* Settings */}
@@ -693,12 +875,9 @@ export function CreateRoundModal({
                           </p>
                         </div>
                         <Switch
-                          checked={formData.allowSkip}
+                          checked={formik.values.allowSkip}
                           onCheckedChange={(checked) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              allowSkip: checked,
-                            }))
+                            formik.setFieldValue("allowSkip", checked)
                           }
                         />
                       </div>
@@ -716,27 +895,21 @@ export function CreateRoundModal({
                           </p>
                         </div>
                         <Switch
-                          checked={formData.sendReminder}
+                          checked={formik.values.sendReminder}
                           onCheckedChange={(checked) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              sendReminder: checked,
-                            }))
+                            formik.setFieldValue("sendReminder", checked)
                           }
                         />
                       </div>
-                      {formData.sendReminder && (
+                      {formik.values.sendReminder && (
                         <div className="flex flex-col gap-2">
                           <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
                             Set reminder time
                           </Label>
                           <Select
-                            value={formData.reminderTime}
+                            value={formik.values.reminderTime}
                             onValueChange={(value) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                reminderTime: value,
-                              }))
+                              formik.setFieldValue("reminderTime", value)
                             }
                           >
                             <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)]">
@@ -776,9 +949,16 @@ export function CreateRoundModal({
           )}
           <Button
             onClick={step === 3 ? handleSubmit : handleNext}
-            className="h-9 px-4 text-sm font-medium bg-[#02563d] text-white hover:bg-[#02563d]/90 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+            disabled={
+              isSubmitting || (step < 3 && !isStepValid(step, formik.values))
+            }
+            className="h-9 px-4 text-sm font-medium bg-[#02563d] text-white hover:bg-[#02563d]/90 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {step === 3 ? "Create round" : "Next"}
+            {isSubmitting
+              ? "Creating..."
+              : step === 3
+              ? "Create round"
+              : "Next"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -4,91 +4,89 @@ export const transformToCreateRoundPayload = (
   values: RoundFormData,
   jobId: string
 ) => {
-  // Transform skills to API format
-  const skillsForRound = values?.skills?.map((skill) => [
+  // Skills for round (each as its own array of one object)
+  const skillsForRound = (values?.skills || []).map((skill) => [
     {
-      propertyId: "69525c30c9ba83a076aac44b",
-      key: "skill",
+      propertyId: "69627d06c9ba83a076aac8f8",
+      key: "_skill_",
       value: skill,
     },
   ]);
 
-  // Transform questions array
-  const questions: any[] = [];
+  // Questions (each as its own array of two objects)
+  const questions: any[] =
+    values?.customQuestionTexts && Array.isArray(values?.customQuestionTexts)
+      ? values?.customQuestionTexts
+          .map((questionText, idx) => {
+            if (
+              values?.questionType === "hybrid" &&
+              typeof questionText === "string" &&
+              questionText.trim() !== ""
+            ) {
+              return [
+                {
+                  propertyId: "69627d97c9ba83a076aac8fa",
+                  key: "_question",
+                  value: questionText,
+                },
+                {
+                  propertyId: "69627dcdc9ba83a076aac8fb",
+                  key: "_qType",
+                  value: "hybrid",
+                },
+              ];
+            }
+            return null;
+          })
+          .filter(Boolean)
+      : [];
 
-  // Add custom questions
-  if (values?.questionType === "hybrid") {
-    values?.customQuestionTexts?.forEach((questionText, index) => {
-      if (questionText?.trim()) {
-        questions.push([
-          {
-            propertyId: "69525d19c9ba83a076aac44f",
-            key: "question",
-            value: questionText,
-          },
-          {
-            propertyId: "69525d77c9ba83a076aac450",
-            key: "qType",
-            value: "custom",
-          },
-        ]);
-      }
-    });
-  }
-
+  // Main values array (follows order and structure from example JSON)
   const valuesArray = [
     {
       propertyId: "69525a92c9ba83a076aac43d",
       key: "roundName",
-      value: values?.roundName,
+      value: values?.roundName || "",
     },
     {
       propertyId: "69525ad1c9ba83a076aac43f",
       key: "roundType",
-      value: values?.roundType,
+      value: values?.roundType || "",
     },
     {
       propertyId: "69525aefc9ba83a076aac440",
       key: "roundObjective",
-      value: values?.roundObjective,
+      value: values?.roundObjective || "",
+    },
+    {
+      propertyId: "69525b69c9ba83a076aac443",
+      key: "language",
+      value: values?.language || "",
     },
     {
       propertyId: "69525bb8c9ba83a076aac448",
       key: "duration",
-      value: values?.duration,
+      value: values?.duration || "",
     },
     {
       propertyId: "69525c1cc9ba83a076aac44a",
       key: "accessibility",
-      value: "Private", // Default to Private as per new payload structure
-    },
-    {
-      propertyId: "69525c5ac9ba83a076aac44c",
-      key: "skillsForRound",
-      value: skillsForRound,
+      value: "Private", // TODO: Needs to Change in future
     },
     {
       propertyId: "69525c85c9ba83a076aac44d",
       key: "questionsType",
-      value: values?.questionType,
+      value: values?.questionType || "",
     },
     {
       propertyId: "69525ca7c9ba83a076aac44e",
       key: "numOfAiQuestions",
-      value:
-        values.questionType === "ai" || values.questionType === "hybrid"
-          ? values.aiGeneratedQuestions
-          : 0,
-    },
-    {
-      propertyId: "69525dbbc9ba83a076aac453",
-      key: "questions",
-      value: questions,
+      value: values?.aiGeneratedQuestions,
     },
     {
       propertyId: "69525dd4c9ba83a076aac454",
       key: "interviewInstructions",
-      value: values?.interviewInstructions,
+      value: values?.interviewInstructions || "",
     },
     {
       propertyId: "69525decc9ba83a076aac455",
@@ -101,58 +99,85 @@ export const transformToCreateRoundPayload = (
       value: values?.sendReminder,
     },
     {
-      propertyId: "69525e47c9ba83a076aac457",
-      key: "reminderTime",
-      value: values?.sendReminder ? values?.reminderTime : "",
-    },
-    {
-      propertyId: "69525e6bc9ba83a076aac458",
-      key: "numOfCustomQuestions",
-      value: values?.questionType === "hybrid" ? values?.customQuestions : 0,
-    },
-    {
       propertyId: "69576660c9ba83a076aac596",
       key: "formUser",
-      value: ["6938f9fb2276e3fc3ac7b328"], // TODO: Get from auth context
+      value: ["6936a4d92276e3fc3ac7b13b"], // Replace with actual user id if needed
     },
     {
       propertyId: "6960b827c9ba83a076aac89b",
       key: "jobName",
-      value: jobId,
+      value: jobId || "",
     },
     {
       propertyId: "6960b94ec9ba83a076aac89c",
       key: "interviewerName",
-      value: "69576a84c9ba83a076aac5a0", // TODO: Get interviewer name/ID
+      value: "695f4c61c9ba83a076aac7de", // Replace with actual interviewer name if needed
+    },
+    {
+      propertyId: "69626f4dc9ba83a076aac8f2",
+      key: "jobID",
+      value: jobId || "",
+    },
+    {
+      propertyId: "69626f8fc9ba83a076aac8f3",
+      key: "interviewerID",
+      value: "695f4c61c9ba83a076aac7de", // Replace as needed
+    },
+    {
+      propertyId: "69627d2ec9ba83a076aac8f9",
+      key: "_skillForRound",
+      value: skillsForRound,
+    },
+    {
+      propertyId: "69627df8c9ba83a076aac8fc",
+      key: "_questions",
+      value: questions,
     },
   ];
 
+  const propertyIds = [
+    "69525a92c9ba83a076aac43d",
+    "69525ad1c9ba83a076aac43f",
+    "69525aefc9ba83a076aac440",
+    "69525b69c9ba83a076aac443",
+    "69525bb8c9ba83a076aac448",
+    "69525bf5c9ba83a076aac449",
+    "69525c1cc9ba83a076aac44a",
+    "69525c85c9ba83a076aac44d",
+    "69525ca7c9ba83a076aac44e",
+    "69525dd4c9ba83a076aac454",
+    "69525decc9ba83a076aac455",
+    "69525e05c9ba83a076aac456",
+    "69576660c9ba83a076aac596",
+    "6960b827c9ba83a076aac89b",
+    "6960b94ec9ba83a076aac89c",
+    "69626f4dc9ba83a076aac8f2",
+    "69626f8fc9ba83a076aac8f3",
+    "69627d2ec9ba83a076aac8f9",
+    "69627df8c9ba83a076aac8fc",
+  ];
+
+  if (values?.sendReminder) {
+    valuesArray.push({
+      propertyId: "69525e47c9ba83a076aac457",
+      key: "reminderTime",
+      value: values?.reminderTime,
+    });
+    propertyIds.push("69525e47c9ba83a076aac457");
+  }
+
+  if (values?.questionType === "hybrid") {
+    valuesArray.push({
+      propertyId: "69525e6bc9ba83a076aac458",
+      key: "numOfCustomQuestions",
+      value: values?.customQuestions,
+    });
+    propertyIds.push("69525e6bc9ba83a076aac458");
+  }
+
   return {
     values: valuesArray,
-    propertyIds: [
-      "69525a07c9ba83a076aac437",
-      "69525a38c9ba83a076aac439",
-      "69525a60c9ba83a076aac43b",
-      "69525a92c9ba83a076aac43d",
-      "69525ad1c9ba83a076aac43f",
-      "69525aefc9ba83a076aac440",
-      "69525b69c9ba83a076aac443",
-      "69525bb8c9ba83a076aac448",
-      "69525bf5c9ba83a076aac449",
-      "69525c1cc9ba83a076aac44a",
-      "69525c5ac9ba83a076aac44c",
-      "69525c85c9ba83a076aac44d",
-      "69525ca7c9ba83a076aac44e",
-      "69525dbbc9ba83a076aac453",
-      "69525dd4c9ba83a076aac454",
-      "69525decc9ba83a076aac455",
-      "69525e05c9ba83a076aac456",
-      "69525e47c9ba83a076aac457",
-      "69525e6bc9ba83a076aac458",
-      "69576660c9ba83a076aac596",
-      "6960b827c9ba83a076aac89b",
-      "6960b94ec9ba83a076aac89c",
-    ],
+    propertyIds,
     flows: [
       {
         stageId: "1",

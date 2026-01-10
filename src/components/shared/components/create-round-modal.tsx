@@ -234,7 +234,7 @@ export function CreateRoundModal({
     onSubmit: async (values: RoundFormData) => {
       setIsSubmitting(true);
       try {
-        const payload = transformToCreateRoundPayload(values,jobId);
+        const payload = transformToCreateRoundPayload(values, jobId);
         const response = await roundService.createRound({}, payload);
         toast.success(response?.message || "Round created successfully", {
           duration: 8000,
@@ -694,7 +694,7 @@ export function CreateRoundModal({
                       </SelectTrigger>
                       <SelectContent>
                         {[
-                          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                         ].map((num) => (
                           <SelectItem key={num} value={num.toString()}>
                             {num}

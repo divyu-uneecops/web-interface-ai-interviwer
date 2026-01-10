@@ -36,4 +36,7 @@ export const API_ENDPOINTS = {
     DELETE: "/objects/interviews/records/{id}",
     CANCEL: "/objects/interviews/records/{id}/cancel",
   },
+  CREATE_ROUND: {
+    FORM_PROPERTIES: "/forms/69521d61c9ba83a076aac3c3/properties",
+  },
 };

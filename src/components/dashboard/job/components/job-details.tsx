@@ -25,24 +25,16 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { StatusTag } from "@/components/ui/status-tag";
-import { CreateRoundModal } from "@/components/dashboard/create-round-modal";
+
 import { DataTable, Column } from "@/components/shared/components/data-table";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
@@ -77,6 +69,7 @@ import { CreateJobModal } from "./create-job-modal";
 import { AddApplicantModal } from "./add-applicant-modal";
 import { useAppSelector } from "@/store/hooks";
 import { isEmpty } from "@/lib/utils";
+import { CreateRoundModal } from "@/components/shared/components/create-round-modal";
 
 export const stats: JobStat[] = [
   { label: "Total Applicants", value: 143, icon: "applicants" },
@@ -88,46 +81,33 @@ export const stats: JobStat[] = [
 export default function JobDetails() {
   const params = useParams();
   const [whatsappReminder, setWhatsappReminder] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [job, setJob] = useState<JobDetail | null>(null);
+  const [isLoadingJob, setIsLoadingJob] = useState(true);
+  const { mappingValues } = useAppSelector((state) => state.jobs);
+
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isEditApplicantModalOpen, setIsEditApplicantModalOpen] =
     useState(false);
-  const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("details");
   const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [rounds, setRounds] = useState<Round[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
     rounds: [],
     applied: [],
   });
-  const [job, setJob] = useState<JobDetail | null>(null);
-  const [isLoadingJob, setIsLoadingJob] = useState(true);
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
-  const [isLoadingRounds, setIsLoadingRounds] = useState(false);
+  const [currentApplicantsOffset, setCurrentApplicantsOffset] = useState(0);
   const [applicantsPagination, setApplicantsPagination] = useState({
     total: 0,
     nextOffset: null as number | null,
     previousOffset: null as number | null,
     limit: 10,
   });
-  const [roundsPagination, setRoundsPagination] = useState({
-    total: 0,
-    nextOffset: null as number | null,
-    previousOffset: null as number | null,
-    limit: 10,
-  });
-  const [currentApplicantsOffset, setCurrentApplicantsOffset] = useState(0);
-  const [currentRoundsOffset, setCurrentRoundsOffset] = useState(0);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(
     null
   );
-  const PAGE_LIMIT = 10;
-
-  const { mappingValues } = useAppSelector((state) => state.jobs);
-
-  // Define filter groups for applicants
   const applicantFilterGroups: FilterGroup[] = [
     {
       id: "status",
@@ -139,6 +119,61 @@ export default function JobDetails() {
       ],
     },
   ];
+
+  const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] = useState(false);
+  const [rounds, setRounds] = useState<Round[]>([]);
+  const [isLoadingRounds, setIsLoadingRounds] = useState(false);
+  const [roundsPagination, setRoundsPagination] = useState({
+    total: 0,
+    nextOffset: null as number | null,
+    previousOffset: null as number | null,
+    limit: 10,
+  });
+  const [currentRoundsOffset, setCurrentRoundsOffset] = useState(0);
+
+  const PAGE_LIMIT = 10;
+
+  // Fetch job detail
+  useEffect(() => {
+    fetchJobDetail();
+  }, [params?.id]);
+
+  // Fetch applicants when on applicants tab
+  useEffect(() => {
+    if (activeTab === "applicants" && params?.id) {
+      fetchApplicants();
+    }
+  }, [activeTab, params?.id]);
+
+  // Fetch rounds when on rounds tab
+  useEffect(() => {
+    if (activeTab === "rounds" && params?.id) {
+      fetchRounds();
+    }
+  }, [activeTab, params?.id]);
+
+  const getStatusTag = (status: ApplicantStatus) => {
+    switch (status) {
+      case "Interviewed":
+        return (
+          <StatusTag variant="success" className="bg-[#def2eb] text-[#0e4230]">
+            Interviewed
+          </StatusTag>
+        );
+      case "Applied":
+        return (
+          <Badge className="bg-[#f5e1ff] text-[#5a3c66] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#f5e1ff]">
+            Applied
+          </Badge>
+        );
+      case "Rejected":
+        return (
+          <Badge className="bg-[#fcefec] text-[#d92d20] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#fcefec]">
+            Rejected
+          </Badge>
+        );
+    }
+  };
 
   const fetchJobDetail = async () => {
     if (!params.id || typeof params.id !== "string") {
@@ -168,7 +203,7 @@ export default function JobDetails() {
     }
   };
 
-  const fetchApplicants = useCallback(async () => {
+  const fetchApplicants = async () => {
     if (!params.id || typeof params.id !== "string") {
       setIsLoadingApplicants(false);
       return;
@@ -240,20 +275,9 @@ export default function JobDetails() {
     } finally {
       setIsLoadingApplicants(false);
     }
-  }, [
-    params.id,
-    job?.jobId,
-    currentApplicantsOffset,
-    appliedFilters,
-    searchQuery,
-  ]);
+  };
 
-  // Fetch job detail
-  useEffect(() => {
-    fetchJobDetail();
-  }, [params.id]);
-
-  const fetchRounds = useCallback(async () => {
+  const fetchRounds = async () => {
     if (!params.id || typeof params.id !== "string") {
       setIsLoadingRounds(false);
       return;
@@ -309,48 +333,11 @@ export default function JobDetails() {
     } finally {
       setIsLoadingRounds(false);
     }
-  }, [params.id, job?.jobId, currentRoundsOffset]);
-
-  // Fetch applicants when on applicants tab
-  useEffect(() => {
-    if (activeTab === "applicants" && params.id && job?.jobId) {
-      fetchApplicants();
-    }
-  }, [activeTab, fetchApplicants, params.id, job?.jobId]);
-
-  // Fetch rounds when on rounds tab
-  useEffect(() => {
-    if (activeTab === "rounds" && params.id && job?.jobId) {
-      fetchRounds();
-    }
-  }, [activeTab, fetchRounds, params.id, job?.jobId]);
+  };
 
   const handleApplyFilters = (filters: FilterState) => {
     setAppliedFilters(filters);
     setCurrentApplicantsOffset(0); // Reset to first page when filters are applied
-  };
-
-  const getStatusTag = (status: ApplicantStatus) => {
-    switch (status) {
-      case "Interviewed":
-        return (
-          <StatusTag variant="success" className="bg-[#def2eb] text-[#0e4230]">
-            Interviewed
-          </StatusTag>
-        );
-      case "Applied":
-        return (
-          <Badge className="bg-[#f5e1ff] text-[#5a3c66] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#f5e1ff]">
-            Applied
-          </Badge>
-        );
-      case "Rejected":
-        return (
-          <Badge className="bg-[#fcefec] text-[#d92d20] border-0 rounded-full px-2 h-6 text-xs font-normal hover:bg-[#fcefec]">
-            Rejected
-          </Badge>
-        );
-    }
   };
 
   // Define table columns for applicants
@@ -477,6 +464,36 @@ export default function JobDetails() {
     </DropdownMenu>
   );
 
+  // Row actions renderer for applicants
+  const renderApplicantRowActions = (applicant: Applicant) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Download className="h-4 text-[#737373] mr-2" />
+          Download
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleEditApplicant(applicant)}>
+          <Pencil className="h-4 text-[#737373] mr-2" />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => handleDeleteApplicant(applicant?.id)}
+        >
+          <Trash2 className="h-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   const handleDeleteApplicant = async (id: string) => {
     if (isEmpty(id)) return;
     try {
@@ -516,36 +533,6 @@ export default function JobDetails() {
     setEditingApplicant(applicant);
     setIsEditApplicantModalOpen(true);
   };
-
-  // Row actions renderer for applicants
-  const renderApplicantRowActions = (applicant: Applicant) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          <Download className="h-4 text-[#737373] mr-2" />
-          Download
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleEditApplicant(applicant)}>
-          <Pencil className="h-4 text-[#737373] mr-2" />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => handleDeleteApplicant(applicant?.id)}
-        >
-          <Trash2 className="h-4 mr-2" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
 
   if (isLoadingJob) {
     return (
@@ -977,15 +964,16 @@ export default function JobDetails() {
       />
 
       {/* Create Round Modal */}
-      <CreateRoundModal
-        open={isCreateRoundModalOpen}
-        onOpenChange={setIsCreateRoundModalOpen}
-        onSubmit={(data) => {
-          // Handle round creation - refresh rounds list
-          fetchRounds();
-          setIsCreateRoundModalOpen(false);
-        }}
-      />
+      {isCreateRoundModalOpen && (
+        <CreateRoundModal
+          open={isCreateRoundModalOpen}
+          onOpenChange={setIsCreateRoundModalOpen}
+          onSubmit={() => {
+            fetchRounds();
+          }}
+          mappingValues={mappingValues}
+        />
+      )}
 
       {/* Add Applicant Modal */}
       <AddApplicantModal

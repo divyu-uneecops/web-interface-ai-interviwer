@@ -210,11 +210,13 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.industry?.map((option, index) => (
-                      <SelectItem key={index} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    {mappingValues?.jobOpening?.industry?.map(
+                      (option, index) => (
+                        <SelectItem key={index} value={option}>
+                          {option}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -240,11 +242,13 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.jobLevel?.map((option, index) => (
-                      <SelectItem key={index} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    {mappingValues?.jobOpening?.jobLevel?.map(
+                      (option, index) => (
+                        <SelectItem key={index} value={option}>
+                          {option}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -270,11 +274,13 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.jobType?.map((option, index) => (
-                      <SelectItem key={index} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    {mappingValues?.jobOpening?.jobType?.map(
+                      (option, index) => (
+                        <SelectItem key={index} value={option}>
+                          {option}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -437,7 +443,7 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.status?.map((option, index) => (
+                    {mappingValues?.jobOpening?.status?.map((option, index) => (
                       <SelectItem key={index} value={option}>
                         {option}
                       </SelectItem>

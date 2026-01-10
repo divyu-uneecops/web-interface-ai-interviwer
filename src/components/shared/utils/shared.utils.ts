@@ -1,4 +1,4 @@
-import { RoundFormData } from "../../create-round-modal";
+import { RoundFormData } from "../interfaces/shared.interface";
 
 // Map language code to API format (e.g., "en" -> "en-GB")
 const mapLanguageToAPI = (language: string): string => {
@@ -88,7 +88,7 @@ export const transformToAPIPayload = (
   }
 
   // Add custom questions
-  if (values.questionType === "hybrid" || values.questionType === "custom") {
+  if (values.questionType === "hybrid") {
     values.customQuestionTexts.forEach((questionText, index) => {
       if (questionText.trim()) {
         questions.push([
@@ -181,10 +181,7 @@ export const transformToAPIPayload = (
     {
       propertyId: "69525e6bc9ba83a076aac458",
       key: "numOfCustomQuestions",
-      value:
-        values.questionType === "hybrid" || values.questionType === "custom"
-          ? values.customQuestions
-          : 0,
+      value: values.questionType === "hybrid" ? values.customQuestions : 0,
     },
     {
       propertyId: "69576660c9ba83a076aac596",
@@ -238,187 +235,4 @@ export const transformToAPIPayload = (
     status: "PENDING",
     formId: "69521d61c9ba83a076aac3c3",
   };
-};
-
-export const validate = (values: RoundFormData) => {
-  const errors: Partial<Record<keyof RoundFormData, string>> = {};
-
-  if (!values.roundName || values.roundName.trim() === "") {
-    errors.roundName = "Round name is required";
-  }
-
-  if (!values.roundType) {
-    errors.roundType = "Round type is required";
-  }
-
-  if (!values.roundObjective || values.roundObjective.trim() === "") {
-    errors.roundObjective = "Round objective is required";
-  }
-
-  if (!values.duration) {
-    errors.duration = "Duration is required";
-  }
-
-  if (!values.language) {
-    errors.language = "Language is required";
-  }
-
-  if (values.skills.length === 0) {
-    errors.skills = "At least one skill is required";
-  }
-
-  if (
-    !values.interviewInstructions ||
-    values.interviewInstructions.trim() === ""
-  ) {
-    errors.interviewInstructions = "Interview instructions are required";
-  }
-
-  if (
-    values.questionType === "ai" &&
-    (!values.aiGeneratedQuestions || values.aiGeneratedQuestions < 1)
-  ) {
-    errors.aiGeneratedQuestions = "Number of AI questions must be at least 1";
-  }
-
-  if (values.questionType === "hybrid") {
-    if (!values.aiGeneratedQuestions || values.aiGeneratedQuestions < 1) {
-      errors.aiGeneratedQuestions = "Number of AI questions must be at least 1";
-    }
-    if (!values.customQuestions || values.customQuestions < 1) {
-      errors.customQuestions = "Number of custom questions must be at least 1";
-    }
-    // Validate custom question texts
-    const emptyQuestions = values.customQuestionTexts.filter(
-      (q) => !q || q.trim() === ""
-    );
-    if (emptyQuestions.length > 0) {
-      errors.customQuestionTexts = "All custom questions must be filled";
-    }
-  }
-
-  if (values.questionType === "custom") {
-    if (!values.customQuestions || values.customQuestions < 1) {
-      errors.customQuestions = "Number of custom questions must be at least 1";
-    }
-    // Validate custom question texts
-    const emptyQuestions = values.customQuestionTexts.filter(
-      (q) => !q || q.trim() === ""
-    );
-    if (emptyQuestions.length > 0) {
-      errors.customQuestionTexts = "All custom questions must be filled";
-    }
-  }
-
-  return errors;
-};
-
-// Validate step 1 fields
-export const validateStep1 = (values: RoundFormData) => {
-  const errors: Partial<Record<keyof RoundFormData, string>> = {};
-
-  if (!values.roundName || values.roundName.trim() === "") {
-    errors.roundName = "Round name is required";
-  }
-
-  if (!values.roundType) {
-    errors.roundType = "Round type is required";
-  }
-
-  if (!values.roundObjective || values.roundObjective.trim() === "") {
-    errors.roundObjective = "Round objective is required";
-  }
-
-  if (!values.duration) {
-    errors.duration = "Duration is required";
-  }
-
-  if (!values.language) {
-    errors.language = "Language is required";
-  }
-
-  if (values.skills.length === 0) {
-    errors.skills = "At least one skill is required";
-  }
-
-  return errors;
-};
-
-// Validate step 2 fields
-export const validateStep2 = (values: RoundFormData) => {
-  const errors: Partial<Record<keyof RoundFormData, string>> = {};
-
-  if (
-    values.questionType === "ai" &&
-    (!values.aiGeneratedQuestions || values.aiGeneratedQuestions < 1)
-  ) {
-    errors.aiGeneratedQuestions = "Number of AI questions must be at least 1";
-  }
-
-  if (values.questionType === "hybrid") {
-    if (!values.aiGeneratedQuestions || values.aiGeneratedQuestions < 1) {
-      errors.aiGeneratedQuestions = "Number of AI questions must be at least 1";
-    }
-    if (!values.customQuestions || values.customQuestions < 1) {
-      errors.customQuestions = "Number of custom questions must be at least 1";
-    }
-    // Validate custom question texts
-    const emptyQuestions = values.customQuestionTexts.filter(
-      (q) => !q || q.trim() === ""
-    );
-    if (emptyQuestions.length > 0) {
-      errors.customQuestionTexts = "All custom questions must be filled";
-    }
-  }
-
-  if (values.questionType === "custom") {
-    if (!values.customQuestions || values.customQuestions < 1) {
-      errors.customQuestions = "Number of custom questions must be at least 1";
-    }
-    // Validate custom question texts
-    const emptyQuestions = values.customQuestionTexts.filter(
-      (q) => !q || q.trim() === ""
-    );
-    if (emptyQuestions.length > 0) {
-      errors.customQuestionTexts = "All custom questions must be filled";
-    }
-  }
-
-  return errors;
-};
-
-// Validate step 3 fields
-export const validateStep3 = (values: RoundFormData) => {
-  const errors: Partial<Record<keyof RoundFormData, string>> = {};
-
-  if (
-    !values.interviewInstructions ||
-    values.interviewInstructions.trim() === ""
-  ) {
-    errors.interviewInstructions = "Interview instructions are required";
-  }
-
-  return errors;
-};
-
-// Check if a specific step is valid
-export const isStepValid = (
-  step: 1 | 2 | 3,
-  values: RoundFormData
-): boolean => {
-  let stepErrors: Partial<Record<keyof RoundFormData, string>> = {};
-
-  switch (step) {
-    case 1:
-      stepErrors = validateStep1(values);
-      break;
-    case 2:
-      stepErrors = validateStep2(values);
-      break;
-    case 3:
-      stepErrors = validateStep3(values);
-      break;
-  }
-
-  return Object.keys(stepErrors).length === 0;
 };

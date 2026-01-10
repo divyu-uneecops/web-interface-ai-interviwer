@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
     CANCEL: "/objects/interviews/records/{id}/cancel",
   },
   CREATE_ROUND: {
+    CREATE: "/v2/forminstances",
     FORM_PROPERTIES: "/forms/69521d61c9ba83a076aac3c3/properties",
   },
 };

@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 
-import serverInterfaceService from "@/services/server-interface.service";
+import { roundService } from "../services/round.service";
 
 import { transformToAPIPayload } from "../utils/shared.utils";
 import {
@@ -234,11 +234,7 @@ export function CreateRoundModal({
       setIsSubmitting(true);
       try {
         const payload = transformToAPIPayload(values);
-        const response = await serverInterfaceService.post(
-          "/v2/forminstances",
-          {},
-          payload
-        );
+        const response = await roundService.createRound({}, payload);
         toast.success(response?.message || "Round created successfully", {
           duration: 8000,
         });

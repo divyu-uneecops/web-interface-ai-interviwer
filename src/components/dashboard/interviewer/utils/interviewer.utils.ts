@@ -133,9 +133,6 @@ export const transformAPIResponseToInterviewers = (
 };
 
 export const transformToAPIPayload = (values: InterviewerFormData) => {
-  // Generate interviewerId
-  const interviewerId = uuidv4() || "";
-
   // Transform skills to API format (array of arrays)
   const interviewerSkills = values?.skills
     ?.filter((skill: string) => skill?.trim()?.length > 0)
@@ -172,11 +169,6 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
   ];
 
   const valuesArray = [
-    {
-      propertyId: "69525606c9ba83a076aac411",
-      key: "interviewerId",
-      value: interviewerId,
-    },
     {
       propertyId: "6952562ac9ba83a076aac413",
       key: "name",
@@ -230,7 +222,6 @@ export const transformToAPIPayload = (values: InterviewerFormData) => {
   return {
     values: valuesArray,
     propertyIds: [
-      "69525606c9ba83a076aac411",
       "6952562ac9ba83a076aac413",
       "6952564bc9ba83a076aac415",
       "69525663c9ba83a076aac416",

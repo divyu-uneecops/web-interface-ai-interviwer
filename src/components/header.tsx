@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import Link from "next/link";
 import { Logo } from "./logo";
 import { Button } from "./ui/button";

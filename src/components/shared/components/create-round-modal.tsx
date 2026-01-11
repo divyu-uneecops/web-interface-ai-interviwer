@@ -30,7 +30,10 @@ import { Switch } from "@/components/ui/switch";
 
 import { roundService } from "../services/round.service";
 
-import { transformToCreateRoundPayload } from "../utils/shared.utils";
+import {
+  transformToCreateRoundPayload,
+  transformToUpdateRoundPayload,
+} from "../utils/shared.utils";
 import {
   CreateRoundModalProps,
   RoundFormData,
@@ -206,6 +209,9 @@ export function CreateRoundModal({
   onSubmit: onSubmitCallback,
   mappingValues,
   jobId,
+  isEditMode = false,
+  roundDetail,
+  roundId,
 }: CreateRoundModalProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -213,32 +219,49 @@ export function CreateRoundModal({
 
   const formik = useFormik<RoundFormData>({
     initialValues: {
-      roundName: "",
-      roundType: "",
-      roundObjective: "",
-      duration: "",
-      language: "",
-      interviewer: "",
-      skills: [],
-      questionType: "ai",
-      aiGeneratedQuestions: 0,
-      customQuestions: 0,
-      customQuestionTexts: [],
-      interviewInstructions: "",
-      allowSkip: false,
-      sendReminder: false,
-      reminderTime: "3 days",
+      roundName: roundDetail?.roundName || "",
+      roundType: roundDetail?.roundType || "",
+      roundObjective: roundDetail?.roundObjective || "",
+      duration: roundDetail?.duration || "",
+      language: roundDetail?.language || "",
+      interviewer: roundDetail?.interviewer || "",
+      skills: roundDetail?.skills || [],
+      questionType: roundDetail?.questionType || "ai",
+      aiGeneratedQuestions: roundDetail?.aiGeneratedQuestions || 0,
+      customQuestions: roundDetail?.customQuestions || 0,
+      customQuestionTexts: roundDetail?.customQuestionTexts || [],
+      interviewInstructions: roundDetail?.interviewInstructions || "",
+      allowSkip: roundDetail?.allowSkip || false,
+      sendReminder: roundDetail?.sendReminder || false,
+      reminderTime: roundDetail?.reminderTime || "3 days",
     },
     validate,
     enableReinitialize: true,
     onSubmit: async (values: RoundFormData) => {
       setIsSubmitting(true);
       try {
-        const payload = transformToCreateRoundPayload(values, jobId);
-        const response = await roundService.createRound({}, payload);
-        toast.success(response?.message || "Round created successfully", {
-          duration: 8000,
-        });
+        if (isEditMode && roundId) {
+          // Update existing round - use update payload format
+          const updatePayload = transformToUpdateRoundPayload(
+            values,
+            formik.touched
+          );
+          const response = await roundService.updateRound(
+            roundId,
+            updatePayload
+          );
+          toast.success(response?.message || "Round updated successfully", {
+            duration: 8000,
+          });
+        } else {
+          // Create new round
+          const payload = transformToCreateRoundPayload(values, jobId);
+          const response = await roundService.createRound({}, payload);
+          toast.success(response?.message || "Round created successfully", {
+            duration: 8000,
+          });
+        }
+
         formik.resetForm();
         setSkillInput("");
         setStep(1);
@@ -258,15 +281,6 @@ export function CreateRoundModal({
       }
     },
   });
-
-  // Reset form when modal closes
-  useEffect(() => {
-    if (!open) {
-      formik.resetForm();
-      setSkillInput("");
-      setStep(1);
-    }
-  }, [open]);
 
   const handleNext = () => {
     setStep((prev) => (prev + 1) as 1 | 2 | 3);
@@ -321,7 +335,7 @@ export function CreateRoundModal({
       >
         <DialogHeader className="gap-1.5 text-left pb-0">
           <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
-            Create new round
+            {isEditMode ? "Edit Round" : "Create new round"}
           </DialogTitle>
           <DialogDescription className="sr-only"></DialogDescription>
         </DialogHeader>
@@ -962,9 +976,13 @@ export function CreateRoundModal({
             className="h-9 px-4 text-sm font-medium bg-[#02563d] text-white hover:bg-[#02563d]/90 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
-              ? "Creating..."
+              ? isEditMode
+                ? "Updating..."
+                : "Creating..."
               : step === 3
-              ? "Create round"
+              ? isEditMode
+                ? "Update round"
+                : "Create round"
               : "Next"}
           </Button>
         </DialogFooter>

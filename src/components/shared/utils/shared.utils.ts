@@ -189,3 +189,226 @@ export const transformToCreateRoundPayload = (
     formId: "69521d61c9ba83a076aac3c3",
   };
 };
+
+export const transformToUpdateRoundPayload = (
+  values: RoundFormData,
+  touched?: any
+) => {
+  // Skills for round (each as its own array of one object)
+  const skillsForRound = (values?.skills || []).map((skill) => [
+    {
+      propertyId: "69627d06c9ba83a076aac8f8",
+      key: "_skill_",
+      value: skill,
+    },
+  ]);
+
+  // Questions (each as its own array of two objects)
+  const questions: any[] =
+    values?.customQuestionTexts && Array.isArray(values?.customQuestionTexts)
+      ? values?.customQuestionTexts
+          .map((questionText, idx) => {
+            if (
+              values?.questionType === "hybrid" &&
+              typeof questionText === "string" &&
+              questionText.trim() !== ""
+            ) {
+              return [
+                {
+                  propertyId: "69627d97c9ba83a076aac8fa",
+                  key: "_question",
+                  value: questionText,
+                },
+                {
+                  propertyId: "69627dcdc9ba83a076aac8fb",
+                  key: "_qType",
+                  value: "hybrid",
+                },
+              ];
+            }
+            return null;
+          })
+          .filter(Boolean)
+      : [];
+
+  // Helper to check if a field is touched
+  const isTouched = (field: string) => {
+    if (!touched) return true; // If no touched object provided, include all fields
+    return touched[field] === true;
+  };
+
+  const valuesArray: any[] = [];
+  const propertyIds: string[] = [];
+
+  // Round name
+  if (isTouched("roundName")) {
+    valuesArray.push({
+      propertyId: "69525a92c9ba83a076aac43d",
+      key: "roundName",
+      value: values?.roundName || "",
+    });
+    propertyIds.push("69525a92c9ba83a076aac43d");
+  }
+
+  // Round type
+  if (isTouched("roundType")) {
+    valuesArray.push({
+      propertyId: "69525ad1c9ba83a076aac43f",
+      key: "roundType",
+      value: values?.roundType || "",
+    });
+    propertyIds.push("69525ad1c9ba83a076aac43f");
+  }
+
+  // Round objective
+  if (isTouched("roundObjective")) {
+    valuesArray.push({
+      propertyId: "69525aefc9ba83a076aac440",
+      key: "roundObjective",
+      value: values?.roundObjective || "",
+    });
+    propertyIds.push("69525aefc9ba83a076aac440");
+  }
+
+  // Language
+  if (isTouched("language")) {
+    valuesArray.push({
+      propertyId: "69525b69c9ba83a076aac443",
+      key: "language",
+      value: values?.language || "",
+    });
+    propertyIds.push("69525b69c9ba83a076aac443");
+  }
+
+  // Duration
+  if (isTouched("duration")) {
+    valuesArray.push({
+      propertyId: "69525bb8c9ba83a076aac448",
+      key: "duration",
+      value: values?.duration || "",
+    });
+    propertyIds.push("69525bb8c9ba83a076aac448");
+  }
+
+  // Question type
+  if (isTouched("questionType")) {
+    valuesArray.push({
+      propertyId: "69525c85c9ba83a076aac44d",
+      key: "questionsType",
+      value: values?.questionType || "",
+    });
+    propertyIds.push("69525c85c9ba83a076aac44d");
+  }
+
+  // Number of AI questions
+  if (isTouched("aiGeneratedQuestions")) {
+    valuesArray.push({
+      propertyId: "69525ca7c9ba83a076aac44e",
+      key: "numOfAiQuestions",
+      value: values?.aiGeneratedQuestions,
+    });
+    propertyIds.push("69525ca7c9ba83a076aac44e");
+  }
+
+  // Interview instructions
+  if (isTouched("interviewInstructions")) {
+    valuesArray.push({
+      propertyId: "69525dd4c9ba83a076aac454",
+      key: "interviewInstructions",
+      value: values?.interviewInstructions || "",
+    });
+    propertyIds.push("69525dd4c9ba83a076aac454");
+  }
+
+  // Allow skip
+  if (isTouched("allowSkip")) {
+    valuesArray.push({
+      propertyId: "69525decc9ba83a076aac455",
+      key: "allowSkip",
+      value: values?.allowSkip,
+    });
+    propertyIds.push("69525decc9ba83a076aac455");
+  }
+
+  // Send reminder
+  if (isTouched("sendReminder")) {
+    valuesArray.push({
+      propertyId: "69525e05c9ba83a076aac456",
+      key: "sendReminder",
+      value: values?.sendReminder,
+    });
+    propertyIds.push("69525e05c9ba83a076aac456");
+  }
+
+  // Reminder time (if sendReminder is true)
+  if (isTouched("sendReminder") && values?.sendReminder) {
+    if (isTouched("reminderTime")) {
+      valuesArray.push({
+        propertyId: "69525e47c9ba83a076aac457",
+        key: "reminderTime",
+        value: values?.reminderTime,
+      });
+      propertyIds.push("69525e47c9ba83a076aac457");
+    }
+  }
+
+  // Custom questions (if hybrid mode)
+  if (isTouched("questionType") && values?.questionType === "hybrid") {
+    if (isTouched("customQuestions")) {
+      valuesArray.push({
+        propertyId: "69525e6bc9ba83a076aac458",
+        key: "numOfCustomQuestions",
+        value: values?.customQuestions,
+      });
+      propertyIds.push("69525e6bc9ba83a076aac458");
+    }
+  }
+
+  // Skills for round
+  if (isTouched("skills")) {
+    valuesArray.push({
+      propertyId: "69627d2ec9ba83a076aac8f9",
+      key: "_skillForRound",
+      value: skillsForRound,
+    });
+    propertyIds.push("69627d2ec9ba83a076aac8f9");
+  }
+
+  // Questions
+  if (isTouched("customQuestionTexts") || isTouched("questionType")) {
+    valuesArray.push({
+      propertyId: "69627df8c9ba83a076aac8fc",
+      key: "_questions",
+      value: questions,
+    });
+    propertyIds.push("69627df8c9ba83a076aac8fc");
+  }
+
+  return {
+    values: valuesArray,
+    propertyIds,
+  };
+};
+
+// Helper function to convert Round interface to RoundFormData
+export const transformRoundToRoundFormData = (
+  round: any
+): RoundFormData => {
+  return {
+    roundName: round?.name || "",
+    roundType: round?.type || "",
+    roundObjective: round?.objective || "",
+    duration: round?.duration || "",
+    language: round?.language || "",
+    interviewer: round?.interviewer || "",
+    skills: round?.skills || [],
+    questionType: (round?.questionType as "ai" | "hybrid") || "ai",
+    aiGeneratedQuestions: round?.aiGeneratedQuestions || 0,
+    customQuestions: round?.customQuestions || 0,
+    customQuestionTexts: round?.customQuestionTexts || [],
+    interviewInstructions: round?.interviewInstructions || "",
+    allowSkip: round?.allowSkip || false,
+    sendReminder: round?.sendReminder || false,
+    reminderTime: round?.reminderTime || "3 days",
+  };
+};

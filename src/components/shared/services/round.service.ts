@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/constant";
+import { buildUrl } from "@/lib/utils";
 import serverInterfaceService from "../../../services/server-interface.service";
 
 export const roundService = {
@@ -12,5 +13,14 @@ export const roundService = {
       params,
       payload,
       signal
+    ),
+  updateRound: (
+    id: string,
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.patch(
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.UPDATE, { id }),
+      payload
     ),
 };

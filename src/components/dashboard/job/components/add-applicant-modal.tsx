@@ -133,20 +133,6 @@ export function AddApplicantModal({
     },
   });
 
-  useEffect(() => {
-    if (!open) {
-      formik.resetForm();
-      setApplicantTab("single");
-    } else if (isEditMode && applicantDetail) {
-      formik.setValues({
-        name: applicantDetail.name || "",
-        email: applicantDetail.email || "",
-        contact: applicantDetail.contact || "",
-        attachment: applicantDetail.attachment || null,
-      });
-    }
-  }, [open, isEditMode, applicantDetail]);
-
   const handleFileChange = (file: File | null) => {
     if (!file) return;
 

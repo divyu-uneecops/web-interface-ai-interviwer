@@ -100,17 +100,6 @@ export function CreateJobModal({
     },
   });
 
-  // Fetch job data when in edit mode
-  useEffect(() => {
-    if (open && isEditMode) {
-      formik.setValues(jobDetail as JobFormData);
-    } else if (!open) {
-      // Reset form when modal closes
-      formik.resetForm();
-      setSkillInput("");
-    }
-  }, [open, isEditMode]);
-
   const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && skillInput?.trim()) {
       e.preventDefault();

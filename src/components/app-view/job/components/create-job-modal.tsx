@@ -321,62 +321,50 @@ export function CreateJobModal({
                 <Label className="text-sm font-medium text-[#0a0a0a] leading-none">
                   Min experience <span className="text-red-700">*</span>
                 </Label>
-                <Select
-                  value={formik?.values?.minExperience?.toString() || ""}
-                  onValueChange={(value) => {
-                    formik.setFieldValue("minExperience", Number(value));
-                    formik.setFieldTouched("minExperience", true);
+                <Input
+                  type="number"
+                  min={0}
+                  className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
+                    formik.touched.minExperience && formik.errors.minExperience
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                  name="minExperience"
+                  placeholder="Min experience"
+                  value={formik.values.minExperience ?? ""}
+                  onChange={(e) => {
+                    formik.setFieldValue(
+                      "minExperience",
+                      e.target.value !== "" ? Number(e.target.value) : ""
+                    );
                   }}
-                >
-                  <SelectTrigger
-                    className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
-                      formik.touched.minExperience &&
-                      formik.errors.minExperience
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                  >
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {experienceOptions?.map((option) => (
-                      <SelectItem key={option?.value} value={option?.value}>
-                        {option?.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onBlur={formik.handleBlur}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-[#0a0a0a] leading-none">
                   Max experience <span className="text-red-700">*</span>
                 </Label>
-                <Select
-                  value={formik?.values?.maxExperience?.toString() || ""}
-                  onValueChange={(value) => {
-                    formik.setFieldValue("maxExperience", Number(value));
-                    formik.setFieldTouched("maxExperience", true);
+                <Input
+                  type="number"
+                  min={0}
+                  className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
+                    formik.touched.maxExperience && formik.errors.maxExperience
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                  name="maxExperience"
+                  placeholder="Max experience"
+                  value={formik.values.maxExperience ?? ""}
+                  onChange={(e) => {
+                    formik.setFieldValue(
+                      "maxExperience",
+                      e.target.value !== "" ? Number(e.target.value) : ""
+                    );
                   }}
-                >
-                  <SelectTrigger
-                    className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
-                      formik.touched.maxExperience &&
-                      formik.errors.maxExperience
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                  >
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {experienceOptions?.map((option) => (
-                      <SelectItem key={option?.value} value={option?.value}>
-                        {option?.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onBlur={formik.handleBlur}
+                />
               </div>
             </div>
 
@@ -417,24 +405,25 @@ export function CreateJobModal({
                 <Label className="text-sm font-medium text-[#0a0a0a] leading-none">
                   No. of openings
                 </Label>
-                <Select
-                  value={formik?.values?.noOfOpenings?.toString() || ""}
-                  onValueChange={(value) => {
-                    formik.setFieldValue("noOfOpenings", Number(value));
-                    formik.setFieldTouched("noOfOpenings", true);
+                <Input
+                  type="number"
+                  min={1}
+                  name="noOfOpenings"
+                  placeholder="No. of openings"
+                  value={formik.values.noOfOpenings ?? ""}
+                  onChange={(e) => {
+                    formik.setFieldValue(
+                      "noOfOpenings",
+                      e.target.value !== "" ? Number(e.target.value) : ""
+                    );
                   }}
-                >
-                  <SelectTrigger className="w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5]">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {openingsOptions?.map((option) => (
-                      <SelectItem key={option?.value} value={option?.value}>
-                        {option?.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onBlur={formik.handleBlur}
+                  className={`w-full h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5] ${
+                    formik.touched.noOfOpenings && formik.errors.noOfOpenings
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                />
               </div>
 
               <div className="space-y-2">

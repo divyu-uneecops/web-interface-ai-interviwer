@@ -122,7 +122,7 @@ export interface ApplicantForm {
   name: string;
   email: string;
   contact: string;
-  attachment: File | string | null;
+  attachment: File | null;
 }
 
 export interface AddApplicantModalProps {

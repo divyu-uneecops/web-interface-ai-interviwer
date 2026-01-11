@@ -117,7 +117,6 @@ export const transformAPIResponseToJobDetail = (
   if (!Array.isArray(data) || data?.length === 0) {
     return {
       id: String(id),
-      jobId: "",
       title: "",
       status: "draft",
       industry: "",
@@ -131,7 +130,6 @@ export const transformAPIResponseToJobDetail = (
       numOfOpenings: 0,
       applicants: 0,
       interviews: 0,
-      formUser: "",
       accessibility: "",
     };
   }
@@ -150,7 +148,6 @@ export const transformAPIResponseToJobDetail = (
   });
 
   // Extraction with fallback
-  const jobId = fieldsMap.get("jobId") || "";
   const title = fieldsMap.get("title") || "";
   const industry = fieldsMap.get("industry") || "";
   const jobLevel = fieldsMap.get("jobLevel") || "";
@@ -161,7 +158,6 @@ export const transformAPIResponseToJobDetail = (
   const numOfOpenings = fieldsMap.get("numOfOpenings") ?? 0;
   const status = fieldsMap.get("status") || "draft";
   const accessibility = fieldsMap.get("accessibility") || "";
-  const formUser = fieldsMap.get("formUser") || "";
   // Required skills extraction (expecting nested array of [{ key: 'skill', value: ... }])
   let requiredSkills: string[] = [];
   const skillsValue = fieldsMap.get("requiredSkills");
@@ -190,7 +186,6 @@ export const transformAPIResponseToJobDetail = (
 
   return {
     id: String(id || ""),
-    jobId: String(jobId),
     title: String(title),
     status: normalizedStatus,
     industry: String(industry),
@@ -206,7 +201,6 @@ export const transformAPIResponseToJobDetail = (
     accessibility: String(accessibility),
     applicants: 0,
     interviews: 0,
-    formUser: formUser[0] || "",
     requiredSkills,
     createdOn: formatRelativeTime(createdOnRaw),
   };

@@ -8,11 +8,9 @@ import {
   Plus,
   CheckCircle2,
   Search,
-  Filter,
   Download,
   Pencil,
   Trash2,
-  X,
   Eye,
   MoreVertical,
   MoreHorizontal,
@@ -24,8 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +30,16 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { StatusTag } from "@/components/ui/status-tag";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
+import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
 import { DataTable, Column } from "@/components/shared/components/data-table";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
@@ -55,15 +60,6 @@ import {
   transformAPIResponseToApplicants,
   transformAPIResponseToRounds,
 } from "@/components/dashboard/job/utils/job.utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyMedia,
-} from "@/components/ui/empty";
-
 import { CreateJobModal } from "./create-job-modal";
 import { AddApplicantModal } from "./add-applicant-modal";
 import { useAppSelector } from "@/store/hooks";
@@ -93,8 +89,6 @@ export default function JobDetails() {
   const [searchQuery, setSearchQuery] = useState("");
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
-    rounds: [],
-    applied: [],
   });
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
   const [currentApplicantsOffset, setCurrentApplicantsOffset] = useState(0);
@@ -876,7 +870,7 @@ export default function JobDetails() {
               currentOffset={currentRoundsOffset}
               onPaginationChange={setCurrentRoundsOffset}
               isLoading={isLoadingRounds}
-              loadingState={<DataTableSkeleton columns={6} rows={10} />}
+              loadingState={<DataTableSkeleton columns={6} rows={3} />}
               emptyState={
                 <div className="text-center py-12">
                   <p className="text-sm text-[#737373]">
@@ -921,7 +915,7 @@ export default function JobDetails() {
               currentOffset={currentApplicantsOffset}
               onPaginationChange={setCurrentApplicantsOffset}
               isLoading={isLoadingApplicants}
-              loadingState={<DataTableSkeleton columns={6} rows={10} />}
+              loadingState={<DataTableSkeleton columns={6} rows={3} />}
               emptyState={
                 <div className="text-center py-12">
                   <p className="text-sm text-[#737373]">No applicants found</p>
@@ -956,6 +950,7 @@ export default function JobDetails() {
             status: job?.status || "",
             skills: job?.requiredSkills || [],
           }}
+          jobId={job?.id}
         />
       )}
 

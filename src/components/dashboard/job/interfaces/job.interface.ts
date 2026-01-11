@@ -32,9 +32,23 @@ export interface JobStat {
 export interface Round {
   id: string;
   name: string;
+  type: string;
+  objective: string;
+  language: string;
+  interviewer: string;
+  skills: string[];
+  questionType: string;
+  aiGeneratedQuestions: number;
+  customQuestions: number;
+  customQuestionTexts: string[];
+  interviewInstructions: string;
+  allowSkip: boolean;
+  sendReminder: boolean;
+  reminderTime: string;
   duration: string;
-  questions: number;
   applicants: number;
+  totalQuestions: number;
+  interviewerID: string;
   created: string;
 }
 

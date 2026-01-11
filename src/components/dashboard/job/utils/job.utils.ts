@@ -614,32 +614,77 @@ export const transformApplicantToUpdatePayload = (
 };
 
 export const transformAPIRoundItemToRound = (item: APIJobItem): Round => {
-  // Create a map of values for easy lookup
+  // Map all values for fast-access
   const valuesMap = new Map<string, any>();
-  if (Array.isArray(item.values)) {
-    item.values.forEach((val) => {
-      if (val && val.key) {
+  if (Array.isArray(item?.values)) {
+    item?.values?.forEach((val) => {
+      if (val && val.key !== undefined) {
         valuesMap.set(val.key, val.value);
       }
     });
   }
 
-  // Extraction with fallback
-  const roundName = valuesMap.get("roundName") || "";
-  const duration = valuesMap.get("duration") || "";
-  const numOfAiQuestions = valuesMap.get("numOfAiQuestions") || 0;
-  const numOfCustomQuestions = valuesMap.get("numOfCustomQuestions") || 0;
-  const questions = numOfAiQuestions + numOfCustomQuestions;
-  const applicants = 0; // TODO: Get from API if available
-  const createdOnRaw = item.createdOn;
+  // Get skills from nested array if present
+  let skills: string[] = [];
+  const skillsRaw = valuesMap.get("_skillForRound") ?? [];
+  if (Array.isArray(skillsRaw) && skillsRaw.length > 0) {
+    // skillsRaw is a nested array [[{key:"_skill_", value:"foo"}]]
+    skills = skillsRaw
+      .flat()
+      .filter(
+        (s: any) => s && s.key === "_skill_" && typeof s.value === "string"
+      )
+      .map((s: any) => s.value);
+  }
 
+  // Compose customQuestionTexts from _questions key, if array
+  let customQuestionTexts: string[] = [];
+  const questionsRaw = valuesMap.get("_questions");
+  if (Array.isArray(questionsRaw)) {
+    // Each is an array of question objects
+    customQuestionTexts = questionsRaw
+      .map((qArr: any[]) =>
+        Array.isArray(qArr)
+          ? qArr.find((q) => q && q.key === "_question")?.value
+          : undefined
+      )
+      .filter((text) => typeof text === "string");
+  }
+
+  // Compose interviewInstructions, handle fallback to ""
+  const interviewInstructions = valuesMap.get("interviewInstructions") ?? "";
+
+  // Compose applicants, fallback to 0
+  const applicants = 0; // Replace with data if available
+
+  const numOfAiQuestions = valuesMap.get("numOfAiQuestions") ?? 0;
+  const numOfCustomQuestions = valuesMap.get("numOfCustomQuestions") ?? 0;
+  const totalQuestions =
+    Number(numOfAiQuestions) + Number(numOfCustomQuestions);
+  const interviewerID = valuesMap.get(" interviewerID") ?? "";
+
+  // Returned object conforms to the Round interface in job.interface.ts
   return {
     id: String(item?.id || ""),
-    name: String(roundName),
-    duration: String(duration),
-    questions: Number(questions),
+    name: String(valuesMap.get("roundName") || ""),
+    type: String(valuesMap.get("roundType") || ""),
+    objective: String(valuesMap.get("roundObjective") || ""),
+    language: String(valuesMap.get("language") || ""),
+    interviewer: String(valuesMap.get("interviewerName") || ""),
+    skills: skills,
+    questionType: String(valuesMap.get("questionsType") || ""),
+    aiGeneratedQuestions: Number(numOfAiQuestions),
+    customQuestions: Number(numOfCustomQuestions),
+    customQuestionTexts,
+    interviewInstructions: String(interviewInstructions),
+    allowSkip: Boolean(valuesMap.get("allowSkip")),
+    sendReminder: Boolean(valuesMap.get("sendReminder")),
+    reminderTime: String(valuesMap.get("reminderTime") || ""),
+    duration: String(valuesMap.get("duration") || ""),
     applicants: Number(applicants),
-    created: formatRelativeTime(createdOnRaw),
+    totalQuestions: Number(totalQuestions),
+    interviewerID: String(interviewerID),
+    created: formatRelativeTime(item.createdOn),
   };
 };
 

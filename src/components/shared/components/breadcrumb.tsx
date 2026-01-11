@@ -34,7 +34,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
                 href={item.href}
                 className="text-sm text-[#737373] hover:text-[#0a0a0a] transition-colors"
               >
-                {item.label}
+                {item?.label}
               </Link>
             ) : (
               <span
@@ -43,7 +43,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
                   isLast ? "text-[#0a0a0a]" : "text-[#737373]"
                 )}
               >
-                {item.label}
+                {item?.label}
               </span>
             )}
           </div>

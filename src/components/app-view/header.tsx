@@ -5,6 +5,7 @@ import { Bell, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateInterviewDialog } from "@/components/app-view/create-interview/create-interview-dialog";
 import { usePathname, useRouter } from "next/navigation";
+import { Logo } from "../logo";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -44,8 +45,7 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
             h1 = "Interviews";
             p = "View and manage candidate interviews";
           } else if (pathname && pathname.startsWith("/app-view/profile")) {
-            h1 = "Your Profile";
-            p = "Manage your company details";
+            return <Logo />;
           } else if (pathname && pathname.startsWith("/app-view/dashboard")) {
             h1 = `Hello ${userName} !`;
             p = "Manage your job openings and hiring pipeline";

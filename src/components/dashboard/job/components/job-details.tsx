@@ -120,6 +120,8 @@ export default function JobDetails() {
   ];
 
   const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] = useState(false);
+  const [isEditRoundModalOpen, setIsEditRoundModalOpen] = useState(false);
+  const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [rounds, setRounds] = useState<Round[]>([]);
   const [isLoadingRounds, setIsLoadingRounds] = useState(false);
   const [roundsPagination, setRoundsPagination] = useState({
@@ -390,7 +392,7 @@ export default function JobDetails() {
         id: "questions",
         header: "Questions",
         align: "center",
-        accessor: (round) => round?.questions,
+        accessor: (round) => round?.totalQuestions,
       },
       {
         id: "applicants",
@@ -435,7 +437,7 @@ export default function JobDetails() {
           <Eye className="h-4 text-[#737373] mr-2" />
           View details
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleEditRound(round)}>
           <Pencil className="h-4 text-[#737373] mr-2" />
           Edit
         </DropdownMenuItem>
@@ -519,6 +521,11 @@ export default function JobDetails() {
   const handleEditApplicant = (applicant: Applicant) => {
     setEditingApplicant(applicant);
     setIsEditApplicantModalOpen(true);
+  };
+
+  const handleEditRound = (round: Round) => {
+    setEditingRound(round);
+    setIsEditRoundModalOpen(true);
   };
 
   if (isLoadingJob) {
@@ -960,6 +967,37 @@ export default function JobDetails() {
           }}
           mappingValues={mappingValues}
           jobId={(params?.id as string) || ""}
+        />
+      )}
+
+      {/* Edit Round Modal */}
+      {isEditRoundModalOpen && (
+        <CreateRoundModal
+          open={isEditRoundModalOpen}
+          onOpenChange={setIsEditRoundModalOpen}
+          onSubmit={() => {
+            fetchRounds();
+          }}
+          mappingValues={mappingValues}
+          jobId={(params?.id as string) || ""}
+          roundDetail={{
+            roundName: editingRound?.name || "",
+            roundType: editingRound?.type || "",
+            roundObjective: editingRound?.objective || "",
+            duration: editingRound?.duration || "",
+            language: editingRound?.language || "",
+            interviewer: editingRound?.interviewer || "",
+            skills: editingRound?.skills || [],
+            questionType: editingRound?.questionType as "ai" | "hybrid",
+            aiGeneratedQuestions: editingRound?.aiGeneratedQuestions || 0,
+            customQuestions: editingRound?.customQuestions || 0,
+            customQuestionTexts: editingRound?.customQuestionTexts || [],
+            interviewInstructions: editingRound?.interviewInstructions || "",
+            allowSkip: editingRound?.allowSkip || false,
+            sendReminder: editingRound?.sendReminder || false,
+            reminderTime: editingRound?.reminderTime || "3 days",
+          }}
+          roundId={editingRound?.id}
         />
       )}
 

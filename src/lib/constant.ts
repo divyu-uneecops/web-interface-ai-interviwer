@@ -30,7 +30,9 @@ export const API_ENDPOINTS = {
   },
   CREATE_ROUND: {
     CREATE: "/v2/forminstances",
+    LIST: "/objects/69521d61c9ba83a076aac3c0/views/69521d61c9ba83a076aac3c1/records",
     UPDATE: "/objects/69521d61c9ba83a076aac3c0/records/{id}",
+    DELETE: "/objects/69521d61c9ba83a076aac3c0/records/{id}",
     FORM_PROPERTIES: "/forms/69521d61c9ba83a076aac3c3/properties",
   },
   INTERVIEW: {

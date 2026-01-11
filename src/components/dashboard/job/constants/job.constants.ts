@@ -1,4 +1,4 @@
-import { Applicant, JobStat, Round } from "../interfaces/job.interface";
+import { JobStat } from "../interfaces/job.interface";
 
 export const experienceOptions = [
   { value: "0", label: "0 year" },
@@ -32,31 +32,4 @@ export const stats: JobStat[] = [
   { label: "In screening", value: 90, icon: "completed" },
   { label: "Final round", value: 7, icon: "hired" },
   { label: "Hired", value: 82.2, icon: "score" },
-];
-
-export const mockRounds: Round[] = [
-  {
-    id: "1",
-    name: "Behavioral Round",
-    duration: "30 min",
-    questions: 5,
-    applicants: 12,
-    created: "2d ago",
-  },
-  {
-    id: "2",
-    name: "Technical Screening",
-    duration: "45 min",
-    questions: 7,
-    applicants: 8,
-    created: "3d ago",
-  },
-  {
-    id: "3",
-    name: "Final round",
-    duration: "60 min",
-    questions: 10,
-    applicants: 5,
-    created: "5d ago",
-  },
 ];

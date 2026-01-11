@@ -77,7 +77,7 @@ export const jobService = {
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl("/objects/69521d7dc9ba83a076aac3c8/records/{id}", { id }),
+      buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, { id }),
       payload
     ),
   getRounds: (
@@ -86,13 +86,13 @@ export const jobService = {
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      "/objects/69521d61c9ba83a076aac3c0/views/69521d61c9ba83a076aac3c1/records",
+      API_ENDPOINTS.CREATE_ROUND.LIST,
       params,
       payload,
       signal
     ),
   deleteRound: (id: string) =>
     serverInterfaceService.delete(
-      buildUrl("/objects/69521d61c9ba83a076aac3c0/records/{id}", { id })
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.DELETE, { id })
     ),
 };

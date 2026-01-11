@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFormik } from "formik";
 import { toast } from "sonner";
+
 import {
   Dialog,
   DialogContent,
@@ -21,13 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
 import {
   AddApplicantModalProps,
   ApplicantForm,
 } from "../interfaces/job.interface";
 import { jobService } from "../services/job.service";
 import {
-  transformApplicantToAPIPayload,
+  transformApplicantToCreatePayload,
   transformApplicantToUpdatePayload,
 } from "../utils/job.utils";
 
@@ -85,7 +87,7 @@ export function AddApplicantModal({
         }
 
         // Transform form data to API payload
-        const payload = transformApplicantToAPIPayload(
+        const payload = transformApplicantToCreatePayload(
           values,
           jobInfo.jobId,
           attachmentPath

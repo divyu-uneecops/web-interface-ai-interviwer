@@ -206,7 +206,7 @@ export const transformAPIResponseToJobDetail = (
   };
 };
 
-export const transformToAPIPayload = (values: JobFormData) => {
+export const transformToCreateJobPayload = (values: JobFormData) => {
   // Transform skills to API format (array of arrays)
   const requiredSkills = (values.skills || []).map((skill) => [
     {
@@ -328,45 +328,6 @@ export const formatRelativeTime = (timestamp: number): string => {
   return "Just now";
 };
 
-export const validate = (values: JobFormData) => {
-  const errors: Partial<Record<keyof JobFormData, string>> = {};
-
-  if (!values.title || values.title.trim() === "") {
-    errors.title = "Job title is required";
-  }
-
-  if (!values.minExperience) {
-    errors.minExperience = "Min experience is required";
-  }
-
-  if (!values.maxExperience) {
-    errors.maxExperience = "Max experience is required";
-  }
-
-  if (values.minExperience && values.maxExperience) {
-    const minExp = values.minExperience;
-    const maxExp = values.maxExperience;
-    if (minExp > maxExp) {
-      errors.maxExperience =
-        "Max experience must be greater than or equal to min experience";
-    }
-  }
-
-  if (!values.description || values.description.trim() === "") {
-    errors.description = "Job description is required";
-  }
-
-  if (!values.status) {
-    errors.status = "Job status is required";
-  }
-
-  if (!values.skills || values.skills.length === 0) {
-    errors.skills = "At least one skill is required";
-  }
-
-  return errors;
-};
-
 export const transformAPIApplicantItemToApplicant = (
   item: APIJobItem
 ): Applicant => {
@@ -441,7 +402,7 @@ export const transformAPIResponseToApplicants = (
   };
 };
 
-export const transformApplicantToAPIPayload = (
+export const transformApplicantToCreatePayload = (
   values: ApplicantForm,
   jobId: string,
   attachmentPath?: string

@@ -28,8 +28,47 @@ import { Badge } from "@/components/ui/badge";
 
 import { jobService } from "../services/job.service";
 import { CreateJobModalProps, JobFormData } from "../interfaces/job.interface";
-import { transformToAPIPayload, validate } from "../utils/job.utils";
+import { transformToCreateJobPayload } from "../utils/job.utils";
 import { experienceOptions, openingsOptions } from "../constants/job.constants";
+
+const validate = (values: JobFormData) => {
+  const errors: Partial<Record<keyof JobFormData, string>> = {};
+
+  if (!values.title || values.title.trim() === "") {
+    errors.title = "Job title is required";
+  }
+
+  if (!values.minExperience) {
+    errors.minExperience = "Min experience is required";
+  }
+
+  if (!values.maxExperience) {
+    errors.maxExperience = "Max experience is required";
+  }
+
+  if (values.minExperience && values.maxExperience) {
+    const minExp = values.minExperience;
+    const maxExp = values.maxExperience;
+    if (minExp > maxExp) {
+      errors.maxExperience =
+        "Max experience must be greater than or equal to min experience";
+    }
+  }
+
+  if (!values.description || values.description.trim() === "") {
+    errors.description = "Job description is required";
+  }
+
+  if (!values.status) {
+    errors.status = "Job status is required";
+  }
+
+  if (!values.skills || values.skills.length === 0) {
+    errors.skills = "At least one skill is required";
+  }
+
+  return errors;
+};
 
 export function CreateJobModal({
   open,
@@ -76,7 +115,7 @@ export function CreateJobModal({
           // });
         } else {
           // Create mode - create new job
-          const payload = transformToAPIPayload(values);
+          const payload = transformToCreateJobPayload(values);
           const response = await jobService.createJobOpening({}, payload);
           toast.success(response?.message || "Job created successfully", {
             duration: 8000,

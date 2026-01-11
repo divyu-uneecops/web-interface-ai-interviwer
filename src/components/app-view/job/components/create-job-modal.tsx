@@ -28,7 +28,10 @@ import { Badge } from "@/components/ui/badge";
 
 import { jobService } from "../services/job.service";
 import { CreateJobModalProps, JobFormData } from "../interfaces/job.interface";
-import { transformToCreateJobPayload } from "../utils/job.utils";
+import {
+  transformToCreateJobPayload,
+  transformToUpdateJobPayload,
+} from "../utils/job.utils";
 import { isEmpty } from "@/lib/utils";
 
 const validate = (values: JobFormData) => {
@@ -87,17 +90,17 @@ export function CreateJobModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formik = useFormik<JobFormData>({
     initialValues: {
-      title: "",
-      industry: "",
-      jobLevel: "",
-      jobType: "",
-      minExperience: null,
-      maxExperience: null,
-      description: "",
-      noOfOpenings: null,
-      attachment: null,
-      status: "",
-      skills: [],
+      title: jobDetail?.title || "",
+      industry: jobDetail?.industry || "",
+      jobLevel: jobDetail?.jobLevel || "",
+      jobType: jobDetail?.jobType || "",
+      minExperience: jobDetail?.minExperience ?? null,
+      maxExperience: jobDetail?.maxExperience ?? null,
+      description: jobDetail?.description || "",
+      noOfOpenings: jobDetail?.noOfOpenings ?? null,
+      attachment: jobDetail?.attachment || null,
+      status: jobDetail?.status || "",
+      skills: jobDetail?.skills || [],
     },
     validate: validate,
     enableReinitialize: true,
@@ -105,18 +108,30 @@ export function CreateJobModal({
       setIsSubmitting(true);
       try {
         if (isEditMode) {
-          // Edit mode - update existing job
-          // Use the jobId from job detail if available, otherwise use the record ID
-          // const payloadJobId = jobDetailJobId || jobId;
-          // const payload = transformToAPIPayload(values, payloadJobId);
-          // const response = await jobService.updateJobOpening(
-          //   jobId,
-          //   { appId: "69521cd1c9ba83a076aac3ae" },
-          //   payload
-          // );
-          // toast.success(response?.message || "Job updated successfully", {
-          //   duration: 8000,
-          // });
+          if (!jobId) {
+            toast.error("Job ID is required for update", {
+              duration: 8000,
+            });
+            setIsSubmitting(false);
+            return;
+          }
+          // Calculate dirty fields by comparing current values with initial values
+          // Use Formik's touched fields to determine which fields have been edited
+          const dirtyFields: Partial<Record<keyof JobFormData, boolean>> = {};
+          Object.keys(formik.touched).forEach((key) => {
+            const fieldKey = key as keyof JobFormData;
+            dirtyFields[fieldKey] = true;
+          });
+
+          const payload = transformToUpdateJobPayload(values, dirtyFields);
+          const response = await jobService.updateJobOpening(
+            jobId,
+            { appId: "69521cd1c9ba83a076aac3ae" },
+            payload
+          );
+          toast.success(response?.message || "Job updated successfully", {
+            duration: 8000,
+          });
         } else {
           // Create mode - create new job
           const payload = transformToCreateJobPayload(values);

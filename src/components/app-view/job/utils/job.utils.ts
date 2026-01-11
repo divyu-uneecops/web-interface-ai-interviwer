@@ -307,6 +307,131 @@ export const transformToCreateJobPayload = (values: JobFormData) => {
   };
 };
 
+export const transformToUpdateJobPayload = (
+  values: JobFormData,
+  dirtyFields: Partial<Record<keyof JobFormData, boolean | any>>
+) => {
+  const valuesArray: any[] = [];
+  const propertyIds: string[] = [];
+
+  // Helper to check if a field is dirty
+  const isDirty = (field: keyof JobFormData) => {
+    return dirtyFields[field] === true;
+  };
+
+  // Title
+  if (isDirty("title")) {
+    valuesArray.push({
+      propertyId: "69525644c9ba83a076aac414",
+      key: "title",
+      value: values?.title || "",
+    });
+    propertyIds.push("69525644c9ba83a076aac414");
+  }
+
+  // Industry
+  if (isDirty("industry")) {
+    valuesArray.push({
+      propertyId: "695257bfc9ba83a076aac41c",
+      key: "industry",
+      value: values?.industry || "",
+    });
+    propertyIds.push("695257bfc9ba83a076aac41c");
+  }
+
+  // Job Level
+  if (isDirty("jobLevel")) {
+    valuesArray.push({
+      propertyId: "695257f8c9ba83a076aac41f",
+      key: "jobLevel",
+      value: values?.jobLevel || "",
+    });
+    propertyIds.push("695257f8c9ba83a076aac41f");
+  }
+
+  // Job Type
+  if (isDirty("jobType")) {
+    valuesArray.push({
+      propertyId: "69525830c9ba83a076aac422",
+      key: "jobType",
+      value: values?.jobType || "",
+    });
+    propertyIds.push("69525830c9ba83a076aac422");
+  }
+
+  // Min Experience
+  if (isDirty("minExperience")) {
+    valuesArray.push({
+      propertyId: "69525880c9ba83a076aac425",
+      key: "minExp",
+      value: values?.minExperience,
+    });
+    propertyIds.push("69525880c9ba83a076aac425");
+  }
+
+  // Max Experience
+  if (isDirty("maxExperience")) {
+    valuesArray.push({
+      propertyId: "69525898c9ba83a076aac427",
+      key: "maxExp",
+      value: values?.maxExperience,
+    });
+    propertyIds.push("69525898c9ba83a076aac427");
+  }
+
+  // Description
+  if (isDirty("description")) {
+    valuesArray.push({
+      propertyId: "695258ccc9ba83a076aac42a",
+      key: "description",
+      value: values?.description || "",
+    });
+    propertyIds.push("695258ccc9ba83a076aac42a");
+  }
+
+  // No. of Openings
+  if (isDirty("noOfOpenings")) {
+    valuesArray.push({
+      propertyId: "695258e5c9ba83a076aac42c",
+      key: "numOfOpenings",
+      value: values?.noOfOpenings,
+    });
+    propertyIds.push("695258e5c9ba83a076aac42c");
+  }
+
+  // Status
+  if (isDirty("status")) {
+    valuesArray.push({
+      propertyId: "6952595cc9ba83a076aac431",
+      key: "status",
+      value: values?.status || "",
+    });
+    propertyIds.push("6952595cc9ba83a076aac431");
+  }
+
+  // Required Skills
+  if (isDirty("skills")) {
+    const requiredSkills = (values.skills || []).map((skill) => [
+      {
+        propertyId: "695259b2c9ba83a076aac434",
+        key: "skill",
+        value: skill,
+      },
+    ]);
+    valuesArray.push({
+      propertyId: "695259d0c9ba83a076aac435",
+      key: "requiredSkills",
+      value: requiredSkills,
+    });
+    propertyIds.push("695259d0c9ba83a076aac435");
+  }
+
+  return {
+    values: valuesArray,
+    propertyIds,
+  };
+};
+
 // Format timestamp to relative time (e.g., "2d ago", "1h ago")
 export const formatRelativeTime = (timestamp: number): string => {
   const now = Date.now();

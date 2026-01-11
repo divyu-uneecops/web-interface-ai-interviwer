@@ -14,16 +14,16 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: ChartColumn },
-  { name: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
+  { name: "Dashboard", href: "/app-view/dashboard", icon: ChartColumn },
+  { name: "Jobs", href: "/app-view/jobs", icon: Briefcase },
   {
     name: "AI Interviewers",
-    href: "/dashboard/interviewers",
+    href: "/app-view/interviewers",
     icon: CircleUser,
   },
-  { name: "Interviews", href: "/dashboard/interviews", icon: FileText },
-  { name: "User Management", href: "/dashboard/role-management", icon: Users },
-  { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
+  { name: "Interviews", href: "/app-view/interviews", icon: FileText },
+  { name: "User Management", href: "/app-view/role-management", icon: Users },
+  { name: "Billing", href: "/app-view/billing", icon: CreditCard },
 ];
 
 export function Sidebar() {

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { DataTable, Column } from "@/components/shared/components/data-table";
-import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
+import { JobStatsGrid } from "@/components/app-view/job/components/job-stats-card";
 import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
 import {
   FilterState,

@@ -36,7 +36,7 @@ import {
 import { toast } from "sonner";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 
-export default function InterviewList() {
+export default function InterviewsList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [interviews, setInterviews] = useState<InterviewDetail[]>([]);
   const [pagination, setPagination] = useState({

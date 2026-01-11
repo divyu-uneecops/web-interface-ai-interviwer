@@ -39,7 +39,7 @@ import {
   EmptyMedia,
 } from "@/components/ui/empty";
 
-import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
+import { JobStatsGrid } from "@/components/app-view/job/components/job-stats-card";
 import { DataTable, Column } from "@/components/shared/components/data-table";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
@@ -52,14 +52,14 @@ import {
   JobDetail,
   JobStat,
   Round,
-} from "@/components/dashboard/job/interfaces/job.interface";
-import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
-import { jobService } from "@/components/dashboard/job/services/job.service";
+} from "@/components/app-view/job/interfaces/job.interface";
+import { ApplicantStatus } from "@/components/app-view/job/types/job.types";
+import { jobService } from "@/components/app-view/job/services/job.service";
 import {
   transformAPIResponseToJobDetail,
   transformAPIResponseToApplicants,
   transformAPIResponseToRounds,
-} from "@/components/dashboard/job/utils/job.utils";
+} from "@/components/app-view/job/utils/job.utils";
 import { CreateJobModal } from "./create-job-modal";
 import { AddApplicantModal } from "./add-applicant-modal";
 import { useAppSelector } from "@/store/hooks";

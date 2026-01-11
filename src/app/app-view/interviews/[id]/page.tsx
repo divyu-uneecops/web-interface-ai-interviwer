@@ -1,6 +1,6 @@
 "use client";
 
-import InterviewDetail from "@/components/dashboard/interviews/components/interview-detail";
+import InterviewDetail from "@/components/app-view/interviews/components/interview-detail";
 
 export default function InterviewDetailPage() {
   return <InterviewDetail />;

@@ -9,7 +9,7 @@ import { ProfileData } from "../interfaces/profile.interface";
 import { mockProfileData } from "../constants/profile.constants";
 import { toast } from "sonner";
 
-export default function ProfilePage() {
+export default function Profile() {
   const [profileData, setProfileData] = useState<ProfileData>(mockProfileData);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingCompany, setIsEditingCompany] = useState(false);

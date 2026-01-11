@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bell, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CreateInterviewDialog } from "@/components/dashboard/create-interview/create-interview-dialog";
+import { CreateInterviewDialog } from "@/components/app-view/create-interview/create-interview-dialog";
 import { usePathname } from "next/navigation";
 
 interface DashboardHeaderProps {

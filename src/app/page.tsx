@@ -11,7 +11,6 @@ import {
   Phone,
   Sparkles,
   Shield,
-  Clock,
   Users,
   BarChart3,
   CheckCircle,
@@ -21,7 +20,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/header";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

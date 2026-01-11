@@ -389,26 +389,3 @@ export const transformToUpdateRoundPayload = (
     propertyIds,
   };
 };
-
-// Helper function to convert Round interface to RoundFormData
-export const transformRoundToRoundFormData = (
-  round: any
-): RoundFormData => {
-  return {
-    roundName: round?.name || "",
-    roundType: round?.type || "",
-    roundObjective: round?.objective || "",
-    duration: round?.duration || "",
-    language: round?.language || "",
-    interviewer: round?.interviewer || "",
-    skills: round?.skills || [],
-    questionType: (round?.questionType as "ai" | "hybrid") || "ai",
-    aiGeneratedQuestions: round?.aiGeneratedQuestions || 0,
-    customQuestions: round?.customQuestions || 0,
-    customQuestionTexts: round?.customQuestionTexts || [],
-    interviewInstructions: round?.interviewInstructions || "",
-    allowSkip: round?.allowSkip || false,
-    sendReminder: round?.sendReminder || false,
-    reminderTime: round?.reminderTime || "3 days",
-  };
-};

@@ -38,7 +38,7 @@ import {
   CreateRoundModalProps,
   RoundFormData,
 } from "../interfaces/shared.interface";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const validate = (values: RoundFormData) => {
   const errors: Partial<Record<keyof RoundFormData, string>> = {};

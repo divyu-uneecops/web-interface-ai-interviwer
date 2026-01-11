@@ -54,24 +54,23 @@ export default function JobList() {
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
   });
+  const { mappingValues } = useAppSelector((state) => state.jobs);
 
   // Define filter groups for jobs
   const jobFilterGroups: FilterGroup[] = [
     {
       id: "status",
       label: "Status",
-      options: [
-        { value: "Active", label: "Active" },
-        { value: "Closed", label: "Closed" },
-        { value: "Draft", label: "Draft" },
-      ],
+      options:
+        mappingValues?.jobOpening?.status?.map((status: string) => ({
+          value: status,
+          label: status,
+        })) || [],
     },
   ];
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [jobDetail, setJobDetail] = useState<JobDetail | null>(null);
-
-  const { mappingValues } = useAppSelector((state) => state.jobs);
 
   useEffect(() => {
     fetchJobs();
@@ -197,7 +196,7 @@ export default function JobList() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/dashboard/jobs/${job?.id}`}>
+          <Link href={`/app-view/jobs/${job?.id}`}>
             <Eye className="h-4 text-[#737373]" />
             View details
           </Link>

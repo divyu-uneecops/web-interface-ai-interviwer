@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { jobService } from "../services/job.service";
 import { CreateJobModalProps, JobFormData } from "../interfaces/job.interface";
 import { transformToCreateJobPayload } from "../utils/job.utils";
-import { experienceOptions, openingsOptions } from "../constants/job.constants";
+import { isEmpty } from "@/lib/utils";
 
 const validate = (values: JobFormData) => {
   const errors: Partial<Record<keyof JobFormData, string>> = {};
@@ -38,33 +38,37 @@ const validate = (values: JobFormData) => {
     errors.title = "Job title is required";
   }
 
-  if (!values.minExperience) {
+  if (isEmpty(values?.minExperience)) {
     errors.minExperience = "Min experience is required";
   }
 
-  if (!values.maxExperience) {
+  if (isEmpty(values?.maxExperience)) {
     errors.maxExperience = "Max experience is required";
   }
 
-  if (values.minExperience && values.maxExperience) {
-    const minExp = values.minExperience;
-    const maxExp = values.maxExperience;
-    if (minExp > maxExp) {
+  if (!isEmpty(values?.minExperience) && !isEmpty(values?.maxExperience)) {
+    const minExp = Number(values.minExperience);
+    const maxExp = Number(values.maxExperience);
+    if (minExp && maxExp && minExp > maxExp) {
       errors.maxExperience =
         "Max experience must be greater than or equal to min experience";
     }
   }
 
-  if (!values.description || values.description.trim() === "") {
+  if (!values?.description || values?.description?.trim() === "") {
     errors.description = "Job description is required";
   }
 
-  if (!values.status) {
+  if (!values?.status) {
     errors.status = "Job status is required";
   }
 
-  if (!values.skills || values.skills.length === 0) {
+  if (!values?.skills || values?.skills?.length === 0) {
     errors.skills = "At least one skill is required";
+  }
+
+  if (!values?.noOfOpenings) {
+    errors.noOfOpenings = "No. of openings is required";
   }
 
   return errors;

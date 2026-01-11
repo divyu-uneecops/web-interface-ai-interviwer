@@ -223,6 +223,9 @@ export default function JobList() {
         duration: 8000, // 8 seconds
       });
       setCurrentOffset(0);
+      if (currentOffset === 0) {
+        fetchJobs();
+      }
     } catch (error: any) {
       toast.error(
         error ? error.response.data.message : "An unknown error occurred",

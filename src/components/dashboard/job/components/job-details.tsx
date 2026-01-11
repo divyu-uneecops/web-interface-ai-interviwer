@@ -48,7 +48,6 @@ import {
   JobStat,
   Round,
 } from "@/components/dashboard/job/interfaces/job.interface";
-import { mockApplicants } from "@/components/dashboard/job/constants/job.constants";
 import { ApplicantStatus } from "@/components/dashboard/job/types/job.types";
 import { jobService } from "@/components/dashboard/job/services/job.service";
 import {
@@ -209,12 +208,6 @@ export default function JobDetails() {
       return;
     }
 
-    // Wait for job to be loaded to get jobId
-    if (!job?.jobId) {
-      setIsLoadingApplicants(false);
-      return;
-    }
-
     setIsLoadingApplicants(true);
     setApplicants([]);
     setApplicantsPagination({
@@ -233,9 +226,9 @@ export default function JobDetails() {
         filters: {
           $and: [
             {
-              key: "#.records.jobId",
+              key: "#.records.jobID",
               operator: "$eq",
-              value: job?.jobId,
+              value: params?.id,
               type: "text",
             },
             ...(appliedFilters.status.length > 0
@@ -980,8 +973,8 @@ export default function JobDetails() {
       <AddApplicantModal
         open={isAddApplicantModalOpen}
         onOpenChange={setIsAddApplicantModalOpen}
-        jobInfo={{ jobId: job?.jobId || "", jobTitle: job?.title || "" }}
-        onSubmit={(form) => {
+        jobInfo={{ jobId: params?.id as string, jobTitle: job?.title || "" }}
+        onSubmit={() => {
           // Handle applicant submission here
           fetchApplicants();
         }}
@@ -996,7 +989,7 @@ export default function JobDetails() {
             setEditingApplicant(null);
           }
         }}
-        jobInfo={{ jobId: job?.jobId || "", jobTitle: job?.title || "" }}
+        jobInfo={{ jobId: params?.id as string, jobTitle: job?.title || "" }}
         isEditMode={true}
         applicantId={editingApplicant?.id}
         applicantDetail={
@@ -1009,7 +1002,7 @@ export default function JobDetails() {
               }
             : null
         }
-        onSubmit={(form) => {
+        onSubmit={() => {
           // Handle applicant update here
           fetchApplicants();
         }}

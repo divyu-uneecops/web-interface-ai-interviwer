@@ -34,33 +34,6 @@ export const stats: JobStat[] = [
   { label: "Hired", value: 82.2, icon: "score" },
 ];
 
-export const mockApplicants: Applicant[] = [
-  {
-    id: "1",
-    name: "Mohit Kumar",
-    email: "mohitkumar@gmail.com",
-    contact: "+91 9876543210",
-    status: "Interviewed",
-    appliedDate: "2d ago",
-  },
-  {
-    id: "2",
-    name: "Mohit Kumar",
-    email: "mohitkumar@gmail.com",
-    contact: "+91 9876543210",
-    status: "Applied",
-    appliedDate: "2d ago",
-  },
-  {
-    id: "3",
-    name: "Mohit Kumar",
-    email: "mohitkumar@gmail.com",
-    contact: "+91 9876543210",
-    status: "Rejected",
-    appliedDate: "2d ago",
-  },
-];
-
 export const mockRounds: Round[] = [
   {
     id: "1",

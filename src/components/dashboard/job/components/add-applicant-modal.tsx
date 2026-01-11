@@ -55,7 +55,7 @@ export function AddApplicantModal({
   open,
   onOpenChange,
   jobInfo,
-  onSubmit,
+  onSubmit: onSubmitCallback,
   isEditMode = false,
   applicantDetail,
   applicantId,
@@ -81,7 +81,7 @@ export function AddApplicantModal({
           // Use the filename for now
           // TODO: Implement actual file upload to get the proper file path
           // The API expects format: propertyId//filename
-          attachmentPath = values?.attachment?.name;
+          attachmentPath = values?.attachment.name;
         }
 
         // Transform form data to API payload
@@ -114,8 +114,8 @@ export function AddApplicantModal({
         }
 
         // Call custom onSubmit if provided
-        if (onSubmit) {
-          onSubmit(values);
+        if (onSubmitCallback) {
+          onSubmitCallback();
         }
 
         formik.resetForm();

@@ -118,7 +118,7 @@ export interface AddApplicantModalProps {
     jobId: string;
     jobTitle: string;
   };
-  onSubmit?: (form: ApplicantForm) => void;
+  onSubmit: () => void;
   isEditMode?: boolean;
   applicantDetail?: ApplicantForm | null;
   applicantId?: string;

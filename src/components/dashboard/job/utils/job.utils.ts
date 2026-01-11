@@ -10,7 +10,6 @@ import {
   Round,
 } from "../interfaces/job.interface";
 import { ApplicantStatus } from "../types/job.types";
-import { Round } from "../interfaces/job.interface";
 
 export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
   // Create a map of values for easy lookup
@@ -218,11 +217,8 @@ export const transformAPIResponseToJobDetail = (
 };
 
 export const transformToAPIPayload = (values: JobFormData) => {
-  // Use existing jobId if provided (for edit), otherwise generate a new one
-  const jobId = Math.floor(Math.random() * 1000) + 100;
-
-  // Transform skills to API format
-  const requiredSkills = values.skills.map((skill) => [
+  // Transform skills to API format (array of arrays)
+  const requiredSkills = (values.skills || []).map((skill) => [
     {
       propertyId: "695259b2c9ba83a076aac434",
       key: "skill",
@@ -232,78 +228,70 @@ export const transformToAPIPayload = (values: JobFormData) => {
 
   const valuesArray = [
     {
-      propertyId: "69525619c9ba83a076aac412",
-      key: "jobId",
-      value: String(jobId),
-    },
-    {
       propertyId: "69525644c9ba83a076aac414",
       key: "title",
-      value: values.title,
+      value: values?.title,
     },
     {
       propertyId: "695257bfc9ba83a076aac41c",
       key: "industry",
-      value: values.industry,
+      value: values?.industry,
     },
     {
       propertyId: "695257f8c9ba83a076aac41f",
       key: "jobLevel",
-      value: values.jobLevel,
+      value: values?.jobLevel,
     },
     {
       propertyId: "69525830c9ba83a076aac422",
       key: "jobType",
-      value: values.jobType,
+      value: values?.jobType,
     },
     {
       propertyId: "69525880c9ba83a076aac425",
       key: "minExp",
-      value: values.minExperience,
+      value: values?.minExperience,
     },
     {
       propertyId: "69525898c9ba83a076aac427",
       key: "maxExp",
-      value: values.maxExperience,
+      value: values?.maxExperience,
     },
     {
       propertyId: "695258ccc9ba83a076aac42a",
       key: "description",
-      value: values.description,
+      value: values?.description,
     },
     {
       propertyId: "695258e5c9ba83a076aac42c",
       key: "numOfOpenings",
-      value: values.noOfOpenings,
+      value: values?.noOfOpenings,
     },
     {
       propertyId: "6952595cc9ba83a076aac431",
       key: "status",
-      value: values.status,
+      value: values?.status,
     },
     {
       propertyId: "6952598ec9ba83a076aac432",
       key: "accessibility",
-      value: "Private",
-      //TODO: Needs to Change in future
-    },
-    {
-      propertyId: "6957547fc9ba83a076aac57c",
-      key: "formUser",
-      value: ["6936a4d92276e3fc3ac7b13b"],
-      //TODO: Needs to Change in future
+      value: "Private", // TODO: change in future if needed
     },
     {
       propertyId: "695259d0c9ba83a076aac435",
       key: "requiredSkills",
       value: requiredSkills,
     },
+    {
+      propertyId: "6957547fc9ba83a076aac57c",
+      key: "formUser",
+      value: ["6936a4d92276e3fc3ac7b13b"], // TODO: change in future if needed
+    },
   ];
 
   return {
     values: valuesArray,
     propertyIds: [
-      "69525619c9ba83a076aac412",
       "69525644c9ba83a076aac414",
       "695257bfc9ba83a076aac41c",
       "695257f8c9ba83a076aac41f",

@@ -7,6 +7,7 @@ export interface CreateJobModalProps {
   mappingValues: Record<string, Record<string, any[]>>;
   isEditMode?: boolean; // If provided, modal will be in edit mode
   jobDetail?: JobFormData | null;
+  jobId?: string;
 }
 
 export interface JobFormData {
@@ -100,7 +101,6 @@ export interface APIJobDetailSection {
 
 export interface JobDetail {
   id: string;
-  jobId: string;
   title: string;
   industry: string;
   jobLevel: string;
@@ -113,7 +113,6 @@ export interface JobDetail {
   accessibility: string;
   applicants: number;
   interviews: number;
-  formUser: string;
   requiredSkills: string[];
   createdOn: string;
 }

@@ -23,7 +23,6 @@ export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
   }
 
   // Extraction with fallback
-  const jobId = valuesMap.get("jobId") || "";
   const title = valuesMap.get("title") || "";
   const industry = valuesMap.get("industry") || "";
   const jobLevel = valuesMap.get("jobLevel") || "";
@@ -34,7 +33,6 @@ export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
   const numOfOpenings = valuesMap.get("numOfOpenings") ?? 0;
   const status = valuesMap.get("status") || "draft";
   const accessibility = valuesMap.get("accessibility") || "";
-  const formUser = valuesMap.get("formUser") || "";
   // Required skills extraction (expecting nested array of [{ key: 'skill', value: ... }])
   let requiredSkills: string[] = [];
   const skillsValue = valuesMap.get("requiredSkills");
@@ -63,7 +61,6 @@ export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
 
   return {
     id: String(item?.id || ""),
-    jobId: String(jobId),
     title: String(title),
     status: normalizedStatus,
     industry: String(industry),
@@ -79,7 +76,6 @@ export const transformAPIJobItemToJob = (item: APIJobItem): JobDetail => {
     accessibility: String(accessibility),
     applicants: 0,
     interviews: 0,
-    formUser: formUser[0] || "",
     requiredSkills,
     createdOn: formatRelativeTime(createdOnRaw),
   };

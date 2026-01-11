@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
 import { useFormik } from "formik";
 import { toast } from "sonner";
@@ -38,6 +38,7 @@ export function CreateJobModal({
   mappingValues,
   isEditMode = false,
   jobDetail,
+  jobId,
 }: CreateJobModalProps) {
   const [skillInput, setSkillInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

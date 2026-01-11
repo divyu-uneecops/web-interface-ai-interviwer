@@ -13,8 +13,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DataTable, Column } from "@/components/shared/components/data-table";
-import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,13 +20,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { DataTable, Column } from "@/components/shared/components/data-table";
+import { JobStatsGrid } from "@/components/dashboard/job/components/job-stats-card";
+import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
 import {
-  FilterDropdown,
   FilterState,
   FilterGroup,
-} from "@/components/shared/components/filter-dropdown";
-
-import { JobDetail, JobFormData } from "../interfaces/job.interface";
+} from "@/components/shared/interfaces/shared.interface";
+import { JobDetail } from "../interfaces/job.interface";
 import { CreateJobModal } from "./create-job-modal";
 import { jobService } from "../services/job.service";
 import { transformAPIResponseToJobs } from "../utils/job.utils";
@@ -69,7 +69,7 @@ export default function JobList() {
   ];
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [jobDetail, setJobDetail] = useState<JobFormData | null>(null);
+  const [jobDetail, setJobDetail] = useState<JobDetail | null>(null);
 
   const { mappingValues } = useAppSelector((state) => state.jobs);
 
@@ -95,7 +95,7 @@ export default function JobList() {
       const response = await jobService.getJobOpenings(params, {
         filters: {
           $and: [
-            ...(appliedFilters.status.length > 0
+            ...(appliedFilters?.status?.length > 0
               ? [
                   {
                     key: "#.records.status",
@@ -109,9 +109,9 @@ export default function JobList() {
         },
         appId: "69521cd1c9ba83a076aac3ae",
       });
-      const result = transformAPIResponseToJobs(response.data, response.page);
-      setJobs(result.jobs);
-      setPagination(result.pagination);
+      const result = transformAPIResponseToJobs(response?.data, response?.page);
+      setJobs(result?.jobs);
+      setPagination(result?.pagination);
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
@@ -209,7 +209,7 @@ export default function JobList() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onClick={() => handleDeleteJob(job?.jobId)}
+          onClick={() => handleDeleteJob(job?.id)}
         >
           <Trash2 className="h-4" />
           Delete
@@ -237,20 +237,7 @@ export default function JobList() {
   };
 
   const handleEditJob = (job: JobDetail) => {
-    const JobFormData: JobFormData = {
-      title: job.title,
-      industry: job.industry,
-      jobLevel: job.jobLevel,
-      jobType: job.jobType,
-      minExperience: job.minExp,
-      maxExperience: job.maxExp,
-      description: job.description,
-      noOfOpenings: job.numOfOpenings,
-      attachment: null,
-      status: job.status,
-      skills: job.requiredSkills,
-    };
-    setJobDetail(JobFormData);
+    setJobDetail(job);
     setIsEditModalOpen(true);
   };
 
@@ -269,7 +256,7 @@ export default function JobList() {
             type="text"
             placeholder="Search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e?.target?.value)}
             className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
           />
         </div>
@@ -317,26 +304,43 @@ export default function JobList() {
       />
 
       {/* Create Job Modal */}
-      <CreateJobModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        onSuccess={() => {
-          fetchJobs();
-        }}
-        mappingValues={mappingValues}
-      />
+      {isCreateModalOpen && (
+        <CreateJobModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          onSuccess={() => {
+            fetchJobs();
+          }}
+          mappingValues={mappingValues}
+        />
+      )}
 
       {/* Edit Job Modal */}
-      <CreateJobModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        onSuccess={() => {
-          fetchJobs();
-        }}
-        mappingValues={mappingValues}
-        isEditMode={true}
-        jobDetail={jobDetail}
-      />
+      {isEditModalOpen && (
+        <CreateJobModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          onSuccess={() => {
+            fetchJobs();
+          }}
+          mappingValues={mappingValues}
+          isEditMode={true}
+          jobDetail={{
+            title: jobDetail?.title || "",
+            industry: jobDetail?.industry || "",
+            jobLevel: jobDetail?.jobLevel || "",
+            jobType: jobDetail?.jobType || "",
+            minExperience: jobDetail?.minExp || null,
+            maxExperience: jobDetail?.maxExp || null,
+            description: jobDetail?.description || "",
+            noOfOpenings: jobDetail?.numOfOpenings || null,
+            attachment: null,
+            status: jobDetail?.status || "",
+            skills: jobDetail?.requiredSkills || [],
+          }}
+          jobId={jobDetail?.id}
+        />
+      )}
     </div>
   );
 }

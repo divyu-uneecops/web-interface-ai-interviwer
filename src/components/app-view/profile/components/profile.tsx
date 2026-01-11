@@ -34,7 +34,10 @@ export default function Profile() {
     <div className="space-y-2.5">
       {/* Breadcrumb */}
       <Breadcrumb
-        items={[{ label: "Home", href: "/dashboard" }, { label: "Profile" }]}
+        items={[
+          { label: "Dashboard", href: "/app-view/dashboard" },
+          { label: "Profile" },
+        ]}
       />
 
       {/* Page Header */}

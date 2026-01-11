@@ -1,18 +1,28 @@
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { DashboardHeader } from "@/components/dashboard/header";
+"use client";
+
+import { Sidebar } from "@/components/app-view/sidebar";
+import { DashboardHeader } from "@/components/app-view/header";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   return (
     <div className="min-h-screen bg-[#fafafa]">
       {/* Sidebar */}
-      <Sidebar />
+      {/* Hide Sidebar on /app-view/profile */}
+      {pathname && !pathname.startsWith("/app-view/profile") && <Sidebar />}
 
       {/* Main Content */}
-      <div className="pl-64">
+      <div
+        className={`${
+          pathname && !pathname.startsWith("/app-view/profile") ? "pl-64" : ""
+        }`}
+      >
         {/* Header */}
         <DashboardHeader />
 

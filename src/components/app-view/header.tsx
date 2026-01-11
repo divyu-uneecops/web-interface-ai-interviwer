@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bell, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateInterviewDialog } from "@/components/app-view/create-interview/create-interview-dialog";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -12,6 +12,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
   const [isCreateInterviewOpen, setIsCreateInterviewOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -30,22 +31,22 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
           let h1 = `Hello ${userName} !`;
           let p = "Manage your job openings and hiring pipeline";
 
-          if (pathname && pathname.startsWith("/dashboard/jobs")) {
+          if (pathname && pathname.startsWith("/app-view/jobs")) {
             h1 = "Job Openings";
             p = "Manage your job openings and hiring pipeline";
           } else if (
             pathname &&
-            pathname.startsWith("/dashboard/interviewers")
+            pathname.startsWith("/app-view/interviewers")
           ) {
             h1 = "AI Interviewers";
             p = "Manage your job openings and hiring pipeline";
-          } else if (pathname && pathname.startsWith("/dashboard/interviews")) {
+          } else if (pathname && pathname.startsWith("/app-view/interviews")) {
             h1 = "Interviews";
             p = "View and manage candidate interviews";
-          } else if (pathname && pathname.startsWith("/dashboard/profile")) {
+          } else if (pathname && pathname.startsWith("/app-view/profile")) {
             h1 = "Your Profile";
             p = "Manage your company details";
-          } else if (pathname && pathname.startsWith("/dashboard")) {
+          } else if (pathname && pathname.startsWith("/app-view/dashboard")) {
             h1 = `Hello ${userName} !`;
             p = "Manage your job openings and hiring pipeline";
           }
@@ -75,7 +76,10 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
           </button>
 
           {/* User Avatar */}
-          <div className="px-1">
+          <div
+            className="px-1"
+            onClick={() => router.push("/app-view/profile")}
+          >
             <div className="w-9 h-9 bg-[rgba(2,86,61,0.1)] rounded-full flex items-center justify-center">
               <span className="text-sm font-normal text-[#02563d] tracking-[-0.15px]">
                 JD

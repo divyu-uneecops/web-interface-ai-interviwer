@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter, Public_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -15,12 +16,6 @@ const publicSans = Public_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
-
-export const metadata: Metadata = {
-  title: "AI Interview - Your Candidates Are Waiting",
-  description:
-    "Sign in to review completed interviews, schedule new ones, and make faster hiring decisions with AI-powered insights.",
-};
 
 export default function RootLayout({
   children,

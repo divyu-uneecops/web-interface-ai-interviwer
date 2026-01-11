@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Activity, CircleCheck, UserPlus, Target, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StatsCard } from "@/components/dashboard/stats-card";
+import { StatsCard } from "@/components/app-view/stats-card";
 import { StatusTag } from "@/components/ui/status-tag";
-import { InviteTeamMemberModal } from "@/components/dashboard/invite-modal";
+import { InviteTeamMemberModal } from "@/components/app-view/invite-modal";
 
 // Sample data for the users table
 const usersData = [

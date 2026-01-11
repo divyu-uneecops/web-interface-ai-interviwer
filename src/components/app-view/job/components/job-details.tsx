@@ -1024,7 +1024,7 @@ export default function JobDetails() {
             name: editingApplicant?.name || "",
             email: editingApplicant?.email || "",
             contact: editingApplicant?.contact || "",
-            attachment: null,
+            attachment: editingApplicant?.attachment || null,
           }}
           onSubmit={() => {
             // Handle applicant update here

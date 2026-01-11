@@ -453,27 +453,16 @@ export const transformAPIApplicantItemToApplicant = (
   const email = valuesMap.get("email") || "";
   const contact = valuesMap.get("phone") || "";
   const status = valuesMap.get("status") || "Applied";
+  const attachment = valuesMap.get("attachment")?.[0] || "";
   const createdOnRaw = item.createdOn;
-
-  // Normalize status
-  let normalizedStatus: ApplicantStatus = "Applied";
-  if (typeof status === "string") {
-    const statusLower = status.toLowerCase();
-    if (statusLower === "interviewed") {
-      normalizedStatus = "Interviewed";
-    } else if (statusLower === "rejected") {
-      normalizedStatus = "Rejected";
-    } else {
-      normalizedStatus = "Applied";
-    }
-  }
 
   return {
     id: String(item?.id || ""),
     name: String(name),
     email: String(email),
     contact: String(contact),
-    status: normalizedStatus,
+    status: status as ApplicantStatus,
+    attachment: attachment,
     appliedDate: formatRelativeTime(createdOnRaw),
   };
 };

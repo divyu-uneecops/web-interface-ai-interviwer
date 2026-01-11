@@ -59,6 +59,7 @@ export interface Applicant {
   email: string;
   contact: string;
   status: ApplicantStatus;
+  attachment: string;
   appliedDate: string;
 }
 
@@ -121,7 +122,7 @@ export interface ApplicantForm {
   name: string;
   email: string;
   contact: string;
-  attachment: File | null;
+  attachment: File | string | null;
 }
 
 export interface AddApplicantModalProps {

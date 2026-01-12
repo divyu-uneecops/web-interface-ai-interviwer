@@ -8,7 +8,6 @@ export interface ValidationError {
 
 export interface LoginFormValues {
   emailOrPhone: string;
-  keepSignedIn: boolean;
 }
 
 export interface VerificationFormValues {
@@ -27,7 +26,3 @@ export interface SignupFormValues {
   industry: string;
   companySize: string;
 }
-
-
-
-

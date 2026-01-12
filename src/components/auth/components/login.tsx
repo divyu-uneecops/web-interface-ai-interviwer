@@ -132,42 +132,14 @@ export default function Login() {
       <div className="flex min-h-screen">
         {/* Left Side - Gradient Background with Decorative Elements */}
         <div className="hidden lg:flex lg:w-1/2 h-screen sticky top-0 bg-gradient-to-b from-[#02563d] to-[#052e16] relative overflow-hidden">
-          {/* Decorative Ellipse 7 */}
-          <div className="absolute left-[-181px] w-[426px] h-[426px] top-[677px]">
-            <div className="absolute inset-[-152.58%]">
-              <div className="w-full h-full rounded-full bg-white/10 blur-3xl" />
-            </div>
-          </div>
-
-          {/* Decorative Ellipse 8 */}
-          <div className="absolute left-[478px] w-[224px] h-[224px] top-[-131px]">
-            <div className="absolute inset-[-156.25%]">
-              <div className="w-full h-full rounded-full bg-white/10 blur-3xl" />
-            </div>
-          </div>
-
-          {/* HIRE FASTER Text */}
-          <p className="absolute font-extrabold leading-[60px] left-[-11px] text-[90px] top-[166px] uppercase bg-clip-text text-transparent bg-gradient-to-r from-[rgba(153,153,153,0.15)] to-[rgba(255,255,255,0.3)]">
-            HIRE FASTER
-          </p>
-
-          {/* SCREEN INTELLIGENTLY Text */}
-          <div className="absolute font-black leading-[65px] left-[720px] text-[75px] text-right top-[596px] translate-x-[-100%] uppercase whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-[rgba(255,255,255,0.3)] to-[rgba(153,153,153,0.15)]">
-            <p className="mb-0">Screen</p>
-            <p>intelligently</p>
-          </div>
-
-          {/* Rectangle Image - Brain/Circuit Board Graphic */}
-          <div className="absolute h-[473px] left-[39px] top-[217px] w-[544px]">
-            <div className="absolute inset-0 opacity-[0.35] overflow-hidden pointer-events-none">
-              <Image
-                src="/LoginLeftImage.svg"
-                alt="AI Interview Graphic"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+          <div className="absolute inset-0 opacity-[0.35] overflow-hidden pointer-events-none">
+            <Image
+              src="/LoginLeftImage.svg"
+              alt="AI Interview Graphic"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
 
@@ -177,7 +149,7 @@ export default function Login() {
             <Logo />
 
             <div className="flex flex-col gap-0">
-              <form onSubmit={formik?.handleSubmit} noValidate>
+              <form onSubmit={formik?.handleSubmit}>
                 <Card className="border-2 border-[rgba(0,0,0,0.1)] rounded-[14px] p-0 flex flex-col gap-6 bg-white">
                   <CardHeader className="px-6 pt-6 pb-0 flex flex-col gap-[6px] h-[46px]">
                     <CardTitle className="text-base font-medium leading-4 text-[#0a0a0a] tracking-[-0.3125px]">
@@ -317,7 +289,7 @@ export default function Login() {
               </form>
 
               {/* Footer */}
-              <div className="flex items-center justify-between py-0 mt-0 w-full">
+              <div className="flex items-center justify-center py-0 mt-0 w-full">
                 <p className="text-sm font-normal leading-5 text-[#45556c] text-center tracking-[-0.1504px]">
                   Don&apos;t have an account?
                 </p>

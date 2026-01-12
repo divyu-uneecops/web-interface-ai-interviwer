@@ -3,24 +3,13 @@ import serverInterfaceService from "../../../../services/server-interface.servic
 import { buildUrl } from "@/lib/utils";
 
 export const interviewService = {
-  createInterview: (
+  getInterviewsFromView: (
     params: Record<string, any>,
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEW?.CREATE || "/objects/interviews/records",
-      params,
-      payload,
-      signal
-    ),
-  getInterviews: (
-    params: Record<string, any>,
-    payload: Record<string, any>,
-    signal?: AbortSignal
-  ) =>
-    serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEW?.LIST || "/objects/interviews/records/list",
+      "/objects/6960b980c9ba83a076aac89d/views/6960b980c9ba83a076aac89e/records",
       params,
       payload,
       signal
@@ -36,27 +25,6 @@ export const interviewService = {
         { id }
       ),
       params,
-      signal
-    ),
-  deleteInterview: (id: string) =>
-    serverInterfaceService.delete(
-      buildUrl(
-        API_ENDPOINTS.INTERVIEW?.DELETE || "/objects/interviews/records/{id}",
-        { id }
-      )
-    ),
-  cancelInterview: (
-    id: string,
-    payload: Record<string, any>,
-    signal?: AbortSignal
-  ) =>
-    serverInterfaceService.patch(
-      buildUrl(
-        API_ENDPOINTS.INTERVIEW?.CANCEL ||
-          "/objects/interviews/records/{id}/cancel",
-        { id }
-      ),
-      payload,
       signal
     ),
 };

@@ -6,6 +6,21 @@ import {
 } from "../interfaces/interview.interface";
 
 /**
+ * Normalize status from API format to InterviewStatus format
+ */
+function normalizeStatus(status: string): InterviewDetail["status"] {
+  const statusMap: Record<string, InterviewDetail["status"]> = {
+    Scheduled: "scheduled",
+    "In Progress": "in-progress",
+    Completed: "completed",
+    Canceled: "cancelled",
+    Cancelled: "cancelled",
+    Pending: "pending",
+  };
+  return statusMap[status] || "pending";
+}
+
+/**
  * Transform API response to InterviewDetail format
  */
 export function transformAPIResponseToInterviews(
@@ -18,23 +33,39 @@ export function transformAPIResponseToInterviews(
       valuesMap[val.key] = val.value;
     });
 
+    // Extract candidate name from formUser array
+    let candidateName = "N/A";
+    const formUser = valuesMap.formUser;
+    if (Array.isArray(formUser) && formUser.length > 0) {
+      candidateName = formUser[0] || "N/A";
+    } else if (typeof formUser === "string") {
+      candidateName = formUser;
+    }
+
+    // Normalize status
+    const statusValue = valuesMap.status || "Pending";
+    const normalizedStatus = normalizeStatus(statusValue);
+
     return {
       id: item.id,
-      interviewId: valuesMap.interviewId || item.id,
-      candidateName: valuesMap.candidateName || valuesMap.name || "N/A",
-      candidateEmail: valuesMap.candidateEmail || valuesMap.email || "N/A",
-      jobTitle: valuesMap.jobTitle || valuesMap.job?.title || "N/A",
-      jobId: valuesMap.jobId || valuesMap.job?.id || "",
-      interviewerName:
-        valuesMap.interviewerName || valuesMap.interviewer?.name || "N/A",
-      interviewerId: valuesMap.interviewerId || valuesMap.interviewer?.id || "",
-      status: valuesMap.status || "pending",
+      interviewId: item.id,
+      candidateName: candidateName,
+      candidateEmail:
+        valuesMap.applicantEmail || valuesMap.candidateEmail || "N/A",
+      jobTitle: valuesMap.jobTitle || "N/A",
+      jobId: valuesMap.jobId || "",
+      interviewerName: valuesMap.interviewerName || "N/A",
+      interviewerId: valuesMap.interviewerId || "",
+      status: normalizedStatus,
       scheduledDate: valuesMap.scheduledDate || valuesMap.date || "",
       scheduledTime: valuesMap.scheduledTime || valuesMap.time || "",
       duration: valuesMap.duration || 30,
-      roundName: valuesMap.roundName || valuesMap.round?.name || "N/A",
-      roundId: valuesMap.roundId || valuesMap.round?.id || "",
-      score: valuesMap.score,
+      roundName: valuesMap.roundName || "N/A",
+      roundId: valuesMap.roundId || "",
+      score:
+        valuesMap.score !== undefined && valuesMap.score !== null
+          ? valuesMap.score
+          : undefined,
       completedAt: valuesMap.completedAt,
       createdAt: formatDate(item.createdOn),
       updatedAt: formatDate(item.updatedOn),

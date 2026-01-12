@@ -1,9 +1,4 @@
-export type InterviewStatus =
-  | "scheduled"
-  | "in-progress"
-  | "completed"
-  | "cancelled"
-  | "pending";
+export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled";
 
 export interface InterviewDetail {
   id: string;

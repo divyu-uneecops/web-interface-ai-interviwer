@@ -3,17 +3,16 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Plus, Search, MoreHorizontal, Eye, Calendar } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { DataTable, Column } from "@/components/shared/components/data-table";
-import { InterviewStatsGrid } from "./interview-stats-card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
@@ -21,20 +20,14 @@ import {
   FilterState,
   FilterGroup,
 } from "@/components/shared/interfaces/shared.interface";
-
 import { InterviewDetail } from "../interfaces/interview.interface";
 import {
-  formatDateTime,
-  getStatusText,
   formatInterviewDate,
+  transformAPIResponseToInterviews,
 } from "../utils/interview.utils";
-import {
-  stats,
-  statusStyles,
-  mockInterviews,
-} from "../constants/interview.constants";
-import { toast } from "sonner";
+import { statusStyles } from "../constants/interview.constants";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
+import { interviewService } from "../services/interview.service";
 
 export default function InterviewsList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,62 +51,85 @@ export default function InterviewsList() {
       id: "status",
       label: "Status",
       options: [
-        { value: "scheduled", label: "Scheduled" },
-        { value: "in-progress", label: "In Progress" },
-        { value: "completed", label: "Completed" },
-        { value: "cancelled", label: "Cancelled" },
-        { value: "pending", label: "Pending" },
+        { value: "Scheduled", label: "Scheduled" },
+        { value: "Completed", label: "Completed" },
+        { value: "Cancelled", label: "Cancelled" },
       ],
     },
   ];
 
   useEffect(() => {
     fetchInterviews();
-  }, [currentOffset, appliedFilters, searchQuery]);
+  }, [currentOffset, appliedFilters]);
 
-  const fetchInterviews = () => {
+  const fetchInterviews = async () => {
     setIsLoading(true);
+    setInterviews([]);
+    setPagination({
+      total: 0,
+      nextOffset: null,
+      previousOffset: null,
+      limit: PAGE_LIMIT,
+    });
 
-    // Simulate API delay
-    setTimeout(() => {
-      // Filter by status
-      let filtered = [...mockInterviews];
-
-      if (appliedFilters.status.length > 0) {
-        filtered = filtered.filter((interview) =>
-          appliedFilters.status.includes(interview.status)
-        );
-      }
-
-      // Filter by search query
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (interview) =>
-            interview.candidateName.toLowerCase().includes(query) ||
-            interview.candidateEmail.toLowerCase().includes(query) ||
-            interview.jobTitle.toLowerCase().includes(query)
-        );
-      }
-
-      // Calculate pagination
-      const total = filtered.length;
-      const startIndex = currentOffset;
-      const endIndex = startIndex + PAGE_LIMIT;
-      const paginatedInterviews = filtered.slice(startIndex, endIndex);
-
-      setInterviews(paginatedInterviews);
-      setPagination({
-        total,
-        nextOffset: endIndex < total ? endIndex : null,
-        previousOffset: startIndex > 0 ? startIndex - PAGE_LIMIT : null,
+    try {
+      const params: Record<string, any> = {
         limit: PAGE_LIMIT,
+        offset: currentOffset,
+      };
+
+      const response = await interviewService.getInterviewsFromView(params, {
+        filters: {
+          $and: [
+            ...(appliedFilters?.status?.length > 0
+              ? [
+                  {
+                    key: "#.records.status",
+                    operator: "$in",
+                    value: appliedFilters.status,
+                    type: "select",
+                  },
+                ]
+              : []),
+          ],
+        },
+        appId: "69521cd1c9ba83a076aac3ae",
       });
 
-      setIsLoading(false);
+      // Transform API response
+      const result = transformAPIResponseToInterviews(
+        response?.data || [],
+        response?.page || {
+          total: 0,
+          nextOffset: null,
+          previousOffset: null,
+          limit: PAGE_LIMIT,
+        }
+      );
+
+      setInterviews(result.interviews);
+      setPagination(result?.pagination);
+
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 300);
+    } catch (error: any) {
+      console.error("Error fetching interviews:", error);
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch interviews",
+        {
+          duration: 3000,
+        }
+      );
+      setInterviews([]);
+      setPagination({
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: PAGE_LIMIT,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Define table columns - matching Figma design exactly
@@ -125,7 +141,7 @@ export default function InterviewsList() {
         align: "left",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a]">
-            {interview.candidateName}
+            {interview?.candidateName}
           </span>
         ),
       },
@@ -135,7 +151,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview.candidateEmail}
+            {interview?.candidateEmail}
           </span>
         ),
       },
@@ -145,7 +161,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview.jobTitle}
+            {interview?.jobTitle}
           </span>
         ),
       },
@@ -155,7 +171,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview.roundName}
+            {interview?.roundName}
           </span>
         ),
       },
@@ -169,10 +185,12 @@ export default function InterviewsList() {
             <Badge
               variant="outline"
               className={`font-normal text-xs tracking-[0.3px] rounded-full px-2 py-0 h-6 border-transparent ${
-                statusStyles[interview.status] || statusStyles.pending
+                statusStyles[
+                  interview?.status?.toLowerCase() as keyof typeof statusStyles
+                ]
               }`}
             >
-              {getStatusText(interview.status)}
+              {interview?.status}
             </Badge>
           </div>
         ),
@@ -184,9 +202,9 @@ export default function InterviewsList() {
         width: "111px",
         cell: (interview) => (
           <div className="flex justify-center">
-            {interview.score !== undefined && interview.score !== null ? (
+            {interview?.score !== undefined && interview?.score !== null ? (
               <span className="text-sm font-normal text-[#0a0a0a]">
-                {interview.score} %
+                {interview?.score} %
               </span>
             ) : (
               <span className="text-sm text-[#737373]">-</span>
@@ -200,7 +218,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {formatInterviewDate(interview.scheduledDate)}
+            {formatInterviewDate(interview?.scheduledDate)}
           </span>
         ),
       },
@@ -231,25 +249,6 @@ export default function InterviewsList() {
     </DropdownMenu>
   );
 
-  const handleDeleteInterview = (id: string) => {
-    // Remove from mock data (in a real app, this would be an API call)
-    const interviewIndex = mockInterviews.findIndex(
-      (int) => int.interviewId === id
-    );
-    if (interviewIndex !== -1) {
-      mockInterviews.splice(interviewIndex, 1);
-      toast.success("Interview deleted successfully", {
-        duration: 3000,
-      });
-      setCurrentOffset(0);
-      fetchInterviews();
-    } else {
-      toast.error("Interview not found", {
-        duration: 3000,
-      });
-    }
-  };
-
   const handleApplyFilters = (filters: FilterState) => {
     setAppliedFilters(filters);
     setCurrentOffset(0); // Reset to first page when filters are applied
@@ -266,7 +265,7 @@ export default function InterviewsList() {
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => {
-              setSearchQuery(e.target.value);
+              setSearchQuery(e?.target?.value);
               setCurrentOffset(0);
             }}
             className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"

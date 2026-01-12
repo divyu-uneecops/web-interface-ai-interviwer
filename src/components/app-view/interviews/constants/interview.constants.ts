@@ -8,17 +8,7 @@ export const statusStyles = {
   "in-progress": "bg-[#fef3c7] text-[#d97706] border-transparent",
   completed: "bg-[#def2eb] text-[#0e4230] border-transparent",
   cancelled: "bg-[#fcefec] text-[#d92d20] border-transparent",
-  pending: "bg-[#e5e5e5] text-[#737373] border-transparent",
 };
-
-export const interviewStatusOptions = [
-  { value: "all", label: "All Status" },
-  { value: "scheduled", label: "Scheduled" },
-  { value: "in-progress", label: "In Progress" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-  { value: "pending", label: "Pending" },
-];
 
 // Mock interview data
 export const mockInterviews: InterviewDetail[] = [
@@ -31,7 +21,7 @@ export const mockInterviews: InterviewDetail[] = [
     jobId: "job-001",
     interviewerName: "AI Interviewer - Sarah",
     interviewerId: "ai-001",
-    status: "scheduled",
+    status: "Scheduled",
     scheduledDate: "2024-01-20",
     scheduledTime: "14:00",
     duration: 45,

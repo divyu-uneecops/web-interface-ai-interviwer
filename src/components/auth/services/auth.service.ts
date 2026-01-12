@@ -4,4 +4,10 @@ import serverInterfaceService from "@/services/server-interface.service";
 export const authService = {
   verifyEmail: (parmas: Record<string, any>) =>
     serverInterfaceService.get(API_ENDPOINTS.AUTH.VERIFY_EMAIL, parmas),
+  login: (payload: any) =>
+    serverInterfaceService.postFormData(
+      API_ENDPOINTS.AUTH.LOGIN,
+      payload,
+      false
+    ),
 };

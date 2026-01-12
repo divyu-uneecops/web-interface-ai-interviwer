@@ -81,15 +81,14 @@ export default function Login() {
             });
           }
         } else {
-          // Step 2: Login with email and password
-          // TODO: Implement actual login API call
-          toast?.success("Login successful! Redirecting...", {
-            duration: 2000,
-          });
-          // Navigate to dashboard or home page
-          setTimeout(() => {
+          const formData = new FormData();
+          formData.append("username", values.email || "");
+          formData.append("password", values.password || "");
+          const response = await authService.login(formData);
+
+          if (response?.success) {
             router.push("/app-view/dashboard");
-          }, 1000);
+          }
         }
       } catch (error: any) {
         const errorMessage =

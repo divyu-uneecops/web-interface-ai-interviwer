@@ -112,5 +112,5 @@ export const jobService = {
     url: string,
     formData: FormData,
     signal?: AbortSignal
-  ) => serverInterfaceService.postFormData(url, formData, signal),
+  ) => serverInterfaceService.postFormData(url, formData, true, signal),
 };

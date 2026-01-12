@@ -69,12 +69,17 @@ export default function Login() {
 
       try {
         if (!isPasswordStep) {
-          // Step 1: Verify email
-          await authService.verifyEmail({ email: values.email });
-          setIsPasswordStep(true);
-          toast?.success("Email verified. Please enter your password.", {
-            duration: 3000,
+          const response = await authService.verifyEmail({
+            identifier: values?.email,
           });
+
+          if (response?.exists) {
+            setIsPasswordStep(true);
+          } else {
+            toast?.error("User does not exist. Please sign up.", {
+              duration: 8000,
+            });
+          }
         } else {
           // Step 2: Login with email and password
           // TODO: Implement actual login API call

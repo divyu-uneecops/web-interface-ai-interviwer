@@ -7,7 +7,9 @@ export interface ValidationError {
 }
 
 export interface LoginFormValues {
-  emailOrPhone: string;
+  email: string;
+  password?: string;
+  keepSignedIn?: boolean;
 }
 
 export interface VerificationFormValues {

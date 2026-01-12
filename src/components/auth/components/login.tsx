@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardHeader,
@@ -19,21 +20,36 @@ import {
 } from "@/components/ui/card";
 
 import { Logo } from "@/components/logo";
-import { authService } from "@/services/auth.service";
 import {
   LoginFormValues,
   ValidationError,
 } from "../interfaces/auth.interfaces";
+import { authService } from "../services/auth.service";
 
 const initialValues: LoginFormValues = {
-  emailOrPhone: "",
+  email: "",
+  password: "",
+  keepSignedIn: false,
 };
 
-const validate = (values: LoginFormValues) => {
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex?.test(email);
+};
+
+const validate = (values: LoginFormValues, isPasswordStep: boolean) => {
   const errors: ValidationError = {};
 
-  if (!values.emailOrPhone || values.emailOrPhone?.trim()?.length === 0) {
-    errors.emailOrPhone = "Email or phone number is required";
+  if (!values?.email || values.email?.trim()?.length === 0) {
+    errors.email = "Email address is required";
+  } else if (!isValidEmail(values.email.trim())) {
+    errors.email = "Please enter a valid email address";
+  }
+
+  if (isPasswordStep) {
+    if (!values?.password || values.password?.trim()?.length === 0) {
+      errors.password = "Password is required";
+    }
   }
 
   return errors;
@@ -42,62 +58,41 @@ const validate = (values: LoginFormValues) => {
 export default function Login() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordStep, setIsPasswordStep] = useState(false);
 
   const formik = useFormik<LoginFormValues>({
     initialValues,
-    validate: validate,
+    validate: (values) => validate(values, isPasswordStep),
     onSubmit: async (values) => {
       setIsSubmitting(true);
 
       try {
-        // Determine if input is email or phone
-        const isEmail = values.emailOrPhone.includes("@");
-
-        if (isEmail) {
-          // For email login, call the login API to send OTP
-          const response = await authService.login({
-            name: "", // API might need this, adjust based on actual API requirements
-            email: values.emailOrPhone.trim(),
-          });
-
-          toast.success("Verification code sent to your email", {
+        if (!isPasswordStep) {
+          // Step 1: Verify email
+          await authService.verifyEmail({ email: values.email });
+          setIsPasswordStep(true);
+          toast?.success("Email verified. Please enter your password.", {
             duration: 3000,
           });
-
-          // Store email in session storage for verification page
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem("emailOrPhone", values.emailOrPhone);
-          }
-
-          // Navigate to verification page
-          router.push("/verification");
         } else {
-          // For phone login, register to send OTP
-          const phoneDigits = values.emailOrPhone.replace(/\D/g, "");
-          const response = await authService.register({
-            phone: phoneDigits,
+          // Step 2: Login with email and password
+          // TODO: Implement actual login API call
+          toast?.success("Login successful! Redirecting...", {
+            duration: 2000,
           });
-
-          toast.success("Verification code sent to your phone", {
-            duration: 3000,
-          });
-
-          // Store phone number in session storage for verification page
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem("emailOrPhone", values.emailOrPhone);
-          }
-
-          // Navigate to verification page
-          router.push("/verification");
+          // Navigate to dashboard or home page
+          setTimeout(() => {
+            router.push("/app-view/dashboard");
+          }, 1000);
         }
       } catch (error: any) {
         const errorMessage =
           error?.response?.data?.message ||
-          error?.message ||
           "An error occurred. Please try again.";
 
-        toast.error(errorMessage, {
-          duration: 5000,
+        toast?.error(errorMessage, {
+          duration: 8000,
         });
       } finally {
         setIsSubmitting(false);
@@ -106,24 +101,12 @@ export default function Login() {
   });
 
   const handleSocialLogin = (provider: "google" | "facebook") => {
-    toast.info(
+    toast?.info(
       `${provider === "google" ? "Google" : "Facebook"} login coming soon`,
       {
         duration: 3000,
       }
     );
-    // TODO: Implement social login
-  };
-
-  // onChange handler for email/phone
-  const handleEmailOrPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    formik.handleChange(e);
-    // Only mark as touched if field was already touched or submit attempted
-    // This allows validation to run and clear errors when user fixes them
-    // but doesn't show errors while user is still typing initially
-    if (formik.touched.emailOrPhone || formik.submitCount > 0) {
-      formik.setFieldTouched("emailOrPhone");
-    }
   };
 
   return (
@@ -162,41 +145,126 @@ export default function Login() {
 
                   <CardContent className="px-6 pb-6 flex flex-col gap-4">
                     {/* Email Input */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 relative">
                       <label
-                        htmlFor="email-or-phone"
+                        htmlFor="email"
                         className="text-sm font-medium leading-none text-[#0a0a0a]"
                       >
                         Email Address <span className="text-[#dc2626]">*</span>
                       </label>
                       <div className="flex flex-col gap-2">
-                        <input
-                          id="email-or-phone"
-                          name="emailOrPhone"
-                          type="text"
-                          placeholder="Email or phone number"
-                          required
-                          value={formik.values.emailOrPhone}
-                          onChange={handleEmailOrPhoneChange}
-                          onBlur={(e) => {
-                            formik.handleBlur(e);
-                            formik.setFieldTouched("emailOrPhone", true);
-                          }}
-                          disabled={isSubmitting}
-                          autoComplete="username"
-                          autoFocus
-                          className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 text-sm leading-5 text-[#737373] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none focus:border-[#A3A3A3] focus:shadow-[0_0_0_3px_rgba(2,86,61,0.50)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        />
-                        {formik.touched.emailOrPhone &&
-                          formik.errors.emailOrPhone && (
-                            <p className="text-sm text-[#dc2626]">
-                              {formik.errors.emailOrPhone}
-                            </p>
-                          )}
+                        {isPasswordStep ? (
+                          <div className="relative">
+                            <Input
+                              id="email"
+                              name="email"
+                              type="text"
+                              value={formik?.values?.email}
+                              disabled={true}
+                              className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 pr-9 text-sm leading-5 text-[#0a0a0a] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsPasswordStep(false);
+                                formik.setFieldValue("password", "");
+                              }}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#0a0a0a] transition-colors"
+                              disabled={isSubmitting}
+                            >
+                              <ArrowLeft className="w-5 h-5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <Input
+                            id="email"
+                            name="email"
+                            type="text"
+                            placeholder="Email address"
+                            required
+                            value={formik?.values?.email}
+                            onChange={formik?.handleChange}
+                            onBlur={formik?.handleBlur}
+                            disabled={isSubmitting}
+                            className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 text-sm leading-5 text-[#737373] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none focus:border-[#A3A3A3] focus:shadow-[0_0_0_3px_rgba(2,86,61,0.50)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          />
+                        )}
+                        {formik?.touched?.email && formik?.errors?.email && (
+                          <p className="text-sm text-[#dc2626]">
+                            {formik?.errors?.email}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    {/* Continue Button */}
+                    {/* Password Input - Only shown in password step */}
+                    {isPasswordStep && (
+                      <div className="flex flex-col gap-2 relative">
+                        <div className="flex items-start justify-between">
+                          <label
+                            htmlFor="password"
+                            className="text-sm font-medium leading-none text-[#0a0a0a]"
+                          >
+                            Password <span className="text-[#dc2626]">*</span>
+                          </label>
+                          <Link
+                            href="/forgot-password"
+                            className="text-sm text-[#737373] underline decoration-solid underline-offset-2 hover:text-[#0a0a0a] transition-colors leading-none"
+                          >
+                            Forgot your password?
+                          </Link>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="relative">
+                            <Input
+                              id="password"
+                              name="password"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Password"
+                              required
+                              value={formik?.values?.password || ""}
+                              onChange={formik?.handleChange}
+                              onBlur={formik?.handleBlur}
+                              disabled={isSubmitting}
+                              className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 pr-9 text-sm leading-5 text-[#0a0a0a] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none focus:border-[#A3A3A3] focus:shadow-[0_0_0_3px_rgba(2,86,61,0.50)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#0a0a0a] transition-colors"
+                              disabled={isSubmitting}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="w-5 h-5" />
+                              ) : (
+                                <Eye className="w-5 h-5" />
+                              )}
+                            </button>
+                          </div>
+                          {formik?.touched?.password &&
+                            formik?.errors?.password && (
+                              <p className="text-sm text-[#dc2626]">
+                                {formik?.errors?.password}
+                              </p>
+                            )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Keep me signed in - Only shown in password step */}
+                    {isPasswordStep && (
+                      <Checkbox
+                        id="keep-signed-in"
+                        label="Keep me signed in"
+                        checked={formik.values.keepSignedIn}
+                        onCheckedChange={(checked) => {
+                          formik.setFieldValue("keepSignedIn", checked);
+                        }}
+                        disabled={isSubmitting}
+                      />
+                    )}
+
+                    {/* Submit Button */}
                     <Button
                       type="submit"
                       variant="default"
@@ -208,6 +276,8 @@ export default function Login() {
                           <Loader2 className="w-4 h-4 animate-spin" />
                           Processing...
                         </>
+                      ) : isPasswordStep ? (
+                        "Sign In"
                       ) : (
                         "Continue"
                       )}

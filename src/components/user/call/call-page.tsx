@@ -6,9 +6,7 @@ import { toast } from "sonner";
 import { AuthFlow } from "./components/auth-flow";
 import { GuidelinesFlow } from "./components/guidelines-flow";
 import { VerificationInstructionsFlow } from "./components/verification-instructions-flow";
-import { VerificationReadyFlow } from "./components/verification-ready-flow";
-import { VerificationRecordingFlow } from "./components/verification-recording-flow";
-import { VerificationCompletedFlow } from "./components/verification-completed-flow";
+import { VerificationFlow } from "./components/verification-flow";
 import { InterviewActiveFlow } from "./components/interview-active-flow";
 import { InterviewCompleteFlow } from "./components/interview-complete-flow";
 import { InterviewFlowState } from "./types/flow.types";
@@ -169,38 +167,27 @@ export default function CallPage({ interviewId }: CallPageProps) {
     );
   }
 
-  // Render Voice & Video Verification - Ready
-  if (flowState === "verification-ready") {
-    return (
-      <VerificationReadyFlow
-        onStateChange={setFlowState}
-        videoRef={videoRef}
-        applicantName={applicantName}
-        companyName={companyName}
-      />
-    );
-  }
+  // Render Voice & Video Verification - Ready, Recording, or Completed
+  if (
+    flowState === "verification-ready" ||
+    flowState === "verification-recording" ||
+    flowState === "verification-completed"
+  ) {
+    const verificationState =
+      flowState === "verification-ready"
+        ? "ready"
+        : flowState === "verification-recording"
+        ? "recording"
+        : "completed";
 
-  // Render Voice & Video Verification - Recording
-  if (flowState === "verification-recording") {
     return (
-      <VerificationRecordingFlow
-        videoRef={videoRef}
-        recordingProgress={recordingProgress}
-        applicantName={applicantName}
-        companyName={companyName}
-      />
-    );
-  }
-
-  // Render Voice & Video Verification - Completed
-  if (flowState === "verification-completed") {
-    return (
-      <VerificationCompletedFlow
+      <VerificationFlow
+        state={verificationState}
         onStateChange={setFlowState}
         onRetry={handleVerificationRetry}
         onContinue={handleVerificationContinue}
         videoRef={videoRef}
+        recordingProgress={recordingProgress}
         applicantName={applicantName}
         companyName={companyName}
       />

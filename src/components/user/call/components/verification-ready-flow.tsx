@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

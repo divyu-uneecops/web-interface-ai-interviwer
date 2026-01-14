@@ -19,7 +19,6 @@ import {
 import { Logo } from "@/components/logo";
 import { ApplicantAuthFormValues } from "../interfaces/applicant-auth.interface";
 import { validateApplicantAuthForm } from "../utils/applicant-auth.utils";
-import { InterviewFlowState } from "../types/flow.types";
 
 const initialValues: ApplicantAuthFormValues = {
   fullName: "",

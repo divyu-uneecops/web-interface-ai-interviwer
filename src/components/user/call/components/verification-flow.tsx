@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,16 @@ export function VerificationFlow({
   companyName,
 }: VerificationFlowProps) {
   const authorizationStatement = `I, ${applicantName}, authorize ${companyName} to record and use my voice for verification, as per the platform's privacy policy.`;
+
+  // Ensure video plays when component mounts and stream is available
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && video.srcObject) {
+      video.play().catch((error) => {
+        console.error("Error playing video:", error);
+      });
+    }
+  }, [videoRef, state]);
 
   const statusText =
     state === "ready" ? "Start Recording" : "Recording in progress";
@@ -83,6 +94,11 @@ export function VerificationFlow({
                       playsInline
                       muted
                       className="w-full h-full object-cover"
+                      onLoadedMetadata={(e) => {
+                        e.currentTarget.play().catch((error) => {
+                          console.error("Error playing video on load:", error);
+                        });
+                      }}
                     />
                   </div>
 

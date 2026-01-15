@@ -57,6 +57,24 @@ export default function CallPage({ interviewId }: CallPageProps) {
     };
   }, [isInterviewActive, flowState]);
 
+  // Ensure video stream is attached when verification flow is active
+  useEffect(() => {
+    if (
+      (flowState === "verification-ready" ||
+        flowState === "verification-recording" ||
+        flowState === "verification-completed") &&
+      streamRef.current &&
+      videoRef.current
+    ) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        videoRef.current.play().catch((error) => {
+          console.error("Error playing video:", error);
+        });
+      }
+    }
+  }, [flowState]);
+
   // Start recording when state changes to verification-recording
   useEffect(() => {
     if (flowState === "verification-recording" && !isRecording) {

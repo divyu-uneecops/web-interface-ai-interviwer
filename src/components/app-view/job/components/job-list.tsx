@@ -121,7 +121,13 @@ export default function JobList() {
       setPagination(result?.pagination);
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(
+        error ? error?.response?.data?.message : "An unknown error occurred",
+        {
+          duration: 8000,
+        }
+      );
       setJobs([]);
       setPagination({
         total: 0,

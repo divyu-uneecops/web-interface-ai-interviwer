@@ -190,7 +190,7 @@ export function CreateJobModal({
           {/* Basic job details Section */}
           <div className="space-y-4">
             {/* Parse job documentation */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label className="font-semibold text-sm text-[#000000]">
                 Parse job documentation
               </Label>
@@ -205,14 +205,14 @@ export function CreateJobModal({
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Or divider */}
-            <div className="flex items-center justify-center gap-2.5 w-full">
+            {/* <div className="flex items-center justify-center gap-2.5 w-full">
               <div className="flex-1 h-px bg-[#e5e5e5]" />
               <span className="text-sm text-[#737373] leading-none">or</span>
               <div className="flex-1 h-px bg-[#e5e5e5]" />
-            </div>
+            </div> */}
 
             {/* Job Title */}
             <div className="space-y-2">

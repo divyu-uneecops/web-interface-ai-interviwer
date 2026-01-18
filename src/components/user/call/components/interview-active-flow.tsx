@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Clock, ChevronRight, Check, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Header } from "@/components/header";
 import { InterviewFlowState } from "../types/flow.types";
+
+import { LiveKitRoom } from "@livekit/components-react";
+import { CustomVideoConference } from "./custom-video-conference";
+
+import "@livekit/components-styles";
 
 interface InterviewActiveFlowProps {
   onStateChange: (state: InterviewFlowState) => void;
@@ -110,48 +115,20 @@ export function InterviewActiveFlow({
 
         {/* Right Panel */}
         <div className="w-1/2 p-6 flex flex-col bg-white">
-          {/* Question Progress Bar - Full width light gray bar */}
-          <div className="mb-6">
-            <div className="w-full bg-[#f5f5f5] rounded-md px-4 py-2">
-              <span className="text-sm font-medium text-[#717182] block text-center">
-                Question {currentQuestion}/{totalQuestions}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex-1 flex flex-col gap-6">
-            {/* AI Question Message Bubble */}
-            <div className="flex items-start gap-3">
-              {/* Avatar - slightly indented from left */}
-              <div className="w-8 h-8 rounded-full bg-[#f5f5f5] flex items-center justify-center shrink-0">
-                <User className="w-5 h-5 text-[#717182]" />
-              </div>
-              {/* Message Bubble - light grey background */}
-              <div className="flex-1 bg-[#fafafa] border border-[#e5e5e5] rounded-lg px-4 py-3">
-                <p className="text-base text-[#0a0a0a] leading-normal font-normal">
-                  Hey {applicantName.split(" ")[0]}, give a brief introduction
-                  about yourself.
-                </p>
-              </div>
-            </div>
-
-            {/* Recording Response Card */}
-            <Card className="border border-[#e5e5e5] rounded-lg p-4 bg-white flex-1 flex flex-col min-h-0">
-              <p className="text-sm font-medium text-[#717182] mb-2">
-                Recording your response...
-              </p>
-              <div className="flex-1 border-b-2 border-dashed border-[#e5e5e5]"></div>
-            </Card>
-
-            {/* Action Button */}
-            <Button
-              onClick={handleNextQuestion}
-              className="self-end h-11 bg-[#02563d] text-white font-medium rounded-md hover:bg-[#02563d]/90 px-4"
-            >
-              {isLastQuestion ? "Finish" : "Go to next question"}{" "}
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
+          <LiveKitRoom
+            token={`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGV2cmlzaGkgQmhhcmR3YWoiLCJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6ImludGVydmlldy02OTYzY2VhNWM5YmE4M2EwNzZhYWM5NDAtNjI2YWZhYWYiLCJjYW5QdWJsaXNoIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwic3ViIjoiY2FuZGlkYXRlLTY5NjNjZWE1YzliYTgzYTA3NmFhYzk0MCIsImlzcyI6IkFQSXR5bnp3UmtQZWh1ciIsIm5iZiI6MTc2ODU2NTU2NywiZXhwIjoxNzY4NTY5MTY3fQ.Gn_A9O2Ptk-eou17usoz2Wc7o-esZ23WeRlCoUjAJRQ`}
+            serverUrl="wss://voicebot-kj0vxeoj.livekit.cloud"
+            connect
+            data-lk-theme="default"
+            style={{ height: "100vh" }}
+          >
+            <CustomVideoConference
+              onEndCall={() => {
+                onStateChange("interview-complete");
+                onStopCamera();
+              }}
+            />
+          </LiveKitRoom>
         </div>
       </div>
 

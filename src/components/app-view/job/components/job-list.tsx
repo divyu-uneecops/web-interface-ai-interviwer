@@ -9,6 +9,7 @@ import {
   Eye,
   Pencil,
   Trash2,
+  Briefcase,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,13 @@ import { isEmpty } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -296,9 +304,19 @@ export default function JobList() {
         isLoading={isLoading}
         loadingState={<DataTableSkeleton columns={7} rows={11} />}
         emptyState={
-          <div className="text-center py-12">
-            <p className="text-[#737373]">"No jobs found"</p>
-          </div>
+          <Empty className="py-12">
+            <EmptyMedia variant="icon">
+              <Briefcase className="h-8 w-8 text-[#737373]" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No jobs found</EmptyTitle>
+              <EmptyDescription>
+                {appliedFilters?.status?.length > 0 || searchQuery
+                  ? "Try adjusting your filters or search query to find what you're looking for."
+                  : "Get started by creating your first job opening."}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         }
         rowActions={renderRowActions}
       />

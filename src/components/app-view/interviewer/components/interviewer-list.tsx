@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ export function InterviewerList() {
   });
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     roundType: [],
     language: [],
@@ -48,6 +49,7 @@ export function InterviewerList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [interviewerDetail, setInterviewerDetail] =
     useState<Interviewer | null>(null);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
@@ -68,23 +70,44 @@ export function InterviewerList() {
     },
   ];
 
+  // Fetch interviewers when filters change (initial load and reset)
   useEffect(() => {
-    fetchInterviewers();
-  }, [currentOffset, appliedFilters]);
+    setCurrentOffset(0);
+    fetchInterviewers(0, true);
+  }, [appliedFilters]);
 
-  const fetchInterviewers = async () => {
-    setIsLoading(true);
-    setInterviewers([]);
-    setPagination({
-      total: 0,
-      nextOffset: null,
-      previousOffset: null,
-      limit: PAGE_LIMIT,
-    });
+  // Fetch more interviewers when offset changes (lazy loading)
+  useEffect(() => {
+    if (
+      currentOffset > 0 &&
+      pagination.nextOffset !== null &&
+      pagination?.nextOffset >= pagination?.total
+    ) {
+      fetchInterviewers(currentOffset, false);
+    }
+  }, [currentOffset]);
+
+  const fetchInterviewers = async (
+    offset: number,
+    isInitialLoad: boolean = true
+  ) => {
+    if (isInitialLoad) {
+      setIsLoading(true);
+      setInterviewers([]);
+      setPagination({
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: PAGE_LIMIT,
+      });
+    } else {
+      setIsLoadingMore(true);
+    }
+
     try {
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
-        offset: currentOffset,
+        offset: offset,
       };
 
       const response = await interviewerService.getInterviewers(params, {
@@ -134,18 +157,23 @@ export function InterviewerList() {
           limit: PAGE_LIMIT,
         }
       );
-      setInterviewers(result?.interviewers);
+
+      if (isInitialLoad) {
+        setInterviewers(result?.interviewers);
+      } else {
+        setInterviewers((prev) => [...prev, ...result?.interviewers]);
+      }
       setPagination(result?.pagination);
-      // Scroll to top when page changes
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error: any) {
-      setInterviewers([]);
-      setPagination({
-        total: 0,
-        nextOffset: null,
-        previousOffset: null,
-        limit: PAGE_LIMIT,
-      });
+      if (isInitialLoad) {
+        setInterviewers([]);
+        setPagination({
+          total: 0,
+          nextOffset: null,
+          previousOffset: null,
+          limit: PAGE_LIMIT,
+        });
+      }
       toast.error(
         error?.response?.data?.message || "Failed to fetch interviewers",
         {
@@ -154,6 +182,7 @@ export function InterviewerList() {
       );
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -161,7 +190,7 @@ export function InterviewerList() {
     setCurrentOffset(0);
 
     if (currentOffset === 0) {
-      fetchInterviewers();
+      fetchInterviewers(0, true);
     }
   };
 
@@ -170,7 +199,7 @@ export function InterviewerList() {
     setCurrentOffset(0);
 
     if (currentOffset === 0) {
-      fetchInterviewers();
+      fetchInterviewers(0, true);
     }
   };
 
@@ -184,20 +213,39 @@ export function InterviewerList() {
     setCurrentOffset(0); // Reset to first page when filters are applied
   };
 
-  const handlePreviousPage = () => {
-    if (pagination.previousOffset !== null) {
-      setCurrentOffset(pagination.previousOffset);
-    }
-  };
+  // Intersection Observer for lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (
+          target.isIntersecting &&
+          pagination.nextOffset !== null &&
+          !isLoading &&
+          !isLoadingMore &&
+          pagination?.nextOffset < pagination?.total
+        ) {
+          setCurrentOffset(pagination.nextOffset);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "100px",
+        threshold: 0.1,
+      }
+    );
 
-  const handleNextPage = () => {
-    if (pagination.nextOffset !== null) {
-      setCurrentOffset(pagination.nextOffset);
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
-  };
 
-  const totalPages = Math.ceil(pagination?.total || 0 / PAGE_LIMIT);
-  const currentPage = Math.floor(currentOffset / PAGE_LIMIT) + 1;
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -239,7 +287,7 @@ export function InterviewerList() {
       {/* Interviewers Grid */}
       {isLoading ? (
         <div className="grid grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index: number) => (
+          {Array.from({ length: 4 }).map((_, index: number) => (
             <div
               key={index}
               className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
@@ -254,7 +302,7 @@ export function InterviewerList() {
         </div>
       ) : (
         <>
-          {interviewers?.length > 0 && !isLoading && (
+          {interviewers?.length > 0 && (
             <>
               <div className="grid grid-cols-4 gap-6">
                 {interviewers?.map((interviewer: Interviewer) => (
@@ -271,49 +319,36 @@ export function InterviewerList() {
           )}
 
           {/* Empty State */}
-          {interviewers?.length === 0 && !isLoading && (
+          {interviewers?.length === 0 && (
             <div className="text-center py-12">
               <p className="text-[#737373]">No interviewers found</p>
             </div>
           )}
 
-          {/* Pagination Controls */}
-          {pagination.total > 0 && !isLoading && (
-            <div className="flex items-center justify-end mt-6">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreviousPage}
-                  disabled={
-                    pagination?.previousOffset === null ||
-                    pagination?.previousOffset < 0 ||
-                    isLoading
-                  }
+          {/* Loading More Indicator */}
+          {isLoadingMore && (
+            <div className="grid grid-cols-4 gap-6 mt-6">
+              {Array.from({ length: 4 }).map((_, index: number) => (
+                <div
+                  key={`loading-more-${index}`}
+                  className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
-                </Button>
-                <div className="text-sm text-[#737373] px-4">
-                  Page {currentPage} of {totalPages}
+                  <div className="w-full aspect-square rounded bg-gray-200 mb-1" />
+                  <div className="h-4 bg-gray-200 rounded mb-2" />
+                  <div className="h-3 bg-gray-200 rounded mb-1" />
+                  <div className="h-3 bg-gray-200 rounded mb-4" />
+                  <div className="h-9 bg-gray-200 rounded" />
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNextPage}
-                  disabled={
-                    (pagination?.nextOffset &&
-                      pagination?.nextOffset >= pagination?.total) ||
-                    pagination?.nextOffset === null ||
-                    isLoading
-                  }
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
+              ))}
             </div>
           )}
+
+          {/* Sentinel element for Intersection Observer */}
+          {pagination?.nextOffset !== null &&
+            !isLoading &&
+            pagination?.nextOffset < pagination?.total && (
+              <div ref={observerTarget} className="h-10 w-full" />
+            )}
         </>
       )}
 

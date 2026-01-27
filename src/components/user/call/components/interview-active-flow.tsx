@@ -60,7 +60,7 @@ export function InterviewActiveFlow({
       <div className="flex">
         {/* Left Panel - Professional Video-Focused Design */}
         <div className="w-1/2 border-r border-gray-200/50 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 overflow-hidden">
-          <div className="flex flex-col items-center justify-center p-4 gap-1">
+          <div className="flex flex-col items-center justify-center p-4 gap-2">
             {/* Minimal Header - Top Left */}
             <div className="flex justify-between w-full animate-fade-in">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 backdrop-blur-sm border border-[#02563d]/20 rounded-lg shadow-sm">
@@ -75,7 +75,7 @@ export function InterviewActiveFlow({
             {/* Hero Video Container - Center Focused */}
             <div className="w-full aspect-video group">
               {/* Professional Video Frame */}
-              <div className="w-full h-full">
+              <div className="w-full h-[550px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)]">
                 {/* Video Element */}
                 <video
                   ref={videoRef}

@@ -60,7 +60,7 @@ export function InterviewActiveFlow({
       <div className="flex">
         {/* Left Panel - Professional Video-Focused Design */}
         <div className="w-1/2 border-r border-gray-200/50 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 overflow-hidden">
-          <div className="flex flex-col items-center justify-center p-4 gap-10">
+          <div className="flex flex-col items-center justify-center p-4 gap-1">
             {/* Minimal Header - Top Left */}
             <div className="flex justify-between w-full animate-fade-in">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 backdrop-blur-sm border border-[#02563d]/20 rounded-lg shadow-sm">

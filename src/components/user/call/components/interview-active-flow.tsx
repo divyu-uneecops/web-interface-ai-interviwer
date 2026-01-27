@@ -136,7 +136,7 @@ export function InterviewActiveFlow({
         {/* Right Panel */}
         <div className="w-1/2 p-6 flex flex-col bg-white">
           <LiveKitRoom
-            token={`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGV2cmlzaGkgQmhhcmR3YWoiLCJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6ImludGVydmlldy02OTYzY2VhNWM5YmE4M2EwNzZhYWM5NDAtYjM5OTI3MDkiLCJjYW5QdWJsaXNoIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwic3ViIjoiY2FuZGlkYXRlLTY5NjNjZWE1YzliYTgzYTA3NmFhYzk0MCIsImlzcyI6IkFQSXR5bnp3UmtQZWh1ciIsIm5iZiI6MTc2OTUyODA2MCwiZXhwIjoxNzY5NTMxNjYwfQ.W1jQ6mg71UVC9X8dMnYa6fMFQ0NuDsxSu3AMY5Lz3gU`}
+            token={`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGV2cmlzaGkgQmhhcmR3YWoiLCJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6ImludGVydmlldy02OTYzY2VhNWM5YmE4M2EwNzZhYWM5NDAtNjk1ZWY4YTciLCJjYW5QdWJsaXNoIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwic3ViIjoiY2FuZGlkYXRlLTY5NjNjZWE1YzliYTgzYTA3NmFhYzk0MCIsImlzcyI6IkFQSXR5bnp3UmtQZWh1ciIsIm5iZiI6MTc2OTUzMDUwNiwiZXhwIjoxNzY5NTM0MTA2fQ.g5_kL41MaPfkcJsQBhlxbnqbyLjxQp9e7Agy7oqn-lA`}
             serverUrl="wss://voicebot-kj0vxeoj.livekit.cloud"
             connect
             data-lk-theme="default"

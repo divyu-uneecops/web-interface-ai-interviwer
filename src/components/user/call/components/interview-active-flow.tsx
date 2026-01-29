@@ -25,6 +25,8 @@ interface InterviewActiveFlowProps {
   onInterviewStart: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   applicantName: string;
+  token?: string | null;
+  serverUrl?: string | null;
 }
 
 export function InterviewActiveFlow({
@@ -33,8 +35,11 @@ export function InterviewActiveFlow({
   onInterviewStart,
   videoRef,
   applicantName,
+  token,
+  serverUrl,
 }: InterviewActiveFlowProps) {
   const [showTipsModal, setShowTipsModal] = useState(true);
+  const hasLiveKitConfig = Boolean(token && serverUrl);
 
 
   // Ensure video plays when component mounts and stream is available
@@ -106,19 +111,25 @@ export function InterviewActiveFlow({
 
         {/* Right Panel */}
         <div className="w-1/2 p-6 flex flex-col bg-white">
-          <LiveKitRoom
-            token={`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGV2cmlzaGkgQmhhcmR3YWoiLCJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6ImludGVydmlldy02OTYzY2VhNWM5YmE4M2EwNzZhYWM5NDAtMmQ1ZTA4Y2EiLCJjYW5QdWJsaXNoIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwic3ViIjoiY2FuZGlkYXRlLTY5NjNjZWE1YzliYTgzYTA3NmFhYzk0MCIsImlzcyI6IkFQSXR5bnp3UmtQZWh1ciIsIm5iZiI6MTc2OTUzMjA3MywiZXhwIjoxNzY5NTM1NjczfQ.1-xWzK02Xzxj60LQL7r4lH0mpCFTXHDcKjZFA3WinB0`}
-            serverUrl="wss://voicebot-kj0vxeoj.livekit.cloud"
-            connect
-            data-lk-theme="default"
-          >
-            <CustomVideoConference
-              onEndCall={() => {
-                onStateChange("interview-complete");
-                onStopCamera();
-              }}
-            />
-          </LiveKitRoom>
+          {hasLiveKitConfig ? (
+            <LiveKitRoom
+              token={token!}
+              serverUrl={serverUrl!}
+              connect
+              data-lk-theme="default"
+            >
+              <CustomVideoConference
+                onEndCall={() => {
+                  onStateChange("interview-complete");
+                  onStopCamera();
+                }}
+              />
+            </LiveKitRoom>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
+              Unable to connect: missing LiveKit token. Please complete the auth step with a valid interview link (applicantId, jobId, roundId, interviewerId in URL).
+            </div>
+          )}
         </div>
       </div>
 

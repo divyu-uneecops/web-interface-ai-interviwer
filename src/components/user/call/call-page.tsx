@@ -4,22 +4,32 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { AuthFlow } from "./components/auth-flow";
+import type { StartInterviewParams } from "./components/auth-flow";
 import { GuidelinesFlow } from "./components/guidelines-flow";
 import { VerificationInstructionsFlow } from "./components/verification-instructions-flow";
 import { VerificationFlow } from "./components/verification-flow";
 import { InterviewActiveFlow } from "./components/interview-active-flow";
 import { InterviewCompleteFlow } from "./components/interview-complete-flow";
 import { InterviewFlowState } from "./types/flow.types";
+import type { StartInterviewResponse } from "@/services/livekit.service";
+
+export interface LiveKitConfig {
+  token: string;
+  serverUrl: string;
+}
 
 interface CallPageProps {
   interviewId: string;
 }
 
-export default function CallPage({ interviewId }: CallPageProps) {
+export default function CallPage({
+  interviewId,
+}: CallPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [flowState, setFlowState] = useState<InterviewFlowState>("auth");
   const [applicantName, setApplicantName] = useState("Rohan Sharma");
   const [companyName, setCompanyName] = useState("[company name]");
+  const [liveKitConfig, setLiveKitConfig] = useState<LiveKitConfig | null>(null);
 
   // Verification state
   const [recordingProgress, setRecordingProgress] = useState(0);
@@ -140,8 +150,15 @@ export default function CallPage({ interviewId }: CallPageProps) {
       .padStart(2, "0")}`;
   };
 
-  const handleAuthenticated = (name: string) => {
+  const handleAuthenticated = (
+    name: string,
+    startInterviewResponse: StartInterviewResponse
+  ) => {
     setApplicantName(name);
+    setLiveKitConfig({
+      token: startInterviewResponse.token,
+      serverUrl: startInterviewResponse.livekitUrl,
+    });
     setIsAuthenticated(true);
     setFlowState("guidelines");
   };
@@ -222,6 +239,8 @@ export default function CallPage({ interviewId }: CallPageProps) {
         onInterviewStart={() => setIsInterviewActive(true)}
         videoRef={videoRef}
         applicantName={applicantName}
+        token={liveKitConfig?.token}
+        serverUrl={liveKitConfig?.serverUrl}
       />
     );
   }

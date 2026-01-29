@@ -19,6 +19,10 @@ import {
 import { Logo } from "@/components/logo";
 import { ApplicantAuthFormValues } from "../interfaces/applicant-auth.interface";
 import { validateApplicantAuthForm } from "../utils/applicant-auth.utils";
+import {
+  startInterviewAPI,
+  type StartInterviewResponse,
+} from "@/services/livekit.service";
 
 const initialValues: ApplicantAuthFormValues = {
   fullName: "",
@@ -27,12 +31,22 @@ const initialValues: ApplicantAuthFormValues = {
   phone: "",
 };
 
+export interface StartInterviewParams {
+  applicantId: string;
+  jobId: string;
+  roundId: string;
+  interviewerId: string;
+}
+
 interface AuthFlowProps {
-  onAuthenticated: (name: string) => void;
+  onAuthenticated: (name: string, startInterviewResponse: StartInterviewResponse) => void;
   interviewId?: string;
 }
 
-export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
+export function AuthFlow({
+  onAuthenticated,
+  interviewId,
+}: AuthFlowProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formik = useFormik<ApplicantAuthFormValues>({
@@ -52,10 +66,26 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
         return;
       }
 
+
+
+
+
       setIsSubmitting(true);
 
       try {
-        onAuthenticated(values.fullName);
+        const response = await startInterviewAPI({
+          email: values.email,
+          interviewId,
+        });
+
+        if (!response.success) {
+          toast.error("Failed to start interview. Please try again.", {
+            duration: 5000,
+          });
+          return;
+        }
+
+        onAuthenticated("Devrishi Bhardwaj", response);
       } catch (error: any) {
         const errorMessage =
           error?.response?.data?.message ||

@@ -42,12 +42,12 @@ const validate = (values: LoginFormValues, isPasswordStep: boolean) => {
 
   if (!values?.email || values.email?.trim()?.length === 0) {
     errors.email = "Email address is required";
-  } else if (!isValidEmail(values.email.trim())) {
+  } else if (!isValidEmail(values?.email?.trim())) {
     errors.email = "Please enter a valid email address";
   }
 
   if (isPasswordStep) {
-    if (!values?.password || values.password?.trim()?.length === 0) {
+    if (!values?.password || values?.password?.trim()?.length === 0) {
       errors.password = "Password is required";
     }
   }
@@ -132,13 +132,13 @@ export default function Login() {
 
         {/* Right Side - Login Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#fafafa] min-h-screen">
-          <div className="w-full max-w-[448px] flex flex-col gap-8 px-8">
+          <div className="w-full max-w-[440px] flex flex-col gap-8">
             <Logo />
 
-            <div className="flex flex-col gap-0">
+            <div className="flex flex-col gap-2">
               <form onSubmit={formik?.handleSubmit}>
-                <Card className="border-2 border-[rgba(0,0,0,0.1)] rounded-[14px] p-0 flex flex-col gap-6 bg-white">
-                  <CardHeader className="px-6 pt-6 pb-0 flex flex-col gap-[6px] h-[46px]">
+                <Card className="border-2 border-[rgba(0,0,0,0.1)] rounded-[14px] p-6 flex flex-col gap-6 bg-white">
+                  <CardHeader className="px-0 flex flex-col gap-[6px] h-[46px]">
                     <CardTitle className="text-base font-medium leading-4 text-[#0a0a0a] tracking-[-0.3125px]">
                       Welcome Back
                     </CardTitle>
@@ -147,7 +147,7 @@ export default function Login() {
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="px-6 pb-6 flex flex-col gap-4">
+                  <CardContent className="px-0 flex flex-col gap-4">
                     {/* Email Input */}
                     <div className="flex flex-col gap-2 relative">
                       <label
@@ -288,17 +288,17 @@ export default function Login() {
                     </Button>
 
                     {/* Divider */}
-                    <div className="relative h-4 w-full">
+                    {/* <div className="relative h-4 w-full">
                       <div className="absolute border-t border-[#e2e8f0] top-[7.5px] left-0 w-full" />
                       <div className="absolute bg-white h-4 left-1/2 top-0 -translate-x-1/2 flex items-center justify-center px-2">
                         <p className="text-xs font-normal leading-4 text-[#62748e] uppercase whitespace-nowrap">
                           Or continue with
                         </p>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Social Login Buttons */}
-                    <div className="grid grid-cols-2 gap-3 h-9">
+                    {/* <div className="grid grid-cols-2 gap-3 h-9">
                       <Button
                         type="button"
                         variant="outline"
@@ -357,7 +357,7 @@ export default function Login() {
                           Facebook
                         </span>
                       </Button>
-                    </div>
+                    </div> */}
                   </CardContent>
                 </Card>
               </form>

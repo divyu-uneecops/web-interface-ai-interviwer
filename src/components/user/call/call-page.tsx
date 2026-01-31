@@ -8,7 +8,6 @@ import { GuidelinesFlow } from "./components/guidelines-flow";
 import { VerificationInstructionsFlow } from "./components/verification-instructions-flow";
 import { VerificationFlow } from "./components/verification-flow";
 import { InterviewActiveFlow } from "./components/interview-active-flow";
-import { InterviewCompleteFlow } from "./components/interview-complete-flow";
 import { InterviewFlowState } from "./types/flow.types";
 import { StartInterviewResponse } from "./interfaces/applicant-auth.interface";
 
@@ -210,11 +209,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
         serverUrl={liveKitConfig?.serverUrl}
       />
     );
-  }
-
-  // Render Interview Complete Screen
-  if (flowState === "interview-complete") {
-    return <InterviewCompleteFlow />;
   }
 
   return null;

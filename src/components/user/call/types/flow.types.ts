@@ -6,8 +6,7 @@ export type InterviewFlowState =
   | "verification-recording"
   | "verification-completed"
   | "interview-tips"
-  | "interview-active"
-  | "interview-complete";
+  | "interview-active";
 
 export interface ChecklistItems {
   camera: boolean;

@@ -1,7 +1,3 @@
-/**
- * Applicant authentication interfaces
- */
-
 export interface ValidationError {
   [key: string]: string | undefined;
 }
@@ -13,21 +9,16 @@ export interface ApplicantAuthFormValues {
   phone: string;
 }
 
-export interface ApplicantAuthRequest {
-  fullName: string;
-  email: string;
-  phone: string;
-  countryCode: string;
+export interface StartInterviewResponse {
+  success: boolean;
+  token: string;
+  room: string;
+  livekitUrl: string;
+  identity: string;
+  transcriptRecordId?: string;
 }
 
-export interface ApplicantAuthResponse {
-  success?: boolean;
-  authenticated?: boolean;
-  message?: string;
-  token?: string;
-  data?: {
-    token?: string;
-    interviewId?: string;
-    applicantId?: string;
-  };
+export interface StartInterviewPayload {
+  email: string;
+  interviewId: string;
 }

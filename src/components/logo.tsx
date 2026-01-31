@@ -7,8 +7,8 @@ export function Logo() {
         <img src="/Icon.svg" alt="Logo" width={24} height={24} />
       </div>
       <div className="text-xl leading-7 tracking-tight">
-        <span className="font-bold text-[#0a0a0a]">AI </span>
-        <span className="font-normal text-[#0a0a0a]">Interview</span>
+        <span className="font-bold text-[#02563D]">AI </span>
+        <span className="font-normal text-[#02563D]">Interview</span>
       </div>
     </div>
   );

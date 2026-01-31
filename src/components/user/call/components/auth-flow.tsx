@@ -17,12 +17,12 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
-import { ApplicantAuthFormValues } from "../interfaces/applicant-auth.interface";
-import { validateApplicantAuthForm } from "../utils/applicant-auth.utils";
 import {
-  startInterviewAPI,
-  type StartInterviewResponse,
-} from "@/services/livekit.service";
+  ApplicantAuthFormValues,
+  StartInterviewResponse,
+} from "../interfaces/applicant-auth.interface";
+import { validateApplicantAuthForm } from "../utils/applicant-auth.utils";
+import { applicantAuthService } from "../services/applicant-auth.service";
 
 const initialValues: ApplicantAuthFormValues = {
   fullName: "",
@@ -39,14 +39,14 @@ export interface StartInterviewParams {
 }
 
 interface AuthFlowProps {
-  onAuthenticated: (name: string, startInterviewResponse: StartInterviewResponse) => void;
+  onAuthenticated: (
+    name: string,
+    startInterviewResponse: StartInterviewResponse,
+  ) => void;
   interviewId?: string;
 }
 
-export function AuthFlow({
-  onAuthenticated,
-  interviewId,
-}: AuthFlowProps) {
+export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formik = useFormik<ApplicantAuthFormValues>({
@@ -61,7 +61,7 @@ export function AuthFlow({
           "Invalid interview link. Please check your link and try again.",
           {
             duration: 5000,
-          }
+          },
         );
         return;
       }
@@ -69,7 +69,7 @@ export function AuthFlow({
       setIsSubmitting(true);
 
       try {
-        const response = await startInterviewAPI({
+        const response = await applicantAuthService.startInterviewAPI({
           email: values.email,
           interviewId,
         });
@@ -185,7 +185,7 @@ export function AuthFlow({
                         formik.setFieldValue("phone", phoneValue);
                         const digitsOnly = phoneValue.replace(
                           /[\s\-\(\)\+\.]/g,
-                          ""
+                          "",
                         );
                         if (digitsOnly.length > 10 || formik.touched.phone) {
                           formik.setFieldTouched("phone", true, false);

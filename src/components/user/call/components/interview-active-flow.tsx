@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, ChevronRight, Check, Video, Mic2 } from "lucide-react";
+import { ChevronRight, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -22,7 +22,6 @@ import "@livekit/components-styles";
 interface InterviewActiveFlowProps {
   onStateChange: (state: InterviewFlowState) => void;
   onStopCamera: () => void;
-  onInterviewStart: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   applicantName: string;
   token?: string | null;
@@ -32,7 +31,6 @@ interface InterviewActiveFlowProps {
 export function InterviewActiveFlow({
   onStateChange,
   onStopCamera,
-  onInterviewStart,
   videoRef,
   applicantName,
   token,
@@ -54,10 +52,7 @@ export function InterviewActiveFlow({
 
   const handleStartInterview = () => {
     setShowTipsModal(false);
-    onInterviewStart();
   };
-
-
 
   return (
     <>

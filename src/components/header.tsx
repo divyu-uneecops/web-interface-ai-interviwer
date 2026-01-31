@@ -10,10 +10,10 @@ export function Header({ isUser = false }) {
     <header
       className={cn(
         " bg-white/80 backdrop-blur-sm border-b border-[rgba(0,0,0,0.1)]",
-        !isUser && "bg-transparent fixed top-0 left-0 right-0 z-50"
+        !isUser && "bg-transparent fixed top-0 left-0 right-0 z-50",
       )}
     >
-      <div className="container mx-auto px-8 h-[72px] flex items-center justify-between">
+      <div className="container px-6 py-4 flex items-center justify-between">
         <Logo />
 
         {!isUser && (

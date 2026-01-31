@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Logo } from "@/components/logo";
 import { InterviewFlowState } from "../types/flow.types";
 import { Header } from "@/components/header";
 

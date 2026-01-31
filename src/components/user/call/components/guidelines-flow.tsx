@@ -32,27 +32,27 @@ export function GuidelinesFlow({ onStateChange }: GuidelinesFlowProps) {
   return (
     <div className="min-h-screen bg-white">
       <Header isUser={true} />
-      <div className="max-w-4xl mx-auto mt-[20px]">
-        <div className="flex flex-col items-center gap-[10px]">
+      <div className="max-w-4xl mx-auto mt-[10px] p-[12px]">
+        <div>
           {/* Main Title Section */}
-          <div className="w-full text-center">
-            <div className="text-[20px] font-bold text-[#0a0a0a] line-height-[28px]">
+          <div className="w-full text-center mb-[10px]">
+            <div className="text-[20px] font-bold text-[#0a0a0a] leading-[28px]">
               Interview guidelines
             </div>
-            <p className="text-[14px] font-normal text-[#0a0a0a] line-height-[20px]">
+            <p className="text-[14px] font-normal text-[#0a0a0a] leading-[20px]">
               Before we begin, please review these guidelines and complete the
               checklist to ensure the best interview experience.
             </p>
           </div>
 
           {/* Job Details Card */}
-          <Card className="w-full border border-[#e5e5e5] rounded-[14px] p-6 bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)]">
+          <Card className="w-full border border-[#e5e5e5] rounded-[14px] p-6 bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] mb-[20px]">
             <div className="flex flex-col gap-4">
               <div>
                 <h2 className="text-[18px] font-medium text-[#0a0a0a] leading-7">
                   Senior Product Manager
                 </h2>
-                <p className="text-[12px] font-normal text-[#737373] leading-5">
+                <p className="text-[12px] font-normal text-[#737373] leading-4">
                   Product management
                 </p>
               </div>
@@ -74,7 +74,7 @@ export function GuidelinesFlow({ onStateChange }: GuidelinesFlowProps) {
             </div>
           </Card>
 
-          <Card className="w-full border border-[#e5e5e5] rounded-[14px] p-6 bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)]">
+          <Card className="w-full border border-[#e5e5e5] rounded-[14px] p-6 bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] mb-[20px]">
             {/* Pre-interview Checklist Section */}
             <div className="w-full">
               <h3 className="text-[16px] font-medium text-[#0a0a0a] mb-4 leading-[20px]">
@@ -142,41 +142,42 @@ export function GuidelinesFlow({ onStateChange }: GuidelinesFlowProps) {
                 ))}
               </div>
             </div>
+          </Card>
 
-            {/* Privacy Notice Card */}
-            <Card className="w-full border border-[#e5e5e5] rounded-[14px] p-4 bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)]">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                  <Info className="w-3.5 h-3.5 text-[#737373]" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-[#0a0a0a] mb-1 leading-5">
-                    Privacy Notice:
-                  </p>
-                  <p className="text-sm font-normal text-[#737373] leading-5">
-                    This interview will be recorded and analyzed to provide
-                    feedback. Your data is encrypted and handled according to
-                    our privacy policy.
-                  </p>
-                </div>
+          {/* Privacy Notice Card */}
+          <Card className="w-full border border-[#e5e5e5] rounded-[14px] p-4 bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] mb-[12px]">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                <Info className="w-3.5 h-3.5 text-[#737373]" />
               </div>
-            </Card>
-
-            {/* Terms Checkbox */}
-            <div className="w-full">
-              <Checkbox
-                id="terms"
-                checked={agreedToTerms}
-                onCheckedChange={setAgreedToTerms}
-                label="I have reviewed the guidelines and agree to the terms and conditions of this interview session"
-              />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[#0a0a0a] mb-1 leading-5">
+                  Privacy Notice:
+                </p>
+                <p className="text-sm font-normal text-[#737373] leading-5">
+                  This interview will be recorded and analyzed to provide
+                  feedback. Your data is encrypted and handled according to our
+                  privacy policy.
+                </p>
+              </div>
             </div>
           </Card>
+
+          {/* Terms Checkbox */}
+          <div className="w-full mb-[16px]">
+            <Checkbox
+              id="terms"
+              className="font-medium"
+              checked={agreedToTerms}
+              onCheckedChange={setAgreedToTerms}
+              label="I have reviewed the guidelines and agree to the terms and conditions of this interview session"
+            />
+          </div>
           {/* Continue Button */}
           <Button
             onClick={() => onStateChange("verification-instructions")}
             disabled={!canContinue}
-            className="h-11 bg-[#02563d] text-white font-medium text-base leading-5 rounded-md hover:bg-[#02563d]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_1px_2px_0_rgba(2,86,61,0.12)]"
+            className="h-11 bg-[#02563d] text-white font-medium text-base leading-5 rounded-md hover:bg-[#02563d]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] mx-auto"
           >
             Continue <ChevronRight className="w-4 h-4" />
           </Button>

@@ -10,7 +10,7 @@ import { VerificationFlow } from "./components/verification-flow";
 import { InterviewActiveFlow } from "./components/interview-active-flow";
 import { InterviewCompleteFlow } from "./components/interview-complete-flow";
 import { InterviewFlowState } from "./types/flow.types";
-import type { StartInterviewResponse } from "@/services/livekit.service";
+import { StartInterviewResponse } from "./interfaces/applicant-auth.interface";
 
 export interface LiveKitConfig {
   token: string;
@@ -21,26 +21,20 @@ interface CallPageProps {
   interviewId: string;
 }
 
-export default function CallPage({
-  interviewId,
-}: CallPageProps) {
+export default function CallPage({ interviewId }: CallPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [flowState, setFlowState] = useState<InterviewFlowState>("auth");
-  const [applicantName, setApplicantName] = useState("Rohan Sharma");
+  const [applicantName, setApplicantName] = useState("");
   const [companyName, setCompanyName] = useState("[company name]");
-  const [liveKitConfig, setLiveKitConfig] = useState<LiveKitConfig | null>(null);
+  const [liveKitConfig, setLiveKitConfig] = useState<LiveKitConfig | null>(
+    null,
+  );
 
   // Verification state
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-
-  // Interview state
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [totalQuestions, setTotalQuestions] = useState(5);
-  const [interviewTimer, setInterviewTimer] = useState(0);
-  const [isInterviewActive, setIsInterviewActive] = useState(false);
 
   // Check authentication on mount
   useEffect(() => {
@@ -52,19 +46,6 @@ export default function CallPage({
       }
     }
   }, []);
-
-  // Timer for interview
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isInterviewActive && flowState === "interview-active") {
-      interval = setInterval(() => {
-        setInterviewTimer((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isInterviewActive, flowState]);
 
   // Ensure video stream is attached when verification flow or interview is active
   useEffect(() => {
@@ -126,7 +107,7 @@ export default function CallPage({
       }
     } catch (error) {
       toast.error(
-        "Failed to access camera/microphone. Please check permissions."
+        "Failed to access camera/microphone. Please check permissions.",
       );
     }
   };
@@ -141,17 +122,9 @@ export default function CallPage({
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
   const handleAuthenticated = (
     name: string,
-    startInterviewResponse: StartInterviewResponse
+    startInterviewResponse: StartInterviewResponse,
   ) => {
     setApplicantName(name);
     setLiveKitConfig({
@@ -171,10 +144,6 @@ export default function CallPage({
   const handleVerificationContinue = () => {
     // Don't stop camera - it should continue during the interview
     setFlowState("interview-active");
-  };
-
-  const handleNextQuestion = () => {
-    setCurrentQuestion((prev) => prev + 1);
   };
 
   // Render Authentication Screen
@@ -235,7 +204,6 @@ export default function CallPage({
       <InterviewActiveFlow
         onStateChange={setFlowState}
         onStopCamera={stopCamera}
-        onInterviewStart={() => setIsInterviewActive(true)}
         videoRef={videoRef}
         applicantName={applicantName}
         token={liveKitConfig?.token}

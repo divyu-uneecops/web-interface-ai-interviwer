@@ -110,7 +110,7 @@ export function InviteTeamMemberModal({
   const updatePermission = (
     category: keyof typeof permissions,
     key: string,
-    value: boolean
+    value: boolean,
   ) => {
     setPermissions((prev) => ({
       ...prev,
@@ -219,7 +219,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "userManagement",
                             "givePermissions",
-                            v
+                            v,
                           )
                         }
                       />
@@ -286,7 +286,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "candidateManagement",
                             "addCandidates",
-                            v
+                            v,
                           )
                         }
                       />
@@ -297,7 +297,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "candidateManagement",
                             "editCandidates",
-                            v
+                            v,
                           )
                         }
                       />
@@ -310,7 +310,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "candidateManagement",
                             "removeCandidates",
-                            v
+                            v,
                           )
                         }
                       />
@@ -321,7 +321,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "candidateManagement",
                             "downloadResume",
-                            v
+                            v,
                           )
                         }
                       />
@@ -343,7 +343,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "interviewScheduling",
                             "createInterview",
-                            v
+                            v,
                           )
                         }
                       />
@@ -356,7 +356,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "interviewScheduling",
                             "scheduleInterview",
-                            v
+                            v,
                           )
                         }
                       />
@@ -369,7 +369,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "interviewScheduling",
                             "reviewFeedbacks",
-                            v
+                            v,
                           )
                         }
                       />
@@ -380,7 +380,7 @@ export function InviteTeamMemberModal({
                           updatePermission(
                             "interviewScheduling",
                             "trackProgress",
-                            v
+                            v,
                           )
                         }
                       />

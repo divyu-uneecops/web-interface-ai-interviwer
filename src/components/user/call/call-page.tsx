@@ -5,9 +5,9 @@ import { toast } from "sonner";
 
 import { AuthFlow } from "./components/auth-flow";
 import { GuidelinesFlow } from "./components/guidelines-flow";
-import { VerificationInstructionsFlow } from "./components/verification-instructions-flow";
 import { VerificationFlow } from "./components/verification-flow";
 import { InterviewActiveFlow } from "./components/interview-active-flow";
+import { InterviewCompleteFlow } from "./components/interview-complete-flow";
 import { InterviewFlowState } from "./types/flow.types";
 import { StartInterviewResponse } from "./interfaces/applicant-auth.interface";
 
@@ -29,7 +29,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
     null,
   );
 
-  // Verification state
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -46,16 +45,25 @@ export default function CallPage({ interviewId }: CallPageProps) {
     }
   }, []);
 
-  // Ensure video stream is attached when verification flow or interview is active
+  // Start camera when entering verification flow
   useEffect(() => {
-    if (
-      (flowState === "verification-ready" ||
-        flowState === "verification-recording" ||
-        flowState === "verification-completed" ||
-        flowState === "interview-active") &&
-      streamRef.current &&
-      videoRef.current
-    ) {
+    const inVerification =
+      flowState === "verification-ready" ||
+      flowState === "verification-recording" ||
+      flowState === "verification-completed";
+    if (inVerification && !streamRef.current) {
+      startCamera();
+    }
+  }, [flowState]);
+
+  // Attach video stream when verification or interview is active
+  useEffect(() => {
+    const needsStream =
+      flowState === "verification-ready" ||
+      flowState === "verification-recording" ||
+      flowState === "verification-completed" ||
+      flowState === "interview-active";
+    if (needsStream && streamRef.current && videoRef.current) {
       if (videoRef.current.srcObject !== streamRef.current) {
         videoRef.current.srcObject = streamRef.current;
         videoRef.current.play().catch((error) => {
@@ -141,7 +149,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
   };
 
   const handleVerificationContinue = () => {
-    // Don't stop camera - it should continue during the interview
     setFlowState("interview-active");
   };
 
@@ -160,17 +167,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
     return <GuidelinesFlow onStateChange={setFlowState} />;
   }
 
-  // Render Voice & Video Verification - Instructions
-  if (flowState === "verification-instructions") {
-    return (
-      <VerificationInstructionsFlow
-        onStateChange={setFlowState}
-        onStartCamera={startCamera}
-      />
-    );
-  }
-
-  // Render Voice & Video Verification - Ready, Recording, or Completed
+  // Render Voice & Video Verification (VerificationFlow)
   if (
     flowState === "verification-ready" ||
     flowState === "verification-recording" ||
@@ -209,6 +206,11 @@ export default function CallPage({ interviewId }: CallPageProps) {
         serverUrl={liveKitConfig?.serverUrl}
       />
     );
+  }
+
+  // Render Interview Complete Screen
+  if (flowState === "interview-complete") {
+    return <InterviewCompleteFlow />;
   }
 
   return null;

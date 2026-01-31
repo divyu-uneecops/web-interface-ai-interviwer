@@ -39,6 +39,7 @@ export function InterviewActiveFlow({
   const [showTipsModal, setShowTipsModal] = useState(true);
   const hasLiveKitConfig = Boolean(token && serverUrl);
 
+
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {
     const video = videoRef.current;
@@ -68,9 +69,7 @@ export function InterviewActiveFlow({
                   Skills Round
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                30 min duration
-              </p>
+              <p className="text-xs text-slate-600 mt-0.5 font-medium">30 min duration</p>
             </div>
 
             {/* Hero Video Container - Center Focused */}
@@ -90,15 +89,16 @@ export function InterviewActiveFlow({
                     });
                   }}
                 />
+
+
+
               </div>
             </div>
 
             {/* Applicant Name - Bottom Center */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="px-4 py-2 bg-white/95 backdrop-blur-md rounded-lg border border-gray-200/60 shadow-lg">
-                <p className="text-sm font-semibold text-gray-800">
-                  {applicantName}
-                </p>
+                <p className="text-sm font-semibold text-gray-800">{applicantName}</p>
               </div>
             </div>
           </div>
@@ -115,16 +115,14 @@ export function InterviewActiveFlow({
             >
               <CustomVideoConference
                 onEndCall={() => {
-                  onStateChange("guidelines");
+                  onStateChange("interview-complete");
                   onStopCamera();
                 }}
               />
             </LiveKitRoom>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
-              Unable to connect: missing LiveKit token. Please complete the auth
-              step with a valid interview link (applicantId, jobId, roundId,
-              interviewerId in URL).
+              Unable to connect: missing LiveKit token. Please complete the auth step with a valid interview link (applicantId, jobId, roundId, interviewerId in URL).
             </div>
           )}
         </div>

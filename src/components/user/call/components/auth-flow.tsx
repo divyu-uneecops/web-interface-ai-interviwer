@@ -16,13 +16,14 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+
 import { Logo } from "@/components/logo";
 import {
   ApplicantAuthFormValues,
-  StartInterviewResponse,
+  AuthFlowProps,
 } from "../interfaces/applicant-auth.interface";
-import { validateApplicantAuthForm } from "../utils/applicant-auth.utils";
 import { applicantAuthService } from "../services/applicant-auth.service";
+import { isValidEmail, validatePhoneNumber } from "@/lib/utils";
 
 const initialValues: ApplicantAuthFormValues = {
   fullName: "",
@@ -31,20 +32,40 @@ const initialValues: ApplicantAuthFormValues = {
   phone: "",
 };
 
-export interface StartInterviewParams {
-  applicantId: string;
-  jobId: string;
-  roundId: string;
-  interviewerId: string;
-}
+export const validateApplicantAuthForm = (values: {
+  fullName: string;
+  email: string;
+  phone: string;
+}) => {
+  const errors: Partial<Record<keyof ApplicantAuthFormValues, string>> = {};
 
-interface AuthFlowProps {
-  onAuthenticated: (
-    name: string,
-    startInterviewResponse: StartInterviewResponse,
-  ) => void;
-  interviewId?: string;
-}
+  // Full name validation
+  if (!values.fullName || values.fullName?.trim()?.length === 0) {
+    errors.fullName = "Full name is required";
+  } else if (values?.fullName?.trim()?.length < 2) {
+    errors.fullName = "Full name must be at least 2 characters";
+  }
+
+  // Email validation
+  if (!values?.email || values?.email?.trim()?.length === 0) {
+    errors.email = "Email address is required";
+  } else if (!isValidEmail(values?.email?.trim())) {
+    errors.email = "Please enter a valid email address";
+  }
+
+  // Phone validation
+  if (!values.phone || values.phone.trim().length === 0) {
+    errors.phone = "Phone number is required";
+  } else {
+    const phoneValidation = validatePhoneNumber(values?.phone);
+    if (!phoneValidation.isValid) {
+      errors.phone =
+        phoneValidation?.error || "Phone number must be exactly 10 digits";
+    }
+  }
+
+  return errors;
+};
 
 export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,12 +90,12 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
       setIsSubmitting(true);
 
       try {
-        const response = await applicantAuthService.startInterviewAPI({
-          email: values.email,
-          interviewId,
+        const response = await applicantAuthService?.startInterviewAPI({
+          email: values?.email,
+          interviewId: interviewId ?? "",
         });
 
-        if (!response.success) {
+        if (!response?.success) {
           toast.error("Failed to start interview. Please try again.", {
             duration: 5000,
           });
@@ -135,15 +156,15 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
                         name="fullName"
                         type="text"
                         label="Full name"
-                        placeholder="Email or phone number"
+                        placeholder="Full Name"
                         required
-                        value={formik.values.fullName}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
+                        value={formik?.values?.fullName}
+                        onChange={formik?.handleChange}
+                        onBlur={formik?.handleBlur}
                         disabled={isSubmitting}
                         error={
-                          formik.touched.fullName && formik.errors.fullName
-                            ? formik.errors.fullName
+                          formik?.touched?.fullName && formik?.errors?.fullName
+                            ? formik?.errors?.fullName
                             : undefined
                         }
                         className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 text-sm leading-5 text-[#0a0a0a] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none focus:border-[#A3A3A3] focus:shadow-[0_0_0_3px_rgba(2,86,61,0.50)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
@@ -156,15 +177,15 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
                         name="email"
                         type="email"
                         label="Email Address"
-                        placeholder="Email or phone number"
+                        placeholder="Email"
                         required
-                        value={formik.values.email}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
+                        value={formik?.values?.email}
+                        onChange={formik?.handleChange}
+                        onBlur={formik?.handleBlur}
                         disabled={isSubmitting}
                         error={
-                          formik.touched.email && formik.errors.email
-                            ? formik.errors.email
+                          formik?.touched?.email && formik?.errors?.email
+                            ? formik?.errors?.email
                             : undefined
                         }
                         className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 text-sm leading-5 text-[#0a0a0a] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none focus:border-[#A3A3A3] focus:shadow-[0_0_0_3px_rgba(2,86,61,0.50)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
@@ -174,26 +195,21 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
                     <PhoneInput
                       label="Phone number"
                       required
-                      placeholder="Email or phone number"
-                      countryCode={formik.values.countryCode}
-                      phoneNumber={formik.values.phone}
+                      placeholder="Phone number"
+                      countryCode={formik?.values?.countryCode}
+                      phoneNumber={formik?.values?.phone}
                       onCountryCodeChange={(value) => {
-                        formik.setFieldValue("countryCode", value);
+                        formik?.setFieldValue("countryCode", value);
                       }}
                       onPhoneNumberChange={(e) => {
-                        const phoneValue = e.target.value;
+                        const phoneValue = e?.target?.value;
                         formik.setFieldValue("phone", phoneValue);
-                        const digitsOnly = phoneValue.replace(
+                        const digitsOnly = phoneValue?.replace(
                           /[\s\-\(\)\+\.]/g,
                           "",
                         );
-                        if (digitsOnly.length > 10 || formik.touched.phone) {
-                          formik.setFieldTouched("phone", true, false);
-                        }
-                      }}
-                      onFocus={(e) => {
-                        if (!formik.touched.phone) {
-                          formik.setFieldTouched("phone", true, false);
+                        if (digitsOnly?.length > 10 || formik?.touched?.phone) {
+                          formik?.setFieldTouched("phone", true, false);
                         }
                       }}
                       onBlur={(e) => {
@@ -201,8 +217,8 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
                       }}
                       id="phone"
                       error={
-                        formik.touched.phone && formik.errors.phone
-                          ? formik.errors.phone
+                        formik?.touched?.phone && formik?.errors?.phone
+                          ? formik?.errors?.phone
                           : undefined
                       }
                     />
@@ -211,7 +227,7 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
                       type="submit"
                       variant="default"
                       className="w-full h-9 bg-[#02563d] text-white font-medium text-sm rounded-md shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] hover:bg-[#02563d]/90 disabled:opacity-50 flex items-center justify-center gap-2"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !formik.isValid}
                     >
                       {isSubmitting ? (
                         <>

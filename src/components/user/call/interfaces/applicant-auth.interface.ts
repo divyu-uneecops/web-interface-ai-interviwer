@@ -22,3 +22,20 @@ export interface StartInterviewPayload {
   email: string;
   interviewId: string;
 }
+
+export interface LiveKitConfig {
+  token: string;
+  serverUrl: string;
+}
+
+export interface CallPageProps {
+  interviewId: string;
+}
+
+export interface AuthFlowProps {
+  onAuthenticated: (
+    name: string,
+    startInterviewResponse: StartInterviewResponse,
+  ) => void;
+  interviewId?: string;
+}

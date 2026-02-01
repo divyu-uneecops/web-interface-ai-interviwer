@@ -9,16 +9,11 @@ import { VerificationFlow } from "./components/verification-flow";
 import { InterviewActiveFlow } from "./components/interview-active-flow";
 import { InterviewCompleteFlow } from "./components/interview-complete-flow";
 import { InterviewFlowState } from "./types/flow.types";
-import { StartInterviewResponse } from "./interfaces/applicant-auth.interface";
-
-export interface LiveKitConfig {
-  token: string;
-  serverUrl: string;
-}
-
-interface CallPageProps {
-  interviewId: string;
-}
+import {
+  CallPageProps,
+  LiveKitConfig,
+  StartInterviewResponse,
+} from "./interfaces/applicant-auth.interface";
 
 export default function CallPage({ interviewId }: CallPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,10 +58,10 @@ export default function CallPage({ interviewId }: CallPageProps) {
       flowState === "verification-recording" ||
       flowState === "verification-completed" ||
       flowState === "interview-active";
-    if (needsStream && streamRef.current && videoRef.current) {
-      if (videoRef.current.srcObject !== streamRef.current) {
-        videoRef.current.srcObject = streamRef.current;
-        videoRef.current.play().catch((error) => {
+    if (needsStream && streamRef?.current && videoRef?.current) {
+      if (videoRef?.current?.srcObject !== streamRef?.current) {
+        videoRef.current.srcObject = streamRef?.current;
+        videoRef?.current?.play().catch((error) => {
           console.error("Error playing video:", error);
         });
       }
@@ -104,12 +99,12 @@ export default function CallPage({ interviewId }: CallPageProps) {
   // Get camera access
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator?.mediaDevices?.getUserMedia({
         video: true,
         audio: true,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
+      if (videoRef?.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
@@ -120,11 +115,11 @@ export default function CallPage({ interviewId }: CallPageProps) {
   };
 
   const stopCamera = () => {
-    if (streamRef.current) {
+    if (streamRef?.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-    if (videoRef.current) {
+    if (videoRef?.current) {
       videoRef.current.srcObject = null;
     }
   };
@@ -135,8 +130,8 @@ export default function CallPage({ interviewId }: CallPageProps) {
   ) => {
     setApplicantName(name);
     setLiveKitConfig({
-      token: startInterviewResponse.token,
-      serverUrl: startInterviewResponse.livekitUrl,
+      token: startInterviewResponse?.token,
+      serverUrl: startInterviewResponse?.livekitUrl,
     });
     setIsAuthenticated(true);
     setFlowState("guidelines");

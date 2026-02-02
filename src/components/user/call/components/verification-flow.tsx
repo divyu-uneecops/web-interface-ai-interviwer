@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Header } from "@/components/header";
-import { InterviewFlowState } from "../types/flow.types";
 
 const HOW_IT_WORKS_STEPS = [
   {

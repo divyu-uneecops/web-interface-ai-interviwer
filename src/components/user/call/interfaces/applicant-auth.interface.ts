@@ -36,10 +36,7 @@ export interface CallPageProps {
 }
 
 export interface AuthFlowProps {
-  onAuthenticated: (
-    name: string,
-    startInterviewResponse: StartInterviewResponse
-  ) => void;
+  onAuthenticated: (startInterviewResponse: StartInterviewResponse) => void;
   interviewId?: string;
 }
 

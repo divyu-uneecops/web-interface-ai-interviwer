@@ -18,7 +18,6 @@ import {
 export default function CallPage({ interviewId }: CallPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [flowState, setFlowState] = useState<InterviewFlowState>("auth");
-  const [applicantName, setApplicantName] = useState("");
   const [companyName, setCompanyName] = useState("[company name]");
   const [interviewDetails, setInterviewDetails] = useState<any>(null);
   const [liveKitConfig, setLiveKitConfig] = useState<LiveKitConfig | null>(
@@ -126,10 +125,8 @@ export default function CallPage({ interviewId }: CallPageProps) {
   };
 
   const handleAuthenticated = (
-    name: string,
     startInterviewResponse: StartInterviewResponse
   ) => {
-    setApplicantName(name);
     setLiveKitConfig({
       token: startInterviewResponse?.token,
       serverUrl: startInterviewResponse?.livekitUrl,
@@ -219,7 +216,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
         onStateChange={setFlowState}
         onStopCamera={stopCamera}
         videoRef={videoRef}
-        applicantName={applicantName}
+        applicantName={interviewDetails?.applicant?.name || ""}
         token={liveKitConfig?.token}
         serverUrl={liveKitConfig?.serverUrl}
       />

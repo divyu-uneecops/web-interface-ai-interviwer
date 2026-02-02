@@ -4,6 +4,5 @@ export type InterviewFlowState =
   | "verification-ready"
   | "verification-recording"
   | "verification-completed"
-  | "interview-tips"
   | "interview-active"
   | "interview-complete";

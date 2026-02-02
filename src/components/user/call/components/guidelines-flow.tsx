@@ -10,7 +10,10 @@ import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { GuidelinesFlowProps } from "../interfaces/applicant-auth.interface";
 
-export function GuidelinesFlow({ onStateChange }: GuidelinesFlowProps) {
+export function GuidelinesFlow({
+  onStateChange,
+  interviewDetails,
+}: GuidelinesFlowProps) {
   const [checklistItems, setChecklistItems] = useState({
     camera: false,
     microphone: false,
@@ -47,21 +50,25 @@ export function GuidelinesFlow({ onStateChange }: GuidelinesFlowProps) {
             <div className="flex flex-col gap-4">
               <div>
                 <h2 className="text-[18px] font-medium text-[#0a0a0a] leading-7">
-                  Senior Product Manager
+                  {interviewDetails?.job?.title}
                 </h2>
                 <p className="text-[12px] font-normal text-[#737373] leading-4">
-                  Product management
+                  {interviewDetails?.job?.industry}
                 </p>
               </div>
 
               <div className="flex flex-row flex-wrap gap-4">
                 <div className="flex items-center gap-2 text-sm font-normal text-[#0a0a0a] leading-5">
                   <Monitor className="w-4 h-4 shrink-0 text-[#737373]" />
-                  <span className="text-[#737373]">Type: Behavioral round</span>
+                  <span className="text-[#737373]">
+                    Type: {interviewDetails?.round?.type}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-normal text-[#0a0a0a] leading-5">
                   <Clock className="w-4 h-4 shrink-0 text-[#737373]" />
-                  <span className="text-[#737373]">Duration: 30 - 40 min.</span>
+                  <span className="text-[#737373]">
+                    Duration: {interviewDetails?.round?.duration}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-normal text-[#0a0a0a] leading-5">
                   <HelpCircle className="w-4 h-4 shrink-0 text-[#737373]" />

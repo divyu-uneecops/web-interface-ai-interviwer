@@ -20,8 +20,9 @@ export default function CallPage({ interviewId }: CallPageProps) {
   const [flowState, setFlowState] = useState<InterviewFlowState>("auth");
   const [applicantName, setApplicantName] = useState("");
   const [companyName, setCompanyName] = useState("[company name]");
+  const [interviewDetails, setInterviewDetails] = useState({});
   const [liveKitConfig, setLiveKitConfig] = useState<LiveKitConfig | null>(
-    null,
+    null
   );
 
   const [recordingProgress, setRecordingProgress] = useState(0);
@@ -109,7 +110,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
       }
     } catch (error) {
       toast.error(
-        "Failed to access camera/microphone. Please check permissions.",
+        "Failed to access camera/microphone. Please check permissions."
       );
     }
   };
@@ -126,13 +127,14 @@ export default function CallPage({ interviewId }: CallPageProps) {
 
   const handleAuthenticated = (
     name: string,
-    startInterviewResponse: StartInterviewResponse,
+    startInterviewResponse: StartInterviewResponse
   ) => {
     setApplicantName(name);
     setLiveKitConfig({
       token: startInterviewResponse?.token,
       serverUrl: startInterviewResponse?.livekitUrl,
     });
+    setInterviewDetails(startInterviewResponse?.interview_data);
     setIsAuthenticated(true);
     setFlowState("guidelines");
   };
@@ -159,7 +161,12 @@ export default function CallPage({ interviewId }: CallPageProps) {
 
   // Render Interview Guidelines Screen
   if (flowState === "guidelines") {
-    return <GuidelinesFlow onStateChange={setFlowState} />;
+    return (
+      <GuidelinesFlow
+        onStateChange={setFlowState}
+        interviewDetails={interviewDetails}
+      />
+    );
   }
 
   // Render Voice & Video Verification (VerificationFlow)
@@ -172,8 +179,8 @@ export default function CallPage({ interviewId }: CallPageProps) {
       flowState === "verification-ready"
         ? "ready"
         : flowState === "verification-recording"
-          ? "recording"
-          : "completed";
+        ? "recording"
+        : "completed";
 
     return (
       <VerificationFlow

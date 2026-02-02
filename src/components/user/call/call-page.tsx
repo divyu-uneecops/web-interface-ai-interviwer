@@ -149,6 +149,22 @@ export default function CallPage({ interviewId }: CallPageProps) {
     setFlowState("interview-active");
   };
 
+  const handleStartVerificationRecording = () => {
+    const stream = streamRef?.current;
+    const hasVideo = stream
+      ?.getVideoTracks?.()
+      .some((t) => t?.readyState === "live");
+    const hasAudio = stream
+      ?.getAudioTracks?.()
+      .some((t) => t?.readyState === "live");
+    if (!hasVideo || !hasAudio) {
+      toast.error("camera and microphone Permission are not given");
+      startCamera();
+      return;
+    }
+    setFlowState("verification-recording");
+  };
+
   // Render Authentication Screen
   if (!isAuthenticated && flowState === "auth") {
     return (
@@ -185,7 +201,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
     return (
       <VerificationFlow
         state={verificationState}
-        onStateChange={setFlowState}
+        onStartRecording={handleStartVerificationRecording}
         onRetry={handleVerificationRetry}
         onContinue={handleVerificationContinue}
         videoRef={videoRef}

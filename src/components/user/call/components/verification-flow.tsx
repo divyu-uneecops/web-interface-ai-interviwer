@@ -38,18 +38,18 @@ type VerificationState = "ready" | "recording" | "completed";
 
 interface VerificationFlowProps {
   state: VerificationState;
-  onStateChange: (state: InterviewFlowState) => void;
-  onRetry?: () => void;
-  onContinue?: () => void;
+  onStartRecording: () => void;
+  onRetry: () => void;
+  onContinue: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  recordingProgress?: number;
+  recordingProgress: number;
   applicantName: string;
   companyName: string;
 }
 
 export function VerificationFlow({
   state,
-  onStateChange,
+  onStartRecording,
   onRetry,
   onContinue,
   videoRef,
@@ -172,7 +172,7 @@ export function VerificationFlow({
         {state === "ready" && (
           <div className="flex justify-center">
             <Button
-              onClick={() => onStateChange("verification-recording")}
+              onClick={() => onStartRecording()}
               className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white hover:bg-[#02563d]/90"
             >
               Start recording

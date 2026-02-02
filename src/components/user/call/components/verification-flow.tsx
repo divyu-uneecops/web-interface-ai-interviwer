@@ -62,25 +62,13 @@ export function VerificationFlow({
 
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {
-    const video = videoRef.current;
-    if (video && video.srcObject) {
+    const video = videoRef?.current;
+    if (video && video?.srcObject) {
       video.play().catch((error) => {
         console.error("Error playing video:", error);
       });
     }
   }, [videoRef, state]);
-
-  const statusText =
-    state === "ready" ? "Start Recording" : "Recording in progress";
-  const progressText =
-    state === "ready"
-      ? "0% completed"
-      : state === "recording"
-      ? `${recordingProgress}% completed`
-      : "100% completed";
-  const statusColor = state === "ready" ? "text-[#0a0a0a]" : "text-[#02563d]";
-  const progressColor =
-    state === "ready" ? "text-[#717182]" : "text-[#02563d]/70";
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -128,9 +116,9 @@ export function VerificationFlow({
       <Header isUser={true} />
 
       {/* Main content - pixel-perfect layout (Figma 1293-8524, 1293-8610, 1293-9045) */}
-      <div className="mx-auto w-full max-w-[672px] px-6 pb-12 pt-6">
+      <div className="mx-auto w-full max-w-[738px] p-3 pt-[10px]">
         {/* Title block: 24px top, 8px between title and subtitle */}
-        <div className="mb-6 text-center">
+        <div className="mb-[10px] text-center">
           <h1 className="text-[20px] font-bold leading-[28px] text-[#0a0a0a]">
             Voice & video verification
           </h1>
@@ -142,21 +130,7 @@ export function VerificationFlow({
 
         {/* Card: 14px radius, 1px border, 24px padding */}
         <Card className="w-full rounded-[14px] border border-[#e5e5e5] bg-white p-6 shadow-none">
-          <div className="flex flex-col gap-6">
-            {/* Status + progress: 16px title, 12px caption, 4px gap */}
-            <div className="text-center">
-              <h3
-                className={`text-[16px] font-medium leading-[20px] ${statusColor}`}
-              >
-                {statusText}
-              </h3>
-              <p
-                className={`mt-1 text-[12px] font-normal leading-[16px] ${progressColor}`}
-              >
-                {progressText}
-              </p>
-            </div>
-
+          <div className="flex flex-col gap-4">
             {/* Video: 16:9, #f5f5f5, 8px radius */}
             <div className="relative w-full overflow-hidden rounded-lg bg-[#f5f5f5] [aspect-ratio:16/9]">
               <video
@@ -173,71 +147,62 @@ export function VerificationFlow({
               />
             </div>
 
-            {/* Three dots - recording only: 6px diameter, #02563d */}
-            {state === "recording" && (
-              <div className="flex justify-center gap-1.5">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#02563d]"
-                    aria-hidden
-                  />
-                ))}
-              </div>
-            )}
-
             {/* Authorization: 16px semibold, 24px line-height */}
-            <p className="text-center text-[16px] font-semibold leading-[24px] text-[#0a0a0a]">
+            <p className="text-[20px] font-bold leading-[28px] text-[#0a0a0a]">
+              {authorizationStatement}
+            </p>
+          </div>
+
+          {/* Hint card: #fafafa, 14px radius, 16px padding */}
+          <div className="mt-6 rounded-[14px] border border-[#e5e5e5] p-4">
+            <p className="text-[14px] font-medium leading-[14px] text-[#0A0A0A]">
+              Tap{" "}
+              <span className="text-[#02563D]">
+                &quot;Start recording&quot;
+              </span>{" "}
+              to begin, and read the statement shown.
+            </p>
+            <p className="mt-2 text-[14px] font-normal leading-[20px] text-[#737373]">
               {authorizationStatement}
             </p>
           </div>
         </Card>
 
-        {/* Hint card: #fafafa, 14px radius, 16px padding */}
-        <div className="mt-6 rounded-[14px] border border-[#e5e5e5] bg-[#fafafa] p-4">
-          <p className="text-[12px] font-normal leading-[16px] text-[#717182]">
-            Tap{" "}
-            <span className="font-semibold text-[#0a0a0a]">
-              &quot;Start recording&quot;
-            </span>{" "}
-            to begin, and read the statement shown.
-          </p>
-          <p className="mt-2 text-[12px] font-normal leading-[16px] text-[#717182]">
-            {authorizationStatement}
-          </p>
-        </div>
-
         {/* CTA: 24px mt, 44px height, 14px radius */}
         {state === "ready" && (
-          <Button
-            onClick={() => onStateChange("verification-recording")}
-            className="mt-6 h-11 w-full rounded-[14px] bg-[#02563d] text-[16px] font-medium text-white hover:bg-[#02563d]/90"
-          >
-            Start recording
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              onClick={() => onStateChange("verification-recording")}
+              className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white hover:bg-[#02563d]/90"
+            >
+              Start recording
+            </Button>
+          </div>
         )}
 
         {state === "recording" && (
-          <Button
-            disabled
-            className="mt-6 h-11 w-full rounded-[14px] bg-[#02563d] text-[16px] font-medium text-white opacity-50"
-          >
-            Recording...
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              disabled
+              className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white opacity-50"
+            >
+              Recording...
+            </Button>
+          </div>
         )}
 
         {state === "completed" && (
-          <div className="mt-6 flex gap-4">
+          <div className="mt-3 flex gap-4 justify-center">
             <Button
               onClick={onRetry}
               variant="outline"
-              className="h-11 flex-1 rounded-[14px] border border-[#e5e5e5] bg-white text-[16px] font-medium text-[#0a0a0a] hover:bg-[#fafafa]"
+              className="h-11 rounded-[8px] border border-[#e5e5e5] bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-[#fafafa]"
             >
               Retry
             </Button>
             <Button
               onClick={onContinue}
-              className="h-11 flex-1 rounded-[14px] bg-[#02563d] text-[16px] font-medium text-white hover:bg-[#02563d]/90"
+              className="h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white hover:bg-[#02563d]/90"
             >
               Continue <ChevronRight className="ml-1 h-4 w-4" />
             </Button>

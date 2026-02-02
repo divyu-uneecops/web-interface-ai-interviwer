@@ -32,7 +32,7 @@ export function GuidelinesFlow({
   return (
     <div className="min-h-screen bg-white">
       <Header isUser={true} />
-      <div className="max-w-4xl mx-auto mt-[10px] p-[12px]">
+      <div className="max-w-[738px] mx-auto mt-[10px] p-[12px]">
         <div>
           {/* Main Title Section */}
           <div className="w-full text-center mb-[10px]">

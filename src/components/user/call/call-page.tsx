@@ -20,7 +20,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
   const [flowState, setFlowState] = useState<InterviewFlowState>("auth");
   const [applicantName, setApplicantName] = useState("");
   const [companyName, setCompanyName] = useState("[company name]");
-  const [interviewDetails, setInterviewDetails] = useState({});
+  const [interviewDetails, setInterviewDetails] = useState<any>(null);
   const [liveKitConfig, setLiveKitConfig] = useState<LiveKitConfig | null>(
     null
   );
@@ -190,7 +190,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
         onContinue={handleVerificationContinue}
         videoRef={videoRef}
         recordingProgress={recordingProgress}
-        applicantName={applicantName}
+        applicantName={interviewDetails?.applicant?.name || ""}
         companyName={companyName}
       />
     );

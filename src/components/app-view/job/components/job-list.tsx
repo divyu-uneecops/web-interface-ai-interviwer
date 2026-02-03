@@ -29,11 +29,11 @@ import {
   FilterState,
   FilterGroup,
 } from "@/components/shared/interfaces/shared.interface";
-import { JobDetail } from "../interfaces/job.interface";
+import { JobDetail, JobStat } from "../interfaces/job.interface";
 import { CreateJobModal } from "./create-job-modal";
 import { jobService } from "../services/job.service";
 import { transformAPIResponseToJobs } from "../utils/job.utils";
-import { stats, statusStyles } from "../constants/job.constants";
+import { statusStyles } from "../constants/job.constants";
 import { isEmpty } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
@@ -49,6 +49,12 @@ import {
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [stats, setStats] = useState<JobStat[]>([
+    { label: "Total Jobs", value: 0, icon: "jobs" },
+    { label: "Total Applicants", value: 0, icon: "applicants" },
+    { label: "Total Interviews Scheduled", value: 0, icon: "scheduled" },
+    { label: "Total Interviews Completed", value: 0, icon: "completed" },
+  ]);
   const [jobs, setJobs] = useState<JobDetail[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -80,9 +86,104 @@ export default function JobList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [jobDetail, setJobDetail] = useState<JobDetail | null>(null);
 
+  const appIdPayload = { appId: "69521cd1c9ba83a076aac3ae" };
+  const listParams = { limit: 1, offset: 0 };
+
+  const fetchStats = async () => {
+    const [
+      jobsResult,
+      applicantsResult,
+      interviewsScheduledResult,
+      interviewsCompletedResult,
+    ] = await Promise.allSettled([
+      jobService.getJobOpenings(listParams, {
+        ...appIdPayload,
+        filters: { $and: [] },
+      }),
+      jobService.getApplicants(listParams, {
+        ...appIdPayload,
+        filters: { $and: [] },
+      }),
+      jobService.getInterviews(listParams, {
+        ...appIdPayload,
+        filters: {
+          $and: [
+            {
+              key: "#.records.status",
+              operator: "$in",
+              value: ["Scheduled"],
+              type: "select",
+            },
+          ],
+        },
+      }),
+      jobService.getInterviews(listParams, {
+        ...appIdPayload,
+        filters: {
+          $and: [
+            {
+              key: "#.records.status",
+              operator: "$in",
+              value: ["Completed"],
+              type: "select",
+            },
+          ],
+        },
+      }),
+    ]);
+
+    const getTotal = (result: PromiseSettledResult<any>) =>
+      result.status === "fulfilled" && result.value?.page?.total?.[0] != null
+        ? result.value.page.total[0]
+        : 0;
+
+    const labelFor = (value: number, plural: string, singular: string) =>
+      value === 1 ? singular : plural;
+
+    const totalJobs = getTotal(jobsResult);
+    const totalApplicants = getTotal(applicantsResult);
+    const totalScheduled = getTotal(interviewsScheduledResult);
+    const totalCompleted = getTotal(interviewsCompletedResult);
+
+    setStats((prev) => [
+      {
+        ...prev[0],
+        value: totalJobs,
+        label: labelFor(totalJobs, "Total Jobs", "Total Job"),
+      },
+      {
+        ...prev[1],
+        value: totalApplicants,
+        label: labelFor(totalApplicants, "Total Applicants", "Total Applicant"),
+      },
+      {
+        ...prev[2],
+        value: totalScheduled,
+        label: labelFor(
+          totalScheduled,
+          "Total Interviews Scheduled",
+          "Total Interview Scheduled"
+        ),
+      },
+      {
+        ...prev[3],
+        value: totalCompleted,
+        label: labelFor(
+          totalCompleted,
+          "Total Interviews Completed",
+          "Total Interview Completed"
+        ),
+      },
+    ]);
+  };
+
   useEffect(() => {
     fetchJobs();
   }, [currentOffset, appliedFilters]);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const fetchJobs = async () => {
     setIsLoading(true);
@@ -118,7 +219,12 @@ export default function JobList() {
       });
       const result = transformAPIResponseToJobs(response?.data, response?.page);
       setJobs(result?.jobs);
-      setPagination(result?.pagination);
+      setPagination({
+        total: result?.pagination?.total[0] || 0,
+        nextOffset: result?.pagination?.nextOffset,
+        previousOffset: result?.pagination?.previousOffset,
+        limit: result?.pagination?.limit,
+      });
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error: any) {

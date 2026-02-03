@@ -27,7 +27,7 @@ export interface JobFormData {
 export interface JobStat {
   label: string;
   value: string | number;
-  icon: "applicants" | "completed" | "hired" | "score";
+  icon: "jobs" | "applicants" | "scheduled" | "completed";
 }
 
 export interface Round {
@@ -77,7 +77,7 @@ export interface APIJobItem {
 }
 
 export interface APIPaginationInfo {
-  total: number;
+  total: number[];
   nextOffset: number | null;
   previousOffset: number | null;
   limit: number;

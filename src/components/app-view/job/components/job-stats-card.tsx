@@ -1,29 +1,37 @@
 "use client";
 
-import { Target, UserPlus, CircleCheck, Activity } from "lucide-react";
+import {
+  Briefcase,
+  Users,
+  CalendarClock,
+  CircleCheck,
+  Target,
+  UserPlus,
+  Activity,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JobStat } from "../interfaces/job.interface";
 
 const iconMap = {
-  applicants: {
-    Icon: Activity,
+  jobs: {
+    Icon: Briefcase,
     bgColor: "bg-[rgba(2,86,61,0.1)]",
     iconColor: "text-[#02563d]",
+  },
+  applicants: {
+    Icon: Users,
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+  },
+  scheduled: {
+    Icon: CalendarClock,
+    bgColor: "bg-purple-50",
+    iconColor: "text-purple-600",
   },
   completed: {
     Icon: CircleCheck,
     bgColor: "bg-green-50",
     iconColor: "text-green-600",
-  },
-  hired: {
-    Icon: UserPlus,
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-600",
-  },
-  score: {
-    Icon: Target,
-    bgColor: "bg-yellow-50",
-    iconColor: "text-yellow-600",
   },
 };
 
@@ -33,7 +41,8 @@ interface JobStatsCardProps {
 }
 
 export function JobStatsCard({ stat, className }: JobStatsCardProps) {
-  const { Icon, bgColor, iconColor } = iconMap[stat.icon];
+  const { Icon, bgColor, iconColor } =
+    iconMap[stat.icon as keyof typeof iconMap];
 
   return (
     <div

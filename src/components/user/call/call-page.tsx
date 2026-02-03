@@ -222,7 +222,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
         onStateChange={setFlowState}
         onStopCamera={stopCamera}
         videoRef={videoRef}
-        applicantName={interviewDetails?.applicant?.name || ""}
+        interviewDetails={interviewDetails}
         token={liveKitConfig?.token}
         serverUrl={liveKitConfig?.serverUrl}
       />

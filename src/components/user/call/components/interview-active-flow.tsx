@@ -24,7 +24,7 @@ interface InterviewActiveFlowProps {
   onStateChange: (state: InterviewFlowState) => void;
   onStopCamera: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  applicantName: string;
+  interviewDetails: any;
   token?: string | null;
   serverUrl?: string | null;
 }
@@ -33,7 +33,7 @@ export function InterviewActiveFlow({
   onStateChange,
   onStopCamera,
   videoRef,
-  applicantName,
+  interviewDetails,
   token,
   serverUrl,
 }: InterviewActiveFlowProps) {
@@ -112,9 +112,11 @@ export function InterviewActiveFlow({
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#02563d]/08 text-[#02563d] text-xs font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#02563d] animate-pulse" />
-                    Skills Round
+                    {interviewDetails?.round?.type} Round
                   </span>
-                  <span className="text-xs text-[#737373]">30 min</span>
+                  <span className="text-xs text-[#737373]">
+                    {interviewDetails?.round?.duration}
+                  </span>
                 </div>
                 <div className="flex-1 min-h-0 rounded-xl overflow-hidden bg-[#0a0a0a] border border-[#e5e5e5]">
                   <video
@@ -130,8 +132,8 @@ export function InterviewActiveFlow({
                     }}
                   />
                 </div>
-                <p className="mt-3 text-sm font-medium text-[#0a0a0a] truncate">
-                  {applicantName}
+                <p className="mt-3 mx-auto text-sm font-medium text-[#0a0a0a] truncate">
+                  {interviewDetails?.applicant?.name}
                 </p>
               </div>
             </div>
@@ -161,9 +163,7 @@ export function InterviewActiveFlow({
                 </LiveKitRoom>
               ) : (
                 <div className="flex-1 flex items-center justify-center px-6 text-sm text-[#737373] text-center">
-                  Unable to connect: missing LiveKit token. Please complete the
-                  auth step with a valid interview link (applicantId, jobId,
-                  roundId, interviewerId in URL).
+                  Unable to connect: missing LiveKit token.
                 </div>
               )}
             </div>

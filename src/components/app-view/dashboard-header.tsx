@@ -71,9 +71,9 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
             Create interview
           </Button>
 
-          <button className="p-0 hover:bg-[rgba(0,0,0,0.05)] rounded-lg transition-colors">
+          {/* <button className="p-0 hover:bg-[rgba(0,0,0,0.05)] rounded-lg transition-colors">
             <Bell className="w-6 h-6 text-[#02563d]" strokeWidth={1.5} />
-          </button>
+          </button> */}
 
           {/* User Avatar */}
           <div

@@ -67,13 +67,6 @@ import { useAppSelector } from "@/store/hooks";
 import { isEmpty } from "@/lib/utils";
 import { CreateRoundModal } from "@/components/shared/components/create-round-modal";
 
-export const stats: JobStat[] = [
-  { label: "Total Applicants", value: 143, icon: "applicants" },
-  { label: "Completed", value: 90, icon: "completed" },
-  { label: "Total Hired", value: 7, icon: "hired" },
-  { label: "Avg Score", value: 82.2, icon: "score" },
-];
-
 export default function JobDetails() {
   const params = useParams();
   const router = useRouter();
@@ -82,6 +75,12 @@ export default function JobDetails() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [job, setJob] = useState<JobDetail | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(true);
+  const [stats, setStats] = useState<JobStat[]>([
+    { label: "Total Jobs", value: 0, icon: "jobs" },
+    { label: "Total Applicants", value: 0, icon: "applicants" },
+    { label: "Total Interviews Scheduled", value: 0, icon: "scheduled" },
+    { label: "Total Interviews Completed", value: 0, icon: "completed" },
+  ]);
   const { mappingValues } = useAppSelector((state) => state.jobs);
 
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
@@ -717,7 +716,7 @@ export default function JobDetails() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Switch
               checked={whatsappReminder}
               onCheckedChange={setWhatsappReminder}
@@ -725,7 +724,7 @@ export default function JobDetails() {
             <span className="text-sm font-medium text-[#0a0a0a]">
               Whatsapp reminder
             </span>
-          </div>
+          </div> */}
           <Button
             variant="secondary"
             className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"

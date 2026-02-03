@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/app-view/dashboard", icon: ChartColumn },
+  // { name: "Dashboard", href: "/app-view/dashboard", icon: ChartColumn },
   { name: "Jobs", href: "/app-view/jobs", icon: Briefcase },
   {
     name: "AI Interviewers",
@@ -23,7 +23,7 @@ const navigation = [
   },
   { name: "Interviews", href: "/app-view/interviews", icon: FileText },
   { name: "User Management", href: "/app-view/role-management", icon: Users },
-  { name: "Billing", href: "/app-view/billing", icon: CreditCard },
+  // { name: "Billing", href: "/app-view/billing", icon: CreditCard },
 ];
 
 export function Sidebar() {

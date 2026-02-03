@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronRight, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -37,8 +38,53 @@ export function InterviewActiveFlow({
   serverUrl,
 }: InterviewActiveFlowProps) {
   const [showTipsModal, setShowTipsModal] = useState(true);
+  const [fullscreenWarningType, setFullscreenWarningType] = useState<
+    null | 1 | 2 | 3
+  >(null);
   const hasLiveKitConfig = Boolean(token && serverUrl);
+  const exitFullscreenCountRef = useRef(0);
 
+  const handleEnterFullscreen = () => {
+    setFullscreenWarningType(null);
+    document.documentElement.requestFullscreen().catch(() => {});
+  };
+
+  const handleFullscreenWarningClose = () => {
+    if (fullscreenWarningType === 3) {
+      if (document?.fullscreenElement) {
+        document
+          ?.exitFullscreen()
+          ?.catch((err) => console.error("Exit fullscreen error:", err));
+      }
+      onStateChange("interview-complete");
+      onStopCamera();
+    }
+    setFullscreenWarningType(null);
+  };
+
+  // Detect user exiting fullscreen and show escalating warnings in Dialog
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement !== null) return;
+
+      exitFullscreenCountRef.current += 1;
+      const count = exitFullscreenCountRef.current;
+
+      if (count === 1) {
+        setFullscreenWarningType(1);
+      } else if (count === 2) {
+        setFullscreenWarningType(2);
+      } else {
+        setFullscreenWarningType(3);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const showFullscreenWarningDialog = fullscreenWarningType !== null;
 
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {
@@ -56,77 +102,146 @@ export function InterviewActiveFlow({
 
   return (
     <>
-      <Header isUser={true} />
-      <div className="flex">
-        {/* Left Panel - Professional Video-Focused Design */}
-        <div className="w-1/2 border-r border-gray-200/50 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 overflow-hidden">
-          <div className="flex flex-col items-center justify-center p-4 gap-2">
-            {/* Minimal Header - Top Left */}
-            <div className="flex justify-between w-full animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 backdrop-blur-sm border border-[#02563d]/20 rounded-lg shadow-sm">
-                <div className="w-2 h-2 bg-[#02563d] rounded-full animate-pulse shadow-[0_0_6px_rgba(2,86,61,0.5)]" />
-                <span className="text-xs font-semibold text-[#02563d] tracking-wide">
-                  Skills Round
-                </span>
+      <div className="fixed inset-0 flex flex-col h-screen w-screen overflow-hidden bg-white">
+        <Header isUser={true} />
+        <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 w-full">
+            {/* Left Panel - Professional Video-Focused Design */}
+            <div className="w-1/2 border-r border-gray-200/50 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 overflow-hidden">
+              <div className="flex flex-col items-center justify-center p-4 gap-2">
+                {/* Minimal Header - Top Left */}
+                <div className="flex justify-between w-full animate-fade-in">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 backdrop-blur-sm border border-[#02563d]/20 rounded-lg shadow-sm">
+                    <div className="w-2 h-2 bg-[#02563d] rounded-full animate-pulse shadow-[0_0_6px_rgba(2,86,61,0.5)]" />
+                    <span className="text-xs font-semibold text-[#02563d] tracking-wide">
+                      Skills Round
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5 font-medium">
+                    30 min duration
+                  </p>
+                </div>
+
+                {/* Hero Video Container - Center Focused */}
+                <div className="w-full aspect-video group">
+                  {/* Professional Video Frame */}
+                  <div className="w-full h-[550px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)]">
+                    {/* Video Element */}
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover"
+                      onLoadedMetadata={(e) => {
+                        e.currentTarget.play().catch((error) => {
+                          console.error("Error playing video on load:", error);
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Applicant Name - Bottom Center */}
+                <div
+                  className="animate-fade-in"
+                  style={{ animationDelay: "0.2s" }}
+                >
+                  <div className="px-4 py-2 bg-white/95 backdrop-blur-md rounded-lg border border-gray-200/60 shadow-lg">
+                    <p className="text-sm font-semibold text-gray-800">
+                      {applicantName}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-slate-600 mt-0.5 font-medium">30 min duration</p>
             </div>
 
-            {/* Hero Video Container - Center Focused */}
-            <div className="w-full aspect-video group">
-              {/* Professional Video Frame */}
-              <div className="w-full h-[550px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)]">
-                {/* Video Element */}
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover"
-                  onLoadedMetadata={(e) => {
-                    e.currentTarget.play().catch((error) => {
-                      console.error("Error playing video on load:", error);
-                    });
-                  }}
-                />
-
-
-
-              </div>
-            </div>
-
-            {/* Applicant Name - Bottom Center */}
-            <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <div className="px-4 py-2 bg-white/95 backdrop-blur-md rounded-lg border border-gray-200/60 shadow-lg">
-                <p className="text-sm font-semibold text-gray-800">{applicantName}</p>
-              </div>
+            {/* Right Panel */}
+            <div className="w-1/2 p-6 flex flex-col bg-white">
+              {hasLiveKitConfig ? (
+                <LiveKitRoom
+                  token={token!}
+                  serverUrl={serverUrl!}
+                  connect
+                  data-lk-theme="default"
+                >
+                  <CustomVideoConference
+                    onEndCall={() => {
+                      if (document?.fullscreenElement) {
+                        document
+                          ?.exitFullscreen()
+                          ?.catch((err) =>
+                            console.error("Exit fullscreen error:", err)
+                          );
+                      }
+                      onStateChange("interview-complete");
+                      onStopCamera();
+                    }}
+                  />
+                </LiveKitRoom>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
+                  Unable to connect: missing LiveKit token. Please complete the
+                  auth step with a valid interview link (applicantId, jobId,
+                  roundId, interviewerId in URL).
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Right Panel */}
-        <div className="w-1/2 p-6 flex flex-col bg-white">
-          {hasLiveKitConfig ? (
-            <LiveKitRoom
-              token={token!}
-              serverUrl={serverUrl!}
-              connect
-              data-lk-theme="default"
-            >
-              <CustomVideoConference
-                onEndCall={() => {
-                  onStateChange("interview-complete");
-                  onStopCamera();
-                }}
-              />
-            </LiveKitRoom>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
-              Unable to connect: missing LiveKit token. Please complete the auth step with a valid interview link (applicantId, jobId, roundId, interviewerId in URL).
-            </div>
-          )}
-        </div>
       </div>
+
+      {/* Fullscreen exit warning Dialog */}
+      <Dialog
+        open={showFullscreenWarningDialog}
+        onOpenChange={(open) => {
+          if (!open && fullscreenWarningType === 3) {
+            onStateChange("interview-complete");
+            onStopCamera();
+          }
+          if (!open) setFullscreenWarningType(null);
+        }}
+      >
+        <DialogContent
+          className="max-w-md p-6"
+          showCloseButton={false}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-left text-lg font-semibold text-[#0a0a0a]">
+              {fullscreenWarningType === 1 && "Fullscreen required"}
+              {fullscreenWarningType === 2 && "Final warning"}
+              {fullscreenWarningType === 3 && "Interview ended"}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#0a0a0a] leading-normal">
+            {fullscreenWarningType === 1 &&
+              "Please stay in fullscreen during the interview. Return to fullscreen to continue."}
+            {fullscreenWarningType === 2 &&
+              "You have exited fullscreen again. Stay in fullscreen for the interview. This is a final warning."}
+            {fullscreenWarningType === 3 &&
+              "Repeatedly exiting fullscreen is not allowed. The interview has been ended and flagged."}
+          </p>
+          <DialogFooter className="flex justify-end gap-2 sm:justify-end">
+            {fullscreenWarningType !== 3 ? (
+              <Button
+                onClick={handleEnterFullscreen}
+                className="h-10 bg-[#02563d] px-5 text-white font-medium hover:bg-[#02563d]/90"
+              >
+                Enter fullscreen
+              </Button>
+            ) : (
+              <Button
+                onClick={handleFullscreenWarningClose}
+                className="h-10 bg-[#02563d] px-5 text-white font-medium hover:bg-[#02563d]/90"
+              >
+                OK
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Interview Tips Modal */}
       <Dialog open={showTipsModal} onOpenChange={setShowTipsModal}>

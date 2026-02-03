@@ -82,7 +82,7 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
           "Invalid interview link. Please check your link and try again.",
           {
             duration: 5000,
-          },
+          }
         );
         return;
       }
@@ -102,7 +102,7 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
           return;
         }
 
-        onAuthenticated("Devrishi Bhardwaj", response);
+        onAuthenticated(response);
       } catch (error: any) {
         const errorMessage =
           error?.response?.data?.message ||
@@ -206,7 +206,7 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
                         formik.setFieldValue("phone", phoneValue);
                         const digitsOnly = phoneValue?.replace(
                           /[\s\-\(\)\+\.]/g,
-                          "",
+                          ""
                         );
                         if (digitsOnly?.length > 10 || formik?.touched?.phone) {
                           formik?.setFieldTouched("phone", true, false);

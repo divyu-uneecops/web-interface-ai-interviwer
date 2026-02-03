@@ -143,6 +143,12 @@ export default function CallPage({ interviewId }: CallPageProps) {
   };
 
   const handleVerificationContinue = () => {
+    if (!document.fullscreenElement) {
+      document?.documentElement
+        ?.requestFullscreen()
+        ?.catch((err) => console.error("Auto fullscreen error:", err));
+    }
+
     setFlowState("interview-active");
   };
 

@@ -102,62 +102,42 @@ export function InterviewActiveFlow({
 
   return (
     <>
-      <div className="fixed inset-0 flex flex-col h-screen w-screen overflow-hidden bg-white">
+      <div className="fixed inset-0 flex flex-col h-screen w-screen overflow-hidden bg-[#fafafa]">
         <Header isUser={true} />
         <div className="flex flex-1 min-h-0">
           <div className="flex flex-1 min-h-0 w-full">
-            {/* Left Panel - Professional Video-Focused Design */}
-            <div className="w-1/2 border-r border-gray-200/50 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 overflow-hidden">
-              <div className="flex flex-col items-center justify-center p-4 gap-2">
-                {/* Minimal Header - Top Left */}
-                <div className="flex justify-between w-full animate-fade-in">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 backdrop-blur-sm border border-[#02563d]/20 rounded-lg shadow-sm">
-                    <div className="w-2 h-2 bg-[#02563d] rounded-full animate-pulse shadow-[0_0_6px_rgba(2,86,61,0.5)]" />
-                    <span className="text-xs font-semibold text-[#02563d] tracking-wide">
-                      Skills Round
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                    30 min duration
-                  </p>
+            {/* Left: Interviewer video */}
+            <div className="w-1/2 flex flex-col border-r border-[#e5e5e5] bg-white overflow-hidden">
+              <div className="flex-1 flex flex-col justify-center px-6 py-5 min-h-0">
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#02563d]/08 text-[#02563d] text-xs font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#02563d] animate-pulse" />
+                    Skills Round
+                  </span>
+                  <span className="text-xs text-[#737373]">30 min</span>
                 </div>
-
-                {/* Hero Video Container - Center Focused */}
-                <div className="w-full aspect-video group">
-                  {/* Professional Video Frame */}
-                  <div className="w-full h-[550px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)]">
-                    {/* Video Element */}
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-full object-cover"
-                      onLoadedMetadata={(e) => {
-                        e.currentTarget.play().catch((error) => {
-                          console.error("Error playing video on load:", error);
-                        });
-                      }}
-                    />
-                  </div>
+                <div className="flex-1 min-h-0 rounded-xl overflow-hidden bg-[#0a0a0a] border border-[#e5e5e5]">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                    onLoadedMetadata={(e) => {
+                      e.currentTarget.play().catch((error) => {
+                        console.error("Error playing video on load:", error);
+                      });
+                    }}
+                  />
                 </div>
-
-                {/* Applicant Name - Bottom Center */}
-                <div
-                  className="animate-fade-in"
-                  style={{ animationDelay: "0.2s" }}
-                >
-                  <div className="px-4 py-2 bg-white/95 backdrop-blur-md rounded-lg border border-gray-200/60 shadow-lg">
-                    <p className="text-sm font-semibold text-gray-800">
-                      {applicantName}
-                    </p>
-                  </div>
-                </div>
+                <p className="mt-3 text-sm font-medium text-[#0a0a0a] truncate">
+                  {applicantName}
+                </p>
               </div>
             </div>
 
-            {/* Right Panel */}
-            <div className="w-1/2 p-6 flex flex-col bg-white">
+            {/* Right: LiveKit / controls */}
+            <div className="w-1/2 flex flex-col bg-[#fafafa] min-h-0">
               {hasLiveKitConfig ? (
                 <LiveKitRoom
                   token={token!}
@@ -180,7 +160,7 @@ export function InterviewActiveFlow({
                   />
                 </LiveKitRoom>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
+                <div className="flex-1 flex items-center justify-center px-6 text-sm text-[#737373] text-center">
                   Unable to connect: missing LiveKit token. Please complete the
                   auth step with a valid interview link (applicantId, jobId,
                   roundId, interviewerId in URL).
@@ -191,7 +171,7 @@ export function InterviewActiveFlow({
         </div>
       </div>
 
-      {/* Fullscreen exit warning Dialog */}
+      {/* Fullscreen exit warning */}
       <Dialog
         open={showFullscreenWarningDialog}
         onOpenChange={(open) => {
@@ -203,19 +183,19 @@ export function InterviewActiveFlow({
         }}
       >
         <DialogContent
-          className="max-w-md p-6"
+          className="max-w-[400px] p-6 rounded-xl"
           showCloseButton={false}
           onPointerDownOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <DialogHeader>
-            <DialogTitle className="text-left text-lg font-semibold text-[#0a0a0a]">
+          <DialogHeader className="space-y-1.5">
+            <DialogTitle className="text-base font-semibold text-[#0a0a0a]">
               {fullscreenWarningType === 1 && "Fullscreen required"}
               {fullscreenWarningType === 2 && "Final warning"}
               {fullscreenWarningType === 3 && "Interview ended"}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-[#0a0a0a] leading-normal">
+          <p className="text-sm text-[#737373] leading-relaxed">
             {fullscreenWarningType === 1 &&
               "Please stay in fullscreen during the interview. Return to fullscreen to continue."}
             {fullscreenWarningType === 2 &&
@@ -223,18 +203,18 @@ export function InterviewActiveFlow({
             {fullscreenWarningType === 3 &&
               "Repeatedly exiting fullscreen is not allowed. The interview has been ended and flagged."}
           </p>
-          <DialogFooter className="flex justify-end gap-2 sm:justify-end">
+          <DialogFooter className="gap-2 pt-4">
             {fullscreenWarningType !== 3 ? (
               <Button
                 onClick={handleEnterFullscreen}
-                className="h-10 bg-[#02563d] px-5 text-white font-medium hover:bg-[#02563d]/90"
+                className="h-9 bg-[#02563d] text-white text-sm font-medium hover:bg-[#02563d]/90 rounded-lg"
               >
                 Enter fullscreen
               </Button>
             ) : (
               <Button
                 onClick={handleFullscreenWarningClose}
-                className="h-10 bg-[#02563d] px-5 text-white font-medium hover:bg-[#02563d]/90"
+                className="h-9 bg-[#02563d] text-white text-sm font-medium hover:bg-[#02563d]/90 rounded-lg"
               >
                 OK
               </Button>
@@ -243,15 +223,18 @@ export function InterviewActiveFlow({
         </DialogContent>
       </Dialog>
 
-      {/* Interview Tips Modal */}
+      {/* Interview tips */}
       <Dialog open={showTipsModal} onOpenChange={setShowTipsModal}>
-        <DialogContent className="max-w-md p-6" showCloseButton={false}>
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-lg font-semibold text-[#0a0a0a] text-left">
+        <DialogContent
+          className="max-w-[400px] p-6 rounded-xl"
+          showCloseButton={false}
+        >
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-base font-semibold text-[#0a0a0a]">
               Interview tips
             </DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-3 mb-6">
+          <ul className="space-y-2.5 py-4">
             {[
               "Speak clearly and at a moderate pace",
               "Look at the camera when responding",
@@ -259,17 +242,21 @@ export function InterviewActiveFlow({
               "Take a moment to think before answering",
               "Be authentic and honest in your responses",
             ].map((tip, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-[#02563d] shrink-0 mt-0.5" />
-                <p className="text-sm text-[#0a0a0a] leading-normal">{tip}</p>
-              </div>
+              <li
+                key={index}
+                className="flex items-start gap-2.5 text-sm text-[#0a0a0a]"
+              >
+                <Check className="w-4 h-4 text-[#02563d] shrink-0 mt-0.5" />
+                <span className="leading-snug">{tip}</span>
+              </li>
             ))}
-          </div>
+          </ul>
           <Button
             onClick={handleStartInterview}
-            className="w-full h-11 bg-[#02563d] text-white font-medium rounded-md hover:bg-[#02563d]/90"
+            className="w-full h-10 bg-[#02563d] text-white text-sm font-medium rounded-lg hover:bg-[#02563d]/90"
           >
-            Start interview <ChevronRight className="w-4 h-4 ml-1" />
+            Start interview
+            <ChevronRight className="w-4 h-4 ml-1.5" />
           </Button>
         </DialogContent>
       </Dialog>

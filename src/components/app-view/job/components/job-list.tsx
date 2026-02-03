@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -46,8 +46,12 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 export default function JobList() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [stats, setStats] = useState<JobStat[]>([
     { label: "Total Jobs", value: 0, icon: "jobs" },
@@ -177,9 +181,26 @@ export default function JobList() {
     ]);
   };
 
+  // Debounce search input -> searchKeyword
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchJobs();
-  }, [currentOffset, appliedFilters]);
+  }, [currentOffset, appliedFilters, searchKeyword]);
 
   useEffect(() => {
     fetchStats();
@@ -198,6 +219,7 @@ export default function JobList() {
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: currentOffset,
+        ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
       const response = await jobService.getJobOpenings(params, {

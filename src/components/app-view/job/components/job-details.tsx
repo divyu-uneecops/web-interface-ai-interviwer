@@ -76,7 +76,7 @@ export default function JobDetails() {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(true);
   const [stats, setStats] = useState<JobStat[]>([
-    { label: "Total Jobs", value: 0, icon: "jobs" },
+    { label: "Total Rounds", value: 0, icon: "rounds" },
     { label: "Total Applicants", value: 0, icon: "applicants" },
     { label: "Total Interviews Scheduled", value: 0, icon: "scheduled" },
     { label: "Total Interviews Completed", value: 0, icon: "completed" },
@@ -129,8 +129,12 @@ export default function JobDetails() {
 
   const PAGE_LIMIT = 10;
 
+  const listParams = { limit: 1, offset: 0 };
+  const appIdPayload = { appId: "69521cd1c9ba83a076aac3ae" };
+
   // Fetch job detail
   useEffect(() => {
+    fetchStats();
     fetchJobDetail();
   }, [params?.id]);
 
@@ -199,6 +203,111 @@ export default function JobDetails() {
     }
   };
 
+  const fetchStats = async () => {
+    if (!params.id || typeof params.id !== "string") {
+      return;
+    }
+
+    const jobIdFilter = {
+      key: "#.records.jobID",
+      operator: "$eq",
+      value: params?.id,
+      type: "text",
+    };
+
+    const [
+      roundsResult,
+      applicantsResult,
+      interviewsScheduledResult,
+      interviewsCompletedResult,
+    ] = await Promise.allSettled([
+      jobService.getRounds(listParams, {
+        ...appIdPayload,
+        filters: {
+          $and: [jobIdFilter],
+        },
+      }),
+      jobService.getApplicants(listParams, {
+        ...appIdPayload,
+        filters: {
+          $and: [jobIdFilter],
+        },
+      }),
+      jobService.getInterviews(listParams, {
+        ...appIdPayload,
+        filters: {
+          $and: [
+            jobIdFilter,
+            {
+              key: "#.records.status",
+              operator: "$in",
+              value: ["Scheduled"],
+              type: "select",
+            },
+          ],
+        },
+      }),
+      jobService.getInterviews(listParams, {
+        ...appIdPayload,
+        filters: {
+          $and: [
+            jobIdFilter,
+            {
+              key: "#.records.status",
+              operator: "$in",
+              value: ["Completed"],
+              type: "select",
+            },
+          ],
+        },
+      }),
+    ]);
+
+    const getTotal = (result: PromiseSettledResult<any>) =>
+      result.status === "fulfilled" && result.value?.page?.total?.[0] != null
+        ? result.value.page.total[0]
+        : 0;
+
+    const labelFor = (value: number, plural: string, singular: string) =>
+      value === 1 ? singular : plural;
+
+    const totalRounds = getTotal(roundsResult);
+    const totalApplicants = getTotal(applicantsResult);
+    const totalScheduled = getTotal(interviewsScheduledResult);
+    const totalCompleted = getTotal(interviewsCompletedResult);
+
+    setStats((prev) => [
+      {
+        ...prev[0],
+        value: totalRounds,
+        label: labelFor(totalRounds, "Total Rounds", "Total Round"),
+      },
+      {
+        ...prev[1],
+        value: totalApplicants,
+        label: labelFor(totalApplicants, "Total Applicants", "Total Applicant"),
+      },
+      {
+        ...prev[2],
+        value: totalScheduled,
+        label: labelFor(
+          totalScheduled,
+          "Total Interviews Scheduled",
+          "Total Interview Scheduled"
+        ),
+      },
+      {
+        ...prev[3],
+        value: totalCompleted,
+        label: labelFor(
+          totalCompleted,
+          "Total Interviews Completed",
+          "Total Interview Completed"
+        ),
+      },
+    ]);
+  };
+
   const fetchApplicants = async () => {
     if (!params.id || typeof params.id !== "string") {
       setIsLoadingApplicants(false);
@@ -247,7 +356,12 @@ export default function JobDetails() {
         response.page
       );
       setApplicants(result.applicants);
-      setApplicantsPagination(result.pagination);
+      setApplicantsPagination({
+        total: result?.pagination?.total[0] || 0,
+        nextOffset: result?.pagination?.nextOffset,
+        previousOffset: result?.pagination?.previousOffset,
+        limit: result?.pagination?.limit,
+      });
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message || "Failed to fetch applicants",
@@ -302,7 +416,12 @@ export default function JobDetails() {
       });
       const result = transformAPIResponseToRounds(response.data, response.page);
       setRounds(result.rounds);
-      setRoundsPagination(result.pagination);
+      setRoundsPagination({
+        total: result?.pagination?.total[0] || 0,
+        nextOffset: result?.pagination?.nextOffset,
+        previousOffset: result?.pagination?.previousOffset,
+        limit: result?.pagination?.limit,
+      });
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to fetch rounds", {
         duration: 8000,

@@ -5,7 +5,7 @@ import {
   Users,
   CalendarClock,
   CircleCheck,
-  Target,
+  Layers,
   UserPlus,
   Activity,
 } from "lucide-react";
@@ -17,6 +17,11 @@ const iconMap = {
     Icon: Briefcase,
     bgColor: "bg-[rgba(2,86,61,0.1)]",
     iconColor: "text-[#02563d]",
+  },
+  rounds: {
+    Icon: Layers,
+    bgColor: "bg-amber-50",
+    iconColor: "text-amber-600",
   },
   applicants: {
     Icon: Users,

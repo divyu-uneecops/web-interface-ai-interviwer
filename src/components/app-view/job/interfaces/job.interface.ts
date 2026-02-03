@@ -27,7 +27,7 @@ export interface JobFormData {
 export interface JobStat {
   label: string;
   value: string | number;
-  icon: "jobs" | "applicants" | "scheduled" | "completed";
+  icon: "jobs" | "rounds" | "applicants" | "scheduled" | "completed";
 }
 
 export interface Round {

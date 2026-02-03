@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ChevronRight, Check } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ChevronRight, Check, Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +19,30 @@ import { LiveKitRoom } from "@livekit/components-react";
 import { CustomVideoConference } from "./custom-video-conference";
 
 import "@livekit/components-styles";
+
+const REMINDER_THRESHOLD_SECONDS = 5 * 60; // 5 minutes
+const DEFAULT_DURATION_MINUTES = 30;
+
+/** Parse round duration string (e.g. "30 mins", "45 minutes", "1 hour") to total seconds. */
+function parseDurationToSeconds(duration: string | undefined): number {
+  if (!duration || typeof duration !== "string") {
+    return DEFAULT_DURATION_MINUTES * 60;
+  }
+  const normalized = duration.trim().toLowerCase();
+  const numMatch = normalized.match(/^(\d+)/);
+  const num = numMatch ? parseInt(numMatch[1], 10) : NaN;
+  if (Number.isNaN(num) || num <= 0) return DEFAULT_DURATION_MINUTES * 60;
+  if (/\b(hr|hour|h)\b/.test(normalized)) return num * 3600;
+  return num * 60; // mins / minutes / min
+}
+
+function formatTimeRemaining(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs
+    .toString()
+    .padStart(2, "0")}`;
+}
 
 interface InterviewActiveFlowProps {
   onStateChange: (state: InterviewFlowState) => void;
@@ -41,8 +65,24 @@ export function InterviewActiveFlow({
   const [fullscreenWarningType, setFullscreenWarningType] = useState<
     null | 1 | 2 | 3
   >(null);
+  const [showFiveMinReminder, setShowFiveMinReminder] = useState(false);
+  const [timeRemainingSeconds, setTimeRemainingSeconds] = useState<
+    number | null
+  >(null);
   const hasLiveKitConfig = Boolean(token && serverUrl);
   const exitFullscreenCountRef = useRef(0);
+  const totalDurationSecondsRef = useRef(0);
+  const fiveMinReminderShownRef = useRef(false);
+
+  const endInterview = useCallback(() => {
+    if (document?.fullscreenElement) {
+      document
+        ?.exitFullscreen()
+        ?.catch((err) => console.error("Exit fullscreen error:", err));
+    }
+    onStateChange("interview-complete");
+    onStopCamera();
+  }, []);
 
   const handleEnterFullscreen = () => {
     setFullscreenWarningType(null);
@@ -86,6 +126,41 @@ export function InterviewActiveFlow({
 
   const showFullscreenWarningDialog = fullscreenWarningType !== null;
 
+  // Initialize total duration from round (used when tips modal closes)
+  useEffect(() => {
+    const total = parseDurationToSeconds(interviewDetails?.round?.duration);
+    totalDurationSecondsRef.current = total;
+  }, [interviewDetails?.round?.duration]);
+
+  // Countdown timer: runs only after user starts interview (!showTipsModal)
+  useEffect(() => {
+    if (showTipsModal || timeRemainingSeconds === null) return;
+
+    if (timeRemainingSeconds <= 0) {
+      endInterview();
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      setTimeRemainingSeconds((prev) => {
+        if (prev === null || prev <= 0) return 0;
+        const next = prev - 1;
+        if (
+          next <= REMINDER_THRESHOLD_SECONDS &&
+          next > 0 &&
+          totalDurationSecondsRef.current >= REMINDER_THRESHOLD_SECONDS &&
+          !fiveMinReminderShownRef.current
+        ) {
+          fiveMinReminderShownRef.current = true;
+          setShowFiveMinReminder(true);
+        }
+        return Math.max(0, next);
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [showTipsModal, timeRemainingSeconds, endInterview]);
+
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {
     const video = videoRef.current;
@@ -98,6 +173,14 @@ export function InterviewActiveFlow({
 
   const handleStartInterview = () => {
     setShowTipsModal(false);
+    const total =
+      totalDurationSecondsRef.current ||
+      parseDurationToSeconds(interviewDetails?.round?.duration);
+    setTimeRemainingSeconds(total);
+  };
+
+  const handleCloseFiveMinReminder = () => {
+    setShowFiveMinReminder(false);
   };
 
   return (
@@ -114,9 +197,20 @@ export function InterviewActiveFlow({
                     <span className="w-1.5 h-1.5 rounded-full bg-[#02563d] animate-pulse" />
                     {interviewDetails?.round?.type} Round
                   </span>
-                  <span className="text-xs text-[#737373]">
-                    {interviewDetails?.round?.duration}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {!showTipsModal && timeRemainingSeconds !== null && (
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0a0a0a] text-white text-sm tabular-nums font-medium"
+                        aria-live="polite"
+                        aria-label={`Time remaining: ${formatTimeRemaining(
+                          timeRemainingSeconds
+                        )}`}
+                      >
+                        <Clock className="w-3.5 h-3.5 text-[#a3a3a3]" />
+                        {formatTimeRemaining(timeRemainingSeconds)}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1 min-h-0 rounded-xl overflow-hidden bg-[#0a0a0a] border border-[#e5e5e5]">
                   <video
@@ -147,19 +241,7 @@ export function InterviewActiveFlow({
                   connect
                   data-lk-theme="default"
                 >
-                  <CustomVideoConference
-                    onEndCall={() => {
-                      if (document?.fullscreenElement) {
-                        document
-                          ?.exitFullscreen()
-                          ?.catch((err) =>
-                            console.error("Exit fullscreen error:", err)
-                          );
-                      }
-                      onStateChange("interview-complete");
-                      onStopCamera();
-                    }}
-                  />
+                  <CustomVideoConference onEndCall={endInterview} />
                 </LiveKitRoom>
               ) : (
                 <div className="flex-1 flex items-center justify-center px-6 text-sm text-[#737373] text-center">
@@ -219,6 +301,38 @@ export function InterviewActiveFlow({
                 OK
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 5-minute remaining reminder */}
+      <Dialog
+        open={showFiveMinReminder}
+        onOpenChange={(open) => !open && handleCloseFiveMinReminder()}
+      >
+        <DialogContent
+          className="max-w-[400px] p-6 rounded-xl"
+          aria-describedby="five-min-reminder-desc"
+        >
+          <DialogHeader className="space-y-1.5">
+            <DialogTitle className="text-base font-semibold text-[#0a0a0a]">
+              Time reminder
+            </DialogTitle>
+          </DialogHeader>
+          <p
+            id="five-min-reminder-desc"
+            className="text-sm text-[#737373] leading-relaxed"
+          >
+            You have about 5 minutes left in this round. Use the time to wrap up
+            your answers. The interview will end automatically when time is up.
+          </p>
+          <DialogFooter className="pt-4">
+            <Button
+              onClick={handleCloseFiveMinReminder}
+              className="h-9 bg-[#02563d] text-white text-sm font-medium hover:bg-[#02563d]/90 rounded-lg"
+            >
+              Continue
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

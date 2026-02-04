@@ -2,13 +2,13 @@ export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled";
 
 export interface InterviewDetail {
   id: string;
-  candidateName: string;
-  candidateEmail: string;
-  jobTitle: string;
-  interviewerName: string;
+  candidateName: Record<string, any>;
+  candidateEmail: Record<string, any>;
+  jobTitle: Record<string, any>;
+  interviewerName: Record<string, any>;
   status: InterviewStatus;
   interviewDate: string;
-  roundName: string;
+  roundName: Record<string, any>;
   score: number;
 }
 
@@ -26,7 +26,7 @@ export interface APIInterviewItem {
 }
 
 export interface APIPaginationInfo {
-  total: number;
+  total: number[];
   nextOffset: number | null;
   previousOffset: number | null;
   limit: number;

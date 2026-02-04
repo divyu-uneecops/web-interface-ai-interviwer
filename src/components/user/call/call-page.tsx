@@ -31,13 +31,13 @@ export default function CallPage({ interviewId }: CallPageProps) {
 
   // Check authentication on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("applicantAuthToken");
-      if (token) {
-        setIsAuthenticated(true);
-        setFlowState("guidelines");
-      }
+    // if (typeof window !== "undefined") {
+    const token = localStorage.getItem("applicantAuthToken");
+    if (token) {
+      setIsAuthenticated(true);
+      setFlowState("guidelines");
     }
+    // }
   }, []);
 
   // Start camera when entering verification flow

@@ -5,12 +5,11 @@ import {
   useParticipants,
   RoomAudioRenderer,
   ConnectionStateToast,
-  useChat,
+  useDataChannel,
 } from "@livekit/components-react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface CustomVideoConferenceProps {
   onEndCall?: () => void;
@@ -21,23 +20,95 @@ export function CustomVideoConference({
 }: CustomVideoConferenceProps) {
   const { localParticipant, isMicrophoneEnabled } = useLocalParticipant();
   const participants = useParticipants();
-  const { chatMessages, send, isSending } = useChat();
+
+  // Fix: useDataChannel returns { message, send } - need to properly handle message
+  const { message, send } = useDataChannel("chat");
 
   // Sync state with actual participant state
   const [isMicEnabled, setIsMicEnabled] = useState(isMicrophoneEnabled ?? true);
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [audioLevels, setAudioLevels] = useState([0, 0, 0, 0, 0]);
-  const [messageText, setMessageText] = useState("");
+  const [chatMessages, setChatMessages] = useState<
+    Array<{ text: string; from: string; timestamp: number }>
+  >([]);
 
   useEffect(() => {
     setIsMicEnabled(isMicrophoneEnabled ?? true);
   }, [isMicrophoneEnabled]);
 
-  // Find agent participant (any remote participant that's not the local one)
+  // Find agent participant
   const agentParticipant = participants.find(
     (p) => p.identity !== localParticipant?.identity
   );
+
+  // Fix: Properly handle incoming data channel messages
+  useEffect(() => {
+    if (!message) return;
+
+    try {
+      // Backend sends as bytes (text.encode()), so decode it
+      let text: string;
+      if (message.payload instanceof ArrayBuffer) {
+        const decoder = new TextDecoder();
+        text = decoder.decode(message.payload);
+      } else if (typeof message.payload === "string") {
+        text = message.payload;
+      } else if (message.payload instanceof Uint8Array) {
+        const decoder = new TextDecoder();
+        text = decoder.decode(message.payload);
+      } else {
+        // Fallback: try to convert
+        text = String(message.payload);
+      }
+
+      if (!text || !text.trim()) return;
+
+      // Try to parse as JSON (new format with role info)
+      let messageText: string;
+      let messageRole: string | null = null;
+
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed && typeof parsed === "object" && parsed.text) {
+          messageText = parsed.text;
+          messageRole = parsed.role || null;
+        } else {
+          messageText = text.trim();
+        }
+      } catch {
+        // Not JSON, use as plain text (backward compatibility)
+        messageText = text.trim();
+      }
+
+      // Determine sender identity
+      // If message has role info, use it; otherwise check participant identity
+      let senderIdentity: string;
+      if (messageRole === "candidate") {
+        senderIdentity = localParticipant?.identity || "candidate";
+      } else if (messageRole === "interviewer") {
+        senderIdentity = agentParticipant?.identity || "agent";
+      } else {
+        // Fallback: check if from local participant (candidate) or remote (agent)
+        senderIdentity =
+          message.from?.identity ||
+          (message.from?.identity === localParticipant?.identity
+            ? localParticipant?.identity
+            : "agent");
+      }
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          text: messageText,
+          from: senderIdentity,
+          timestamp: Date.now(),
+        },
+      ]);
+    } catch (error) {
+      console.error("Error processing data channel message:", error);
+    }
+  }, [message, localParticipant, agentParticipant]); // Include dependencies
 
   // Check if agent is speaking
   useEffect(() => {
@@ -46,20 +117,15 @@ export function CustomVideoConference({
       return;
     }
 
-    // Set initial state
     setIsAgentSpeaking(agentParticipant.isSpeaking);
 
-    // Use a polling approach to check speaking state
-    // This is more reliable than event listeners which may not always fire
     const interval = setInterval(() => {
       if (agentParticipant) {
         setIsAgentSpeaking(agentParticipant.isSpeaking);
       }
-    }, 100); // Check every 100ms for smooth animation
+    }, 100);
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [agentParticipant]);
 
   // Check if user (local participant) is speaking
@@ -69,19 +135,15 @@ export function CustomVideoConference({
       return;
     }
 
-    // Set initial state
     setIsUserSpeaking(localParticipant.isSpeaking);
 
-    // Use a polling approach to check speaking state
     const interval = setInterval(() => {
       if (localParticipant) {
         setIsUserSpeaking(localParticipant.isSpeaking);
       }
-    }, 100); // Check every 100ms for smooth animation
+    }, 100);
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [localParticipant]);
 
   // Generate dynamic audio levels for visualization
@@ -94,18 +156,16 @@ export function CustomVideoConference({
     }
 
     const interval = setInterval(() => {
-      // Generate random levels with center bar being highest (like in the image)
-      // Center bar should be solid/highest, outer bars progressively shorter
-      const centerLevel = 0.7 + Math.random() * 0.3; // 0.7 to 1.0 (center is always high)
+      const centerLevel = 0.7 + Math.random() * 0.3;
       const levels = [
-        Math.random() * 0.3, // Leftmost: 0-0.3 (lightest)
-        Math.random() * 0.5 + 0.2, // Left: 0.2-0.7 (medium)
-        centerLevel, // Center: 0.7-1.0 (highest/solid)
-        Math.random() * 0.5 + 0.2, // Right: 0.2-0.7 (medium)
-        Math.random() * 0.3, // Rightmost: 0-0.3 (lightest)
+        Math.random() * 0.3,
+        Math.random() * 0.5 + 0.2,
+        centerLevel,
+        Math.random() * 0.5 + 0.2,
+        Math.random() * 0.3,
       ];
       setAudioLevels(levels);
-    }, 100); // Update every 100ms for smooth animation
+    }, 100);
 
     return () => clearInterval(interval);
   }, [isUserSpeaking, isAgentSpeaking]);
@@ -126,42 +186,28 @@ export function CustomVideoConference({
 
   const isActive = isUserSpeaking || isAgentSpeaking;
 
-  const handleSendMessage = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const trimmed = messageText.trim();
-    if (!trimmed) return;
-    try {
-      await send(trimmed);
-      setMessageText("");
-    } catch (error) {
-      console.error("Error sending chat message:", error);
-    }
-  };
-
   return (
     <div className="flex flex-col h-full w-full bg-gradient-to-br from-[#fafafa] via-white to-[#fafafa] overflow-hidden">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:flex-row gap-4 px-4 py-4 md:px-6 md:py-6 relative">
         {/* Audio Visualization Section */}
         <div className="flex-1 flex items-center justify-center">
-          {/* Audio Visualization Bars Container - Only show when speaking */}
           {isActive && (
             <div className="relative flex items-end justify-center gap-4 px-8 py-4 bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50">
               {audioLevels.map((level, index) => {
                 const isCenter = index === 2;
-                // Different colors: Blue for user, Green for agent
                 const color = isUserSpeaking ? "#2563eb" : "#02563d";
-
-                // Height calculation: Center bar tallest, outer bars progressively shorter
-                const maxHeight =
-                  isCenter ? 64 : index === 1 || index === 3 ? 40 : 24;
+                const maxHeight = isCenter
+                  ? 64
+                  : index === 1 || index === 3
+                  ? 40
+                  : 24;
                 const dynamicHeight = maxHeight * Math.max(level, 0.15);
-
-                // Opacity gradient: center solid, outer bars lighter
-                const opacity =
-                  isCenter ? 1 : index === 1 || index === 3 ? 0.7 : 0.4;
-
-                // Width: center bar slightly wider
+                const opacity = isCenter
+                  ? 1
+                  : index === 1 || index === 3
+                  ? 0.7
+                  : 0.4;
                 const width = isCenter ? "16px" : "12px";
 
                 return (
@@ -193,7 +239,11 @@ export function CustomVideoConference({
                 Interview Chat
               </span>
               <span className="text-xs text-gray-500">
-                Chat with the AI interviewer
+                {chatMessages?.length > 0
+                  ? `${chatMessages?.length} message${
+                      chatMessages?.length > 1 ? "s" : ""
+                    }`
+                  : "Waiting for messages..."}
               </span>
             </div>
           </div>
@@ -201,19 +251,16 @@ export function CustomVideoConference({
           <div className="flex-1 min-h-0 px-3 py-3 space-y-2 overflow-y-auto">
             {chatMessages.length === 0 ? (
               <p className="text-xs text-gray-400 text-center mt-6">
-                No messages yet. Your conversation will appear here.
+                No messages yet. The interviewer's messages will appear here.
               </p>
             ) : (
               chatMessages.map((msg, index) => {
-                const isLocal = msg.from?.isLocal;
-                const senderName =
-                  isLocal || msg.from?.identity === localParticipant?.identity
-                    ? "You"
-                    : msg.from?.name || "Interviewer";
+                const isLocal = msg.from === localParticipant?.identity;
+                const senderName = isLocal ? "You" : "Interviewer";
 
                 return (
                   <div
-                    key={(msg as any).id ?? index}
+                    key={`${msg.timestamp}-${index}`}
                     className={`flex ${
                       isLocal ? "justify-end" : "justify-start"
                     }`}
@@ -233,7 +280,7 @@ export function CustomVideoConference({
                         {senderName}
                       </div>
                       <div className="whitespace-pre-wrap break-words">
-                        {msg.message}
+                        {msg.text}
                       </div>
                     </div>
                   </div>
@@ -241,29 +288,6 @@ export function CustomVideoConference({
               })
             )}
           </div>
-
-          <form
-            onSubmit={handleSendMessage}
-            className="border-t border-gray-100 px-3 py-2.5 bg-white/90"
-          >
-            <div className="flex items-center gap-2">
-              <Input
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Type your message..."
-                className="h-9 text-sm"
-                disabled={isSending}
-              />
-              <Button
-                type="submit"
-                size="sm"
-                className="h-9 px-3 text-xs font-medium bg-[#02563d] text-white hover:bg-[#02563d]/90"
-                disabled={isSending || !messageText.trim()}
-              >
-                Send
-              </Button>
-            </div>
-          </form>
         </div>
       </div>
 
@@ -272,15 +296,16 @@ export function CustomVideoConference({
         <div className="absolute inset-0 bg-gradient-to-t from-white/95 via-white/90 to-white/85 backdrop-blur-xl border-t border-gray-200/50 shadow-[0_-4px_24px_rgba(0,0,0,0.04)]" />
 
         <div className="relative flex items-center justify-between px-8 py-5">
-          {/* Mute Button */}
           <Button
             onClick={handleToggleMic}
             className="group relative flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-sm border border-gray-200/60 hover:border-gray-300 hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
-            aria-label={
-              isMicEnabled ? "Mute microphone" : "Unmute microphone"
-            }
+            aria-label={isMicEnabled ? "Mute microphone" : "Unmute microphone"}
           >
-            <div className={`relative ${isMicEnabled ? 'text-gray-700' : 'text-red-500'}`}>
+            <div
+              className={`relative ${
+                isMicEnabled ? "text-gray-700" : "text-red-500"
+              }`}
+            >
               {isMicEnabled ? (
                 <Mic className="w-5 h-5 transition-transform group-hover:scale-110" />
               ) : (
@@ -292,7 +317,6 @@ export function CustomVideoConference({
             </span>
           </Button>
 
-          {/* End Call Button */}
           <Button
             onClick={onEndCall}
             className="group relative flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 border-0"
@@ -302,7 +326,6 @@ export function CustomVideoConference({
           </Button>
         </div>
       </div>
-
 
       {/* Essential LiveKit Components */}
       <RoomAudioRenderer />

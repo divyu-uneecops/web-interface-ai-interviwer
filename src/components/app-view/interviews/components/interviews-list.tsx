@@ -108,7 +108,12 @@ export default function InterviewsList() {
       );
 
       setInterviews(result?.interviews || []);
-      setPagination(result?.pagination);
+      setPagination({
+        total: result?.pagination?.total[0] || 0,
+        nextOffset: result?.pagination?.nextOffset,
+        previousOffset: result?.pagination?.previousOffset,
+        limit: result?.pagination?.limit,
+      });
 
       // Scroll to top when page changes
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -141,7 +146,7 @@ export default function InterviewsList() {
         align: "left",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a]">
-            {interview?.candidateName}
+            {interview?.candidateName?.name}
           </span>
         ),
       },
@@ -151,7 +156,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.candidateEmail}
+            {interview?.candidateEmail?.label}
           </span>
         ),
       },
@@ -161,7 +166,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.jobTitle}
+            {interview?.jobTitle?.label}
           </span>
         ),
       },
@@ -171,7 +176,7 @@ export default function InterviewsList() {
         align: "center",
         cell: (interview) => (
           <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.roundName}
+            {interview?.roundName?.label}
           </span>
         ),
       },
@@ -299,7 +304,7 @@ export default function InterviewsList() {
 
       {/* Interviews Table */}
       <DataTable<InterviewDetail>
-        data={interviews}
+        data={interviews || []}
         columns={columns}
         getRowId={(interview) => interview?.id}
         pagination={pagination}

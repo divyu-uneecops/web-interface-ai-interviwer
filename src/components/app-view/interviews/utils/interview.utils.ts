@@ -32,8 +32,7 @@ export function transformAPIResponseToInterviews(
     return {
       id: item.id,
       candidateName: candidateName,
-      candidateEmail:
-        valuesMap.applicantEmail || valuesMap.candidateEmail || "N/A",
+      candidateEmail: valuesMap.applicantEmail || "N/A",
       jobTitle: valuesMap.jobTitle || "N/A",
       interviewerName: valuesMap.interviewerName || "N/A",
       status: statusValue,

@@ -42,10 +42,7 @@ export default function Verification() {
 
       try {
         // Get email/phone from session storage
-        const emailOrPhone =
-          typeof window !== "undefined"
-            ? sessionStorage.getItem("emailOrPhone")
-            : null;
+        const emailOrPhone = sessionStorage.getItem("emailOrPhone");
 
         if (!emailOrPhone) {
           toast.error("Session expired. Please login again.", {
@@ -64,10 +61,10 @@ export default function Verification() {
         // Store token if provided
         if (response?.token || response?.data?.token) {
           const token = response?.token || response?.data?.token;
-          if (typeof window !== "undefined") {
-            localStorage.setItem("authToken", token);
-            sessionStorage.removeItem("emailOrPhone");
-          }
+          // if (typeof window !== "undefined") {
+          localStorage.setItem("authToken", token);
+          sessionStorage.removeItem("emailOrPhone");
+          // }
         }
 
         toast.success("Verification successful! Redirecting...", {
@@ -95,7 +92,7 @@ export default function Verification() {
 
   // onChange handler for verification code
   const handleVerificationCodeChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newValue = e.target.value.replace(/\D/g, ""); // Only allow digits
     formik.setFieldValue("verificationCode", newValue);

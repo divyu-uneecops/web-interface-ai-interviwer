@@ -9,7 +9,7 @@ export const interviewService = {
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      "/objects/6960b980c9ba83a076aac89d/views/6960b980c9ba83a076aac89e/records",
+      API_ENDPOINTS.INTERVIEW.LIST,
       params,
       payload,
       signal

@@ -51,24 +51,6 @@ export function InterviewerList() {
     useState<Interviewer | null>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
   const { mappingValues } = useAppSelector((state) => state.interviewers);
-
-  // Debounce search input -> searchKeyword
-  useEffect(() => {
-    if (searchDebounceRef.current) {
-      clearTimeout(searchDebounceRef.current);
-    }
-    searchDebounceRef.current = setTimeout(() => {
-      setSearchKeyword(searchQuery.trim());
-      setCurrentOffset(0);
-      searchDebounceRef.current = null;
-    }, SEARCH_DEBOUNCE_MS);
-    return () => {
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current);
-      }
-    };
-  }, [searchQuery]);
-
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
     {
@@ -100,6 +82,23 @@ export function InterviewerList() {
     },
   ];
 
+  // Debounce search input -> searchKeyword
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   // Fetch interviewers when filters or search keyword change (initial load and reset)
   useEffect(() => {
     setCurrentOffset(0);
@@ -115,7 +114,7 @@ export function InterviewerList() {
 
   // Handle scroll for lazy loading (same pattern as create-round-modal Select Interviewer)
   useEffect(() => {
-    const container = listContainerRef.current;
+    const container = listContainerRef?.current;
     if (!container) return;
 
     const handleScroll = () => {
@@ -126,16 +125,17 @@ export function InterviewerList() {
       if (
         scrollPercentage >= 0.8 &&
         pagination.nextOffset !== null &&
+        pagination?.nextOffset < pagination?.total &&
         !isLoading &&
         !isLoadingMore
       ) {
-        setCurrentOffset(pagination.nextOffset);
+        setCurrentOffset(pagination?.nextOffset);
       }
     };
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [pagination.nextOffset, isLoading, isLoadingMore]);
+  }, [pagination?.nextOffset, isLoading, isLoadingMore]);
 
   const fetchInterviewers = async (
     offset: number,
@@ -239,19 +239,13 @@ export function InterviewerList() {
 
   const handleCreateInterviewer = () => {
     setCurrentOffset(0);
-
-    if (currentOffset === 0) {
-      fetchInterviewers(0, true);
-    }
+    fetchInterviewers(0, true);
   };
 
   const handleUpdateInterviewer = () => {
     setInterviewerDetail(null);
     setCurrentOffset(0);
-
-    if (currentOffset === 0) {
-      fetchInterviewers(0, true);
-    }
+    fetchInterviewers(0, true);
   };
 
   const handleEditInterviewer = async (interviewer: Interviewer) => {

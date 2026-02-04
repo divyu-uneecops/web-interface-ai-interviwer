@@ -89,6 +89,12 @@ export default function JobList() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [jobDetail, setJobDetail] = useState<JobDetail | null>(null);
+  const [jobCountsMap, setJobCountsMap] = useState<
+    Record<string, { applicants: number; interviews: number }>
+  >({});
+  const [loadingCountsForJobIds, setLoadingCountsForJobIds] = useState<
+    Set<string>
+  >(new Set());
 
   const appIdPayload = { appId: "69521cd1c9ba83a076aac3ae" };
   const listParams = { limit: 1, offset: 0 };
@@ -206,6 +212,80 @@ export default function JobList() {
     fetchStats();
   }, []);
 
+  useEffect(() => {
+    if (jobs.length > 0) {
+      fetchJobCounts(jobs.map((j) => j?.id));
+    } else {
+      setJobCountsMap({});
+    }
+  }, [jobs]);
+
+  const getTotalFromResult = (result: PromiseSettledResult<any>) =>
+    result.status === "fulfilled" && result.value?.page?.total?.[0] != null
+      ? result.value.page.total[0]
+      : 0;
+
+  const fetchJobCounts = async (jobIds: string[]) => {
+    if (jobIds?.length === 0) return;
+    setLoadingCountsForJobIds((prev) => new Set([...prev, ...(jobIds || [])]));
+    try {
+      const jobIdFilter = (jobId: string) => ({
+        key: "#.records.jobID",
+        operator: "$eq",
+        value: jobId,
+        type: "text",
+      });
+
+      const settled = await Promise.allSettled(
+        jobIds.map(async (jobId) => {
+          const [applicantsResult, interviewsResult] = await Promise.allSettled(
+            [
+              jobService.getApplicants(listParams, {
+                ...appIdPayload,
+                filters: { $and: [jobIdFilter(jobId)] },
+              }),
+              jobService.getInterviews(listParams, {
+                ...appIdPayload,
+                filters: {
+                  $and: [jobIdFilter(jobId)],
+                },
+              }),
+            ]
+          );
+          const applicants = getTotalFromResult(applicantsResult);
+          const interviews = getTotalFromResult(interviewsResult);
+          return { jobId, applicants, interviews };
+        })
+      );
+
+      const results = settled
+        .filter(
+          (
+            r
+          ): r is PromiseFulfilledResult<{
+            jobId: string;
+            applicants: number;
+            interviews: number;
+          }> => r.status === "fulfilled"
+        )
+        .map((r) => r.value);
+
+      setJobCountsMap((prev) => {
+        const next = { ...prev };
+        results.forEach(({ jobId, applicants, interviews }) => {
+          next[jobId] = { applicants, interviews };
+        });
+        return next;
+      });
+    } finally {
+      setLoadingCountsForJobIds((prev) => {
+        const next = new Set(prev);
+        jobIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    }
+  };
+
   const fetchJobs = async () => {
     setIsLoading(true);
     setJobs([]);
@@ -307,13 +387,23 @@ export default function JobList() {
         id: "applicants",
         header: "Applicants",
         align: "center",
-        accessor: (job) => job?.applicants,
+        cell: (job) => {
+          const loading = job?.id && loadingCountsForJobIds.has(job?.id);
+          const counts = job?.id ? jobCountsMap[job?.id] : undefined;
+          if (loading) return "...";
+          return counts?.applicants ?? job?.applicants ?? "--";
+        },
       },
       {
         id: "interviews",
         header: "Interviews",
         align: "center",
-        accessor: (job) => job?.interviews,
+        cell: (job) => {
+          const loading = job?.id && loadingCountsForJobIds.has(job?.id);
+          const counts = job?.id ? jobCountsMap[job?.id] : undefined;
+          if (loading) return "...";
+          return counts?.interviews ?? job?.interviews ?? "--";
+        },
       },
       {
         id: "created",
@@ -322,7 +412,7 @@ export default function JobList() {
         accessor: (job) => job?.createdOn,
       },
     ],
-    []
+    [jobCountsMap, loadingCountsForJobIds]
   );
 
   // Row actions renderer

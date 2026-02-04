@@ -789,47 +789,51 @@ export default function JobDetails() {
       {/* Job Header */}
       <div className="flex items-start justify-between">
         <div className="space-y-2.5">
-          {/* Title + Badge */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex">
             <ChevronLeft
-              className="cursor-pointer"
+              className="cursor-pointer mr-2"
               onClick={() => router.back()}
             />
-            <h1 className="text-xl font-bold text-black leading-7">
-              {job?.title}
-            </h1>
-            <Badge
-              className={`border-0 rounded-full px-2 h-6 text-xs font-normal ${
-                job?.status === "Active"
-                  ? "bg-[#def2eb] text-[#0e4230] hover:bg-[#def2eb]"
-                  : job?.status === "Closed"
-                  ? "bg-[#fcefec] text-[#d92d20] hover:bg-[#fcefec]"
-                  : "bg-[#e5e5e5] text-[#000000] hover:bg-[#e5e5e5]"
-              }`}
-            >
-              {job?.status}
-            </Badge>
-          </div>
+            <div>
+              {/* Title + Badge */}
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-xl font-bold text-black leading-7">
+                  {job?.title}
+                </h1>
+                <Badge
+                  className={`border-0 rounded-full px-2 h-6 text-xs font-normal ${
+                    job?.status === "Active"
+                      ? "bg-[#def2eb] text-[#0e4230] hover:bg-[#def2eb]"
+                      : job?.status === "Closed"
+                      ? "bg-[#fcefec] text-[#d92d20] hover:bg-[#fcefec]"
+                      : "bg-[#e5e5e5] text-[#000000] hover:bg-[#e5e5e5]"
+                  }`}
+                >
+                  {job?.status}
+                </Badge>
+              </div>
 
-          {/* Meta Info */}
-          <div className="flex items-center gap-4 h-5">
-            <div className="flex items-center gap-1">
-              <Building2 className="w-4 h-4 text-[#45556c]" />
-              <span className="text-sm text-[#45556c] leading-5">
-                {job?.industry}
-              </span>
+              {/* Meta Info */}
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-1">
+                  <Building2 className="w-4 h-4 text-[#45556c]" />
+                  <span className="text-sm text-[#45556c] leading-5">
+                    {job?.industry}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4 text-[#45556c]" />
+                  <span className="text-sm text-[#45556c] leading-5">
+                    {job?.jobType}
+                  </span>
+                </div>
+                {job?.createdOn && (
+                  <span className="text-sm text-[#45556c] leading-5">
+                    Posted {job?.createdOn}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-[#45556c]" />
-              <span className="text-sm text-[#45556c] leading-5">
-                {job?.jobType}
-              </span>
-            </div>
-            {job?.createdOn && (
-              <span className="text-sm text-[#45556c] leading-5">
-                Posted {job?.createdOn}
-              </span>
-            )}
           </div>
         </div>
 

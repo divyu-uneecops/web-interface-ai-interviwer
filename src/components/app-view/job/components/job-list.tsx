@@ -38,6 +38,7 @@ import { isEmpty } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Empty,
   EmptyHeader,
@@ -59,6 +60,7 @@ export default function JobList() {
     { label: "Total Interviews Scheduled", value: 0, icon: "scheduled" },
     { label: "Total Interviews Completed", value: 0, icon: "completed" },
   ]);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [jobs, setJobs] = useState<JobDetail[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -100,91 +102,100 @@ export default function JobList() {
   const listParams = { limit: 1, offset: 0 };
 
   const fetchStats = async () => {
-    const [
-      jobsResult,
-      applicantsResult,
-      interviewsScheduledResult,
-      interviewsCompletedResult,
-    ] = await Promise.allSettled([
-      jobService.getJobOpenings(listParams, {
-        ...appIdPayload,
-        filters: { $and: [] },
-      }),
-      jobService.getApplicants(listParams, {
-        ...appIdPayload,
-        filters: { $and: [] },
-      }),
-      jobService.getInterviews(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            {
-              key: "#.records.status",
-              operator: "$in",
-              value: ["Scheduled"],
-              type: "select",
-            },
-          ],
+    setIsLoadingStats(true);
+    try {
+      const [
+        jobsResult,
+        applicantsResult,
+        interviewsScheduledResult,
+        interviewsCompletedResult,
+      ] = await Promise.allSettled([
+        jobService.getJobOpenings(listParams, {
+          ...appIdPayload,
+          filters: { $and: [] },
+        }),
+        jobService.getApplicants(listParams, {
+          ...appIdPayload,
+          filters: { $and: [] },
+        }),
+        jobService.getInterviews(listParams, {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              {
+                key: "#.records.status",
+                operator: "$in",
+                value: ["Scheduled"],
+                type: "select",
+              },
+            ],
+          },
+        }),
+        jobService.getInterviews(listParams, {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              {
+                key: "#.records.status",
+                operator: "$in",
+                value: ["Completed"],
+                type: "select",
+              },
+            ],
+          },
+        }),
+      ]);
+
+      const getTotal = (result: PromiseSettledResult<any>) =>
+        result.status === "fulfilled" && result.value?.page?.total?.[0] != null
+          ? result.value.page.total[0]
+          : 0;
+
+      const labelFor = (value: number, plural: string, singular: string) =>
+        value === 1 ? singular : plural;
+
+      const totalJobs = getTotal(jobsResult);
+      const totalApplicants = getTotal(applicantsResult);
+      const totalScheduled = getTotal(interviewsScheduledResult);
+      const totalCompleted = getTotal(interviewsCompletedResult);
+
+      setStats((prev) => [
+        {
+          ...prev[0],
+          value: totalJobs,
+          label: labelFor(totalJobs, "Total Jobs", "Total Job"),
         },
-      }),
-      jobService.getInterviews(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            {
-              key: "#.records.status",
-              operator: "$in",
-              value: ["Completed"],
-              type: "select",
-            },
-          ],
+        {
+          ...prev[1],
+          value: totalApplicants,
+          label: labelFor(
+            totalApplicants,
+            "Total Applicants",
+            "Total Applicant"
+          ),
         },
-      }),
-    ]);
-
-    const getTotal = (result: PromiseSettledResult<any>) =>
-      result.status === "fulfilled" && result.value?.page?.total?.[0] != null
-        ? result.value.page.total[0]
-        : 0;
-
-    const labelFor = (value: number, plural: string, singular: string) =>
-      value === 1 ? singular : plural;
-
-    const totalJobs = getTotal(jobsResult);
-    const totalApplicants = getTotal(applicantsResult);
-    const totalScheduled = getTotal(interviewsScheduledResult);
-    const totalCompleted = getTotal(interviewsCompletedResult);
-
-    setStats((prev) => [
-      {
-        ...prev[0],
-        value: totalJobs,
-        label: labelFor(totalJobs, "Total Jobs", "Total Job"),
-      },
-      {
-        ...prev[1],
-        value: totalApplicants,
-        label: labelFor(totalApplicants, "Total Applicants", "Total Applicant"),
-      },
-      {
-        ...prev[2],
-        value: totalScheduled,
-        label: labelFor(
-          totalScheduled,
-          "Total Interviews Scheduled",
-          "Total Interview Scheduled"
-        ),
-      },
-      {
-        ...prev[3],
-        value: totalCompleted,
-        label: labelFor(
-          totalCompleted,
-          "Total Interviews Completed",
-          "Total Interview Completed"
-        ),
-      },
-    ]);
+        {
+          ...prev[2],
+          value: totalScheduled,
+          label: labelFor(
+            totalScheduled,
+            "Total Interviews Scheduled",
+            "Total Interview Scheduled"
+          ),
+        },
+        {
+          ...prev[3],
+          value: totalCompleted,
+          label: labelFor(
+            totalCompleted,
+            "Total Interviews Completed",
+            "Total Interview Completed"
+          ),
+        },
+      ]);
+    } finally {
+      setIsLoadingStats(false);
+    }
   };
 
   // Debounce search input -> searchKeyword
@@ -515,7 +526,24 @@ export default function JobList() {
       </div>
 
       {/* Stats Cards */}
-      <JobStatsGrid stats={stats} />
+      {isLoadingStats ? (
+        <div className="grid grid-cols-4 gap-4 h-[90px]">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 bg-white border border-[rgba(0,0,0,0.1)] rounded h-[90px] pl-[25px] pr-px"
+            >
+              <Skeleton className="w-10 h-10 rounded-[10px] bg-[#e5e5e5] shrink-0" />
+              <div className="flex flex-col h-12 gap-2">
+                <Skeleton className="h-8 w-16 bg-[#e5e5e5]" />
+                <Skeleton className="h-4 w-24 bg-[#e5e5e5]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <JobStatsGrid stats={stats} />
+      )}
 
       {/* Jobs Table */}
       <DataTable<JobDetail>

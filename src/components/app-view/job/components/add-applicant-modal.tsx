@@ -255,6 +255,7 @@ export function AddApplicantModal({
                 Single Applicant
               </TabsTrigger>
               <TabsTrigger
+                disabled
                 value="bulk"
                 className="flex-1 h-full rounded-md text-sm font-medium transition-all flex items-center justify-center text-[#0a0a0a] data-[state=active]:bg-white data-[state=active]:shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] data-[state=active]:border data-[state=active]:border-transparent"
               >
@@ -265,7 +266,7 @@ export function AddApplicantModal({
             <TabsContent value="single" className="mt-0">
               <div className="space-y-5">
                 {/* Parse resume */}
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label className="text-sm font-semibold text-[#000000]">
                     Parse resume
                   </Label>
@@ -279,16 +280,16 @@ export function AddApplicantModal({
                       </p>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Or divider */}
-                <div className="flex items-center gap-2.5">
+                {/* <div className="flex items-center gap-2.5">
                   <div className="flex-1 h-px bg-[#e5e5e5]" />
                   <span className="text-sm text-[#737373] leading-none">
                     or
                   </span>
                   <div className="flex-1 h-px bg-[#e5e5e5]" />
-                </div>
+                </div> */}
 
                 {/* Applicant name */}
                 <div className="space-y-2">

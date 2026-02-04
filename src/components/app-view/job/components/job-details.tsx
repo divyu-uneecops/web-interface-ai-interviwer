@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Building2,
@@ -67,6 +67,8 @@ import { useAppSelector } from "@/store/hooks";
 import { isEmpty } from "@/lib/utils";
 import { CreateRoundModal } from "@/components/shared/components/create-round-modal";
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 export default function JobDetails() {
   const params = useParams();
   const router = useRouter();
@@ -88,6 +90,8 @@ export default function JobDetails() {
     useState(false);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
   });
@@ -138,12 +142,29 @@ export default function JobDetails() {
     fetchJobDetail();
   }, [params?.id]);
 
+  // Debounce search input -> searchKeyword for applicants
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentApplicantsOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   // Fetch applicants when on applicants tab
   useEffect(() => {
     if (activeTab === "applicants" && params?.id) {
       fetchApplicants();
     }
-  }, [activeTab, params?.id, appliedFilters]);
+  }, [activeTab, params?.id, appliedFilters, searchKeyword]);
 
   // Fetch rounds when on rounds tab
   useEffect(() => {
@@ -326,6 +347,7 @@ export default function JobDetails() {
       const params_query: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: currentApplicantsOffset,
+        ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
       const response = await jobService.getApplicants(params_query, {
@@ -1065,7 +1087,11 @@ export default function JobDetails() {
               loadingState={<DataTableSkeleton columns={6} rows={3} />}
               emptyState={
                 <div className="text-center py-12">
-                  <p className="text-sm text-[#737373]">No applicants found</p>
+                  <p className="text-sm text-[#737373]">
+                    {appliedFilters?.status?.length > 0 || searchQuery
+                      ? "Try adjusting your filters or search query to find what you're looking for."
+                      : "No applicants found"}
+                  </p>
                 </div>
               }
               rowActions={renderApplicantRowActions}

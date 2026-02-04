@@ -54,7 +54,7 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
           return (
             <div>
               <h1 className="text-xl font-bold text-black leading-7">{h1}</h1>
-              <p className="text-xs text-black leading-4">{p}</p>
+              <p className="text-xs text-black leading-4 font-normal">{p}</p>
             </div>
           );
         })()}

@@ -24,9 +24,12 @@ import { transformAPIResponseToInterviewers } from "../utils/interviewer.utils";
 import { useAppSelector } from "@/store/hooks";
 
 const PAGE_LIMIT = 12; // 4 columns x 3 rows
+const SEARCH_DEBOUNCE_MS = 400;
 
 export function InterviewerList() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
   const [pagination, setPagination] = useState<APIPaginationInfo>({
@@ -48,6 +51,23 @@ export function InterviewerList() {
     useState<Interviewer | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
   const { mappingValues } = useAppSelector((state) => state.interviewers);
+
+  // Debounce search input -> searchKeyword
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
 
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
@@ -80,11 +100,11 @@ export function InterviewerList() {
     },
   ];
 
-  // Fetch interviewers when filters change (initial load and reset)
+  // Fetch interviewers when filters or search keyword change (initial load and reset)
   useEffect(() => {
     setCurrentOffset(0);
     fetchInterviewers(0, true);
-  }, [appliedFilters]);
+  }, [appliedFilters, searchKeyword]);
 
   // Fetch more interviewers when offset changes (lazy loading)
   useEffect(() => {
@@ -118,6 +138,7 @@ export function InterviewerList() {
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: offset,
+        ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
       const response = await interviewerService.getInterviewers(params, {
@@ -331,7 +352,14 @@ export function InterviewerList() {
           {/* Empty State */}
           {interviewers?.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-[#737373]">No interviewers found</p>
+              <p className="text-[#737373]">
+                {appliedFilters?.roundType?.length > 0 ||
+                appliedFilters?.language?.length > 0 ||
+                appliedFilters?.voice?.length > 0 ||
+                searchQuery
+                  ? "Try adjusting your filters or search query to find what you're looking for."
+                  : "No interviewers found"}
+              </p>
             </div>
           )}
 

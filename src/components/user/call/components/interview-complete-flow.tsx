@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/header";
 import { applicantAuthService } from "../services/applicant-auth.service";
+import { useRouter } from "next/navigation";
 
 // Feedback form instance config (formId and property IDs for interview feedback)
 const FEEDBACK_FORM_ID = "6981bfe01695f2d642cdd71c";
@@ -33,6 +34,7 @@ export function InterviewCompleteFlow({
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -66,6 +68,7 @@ export function InterviewCompleteFlow({
       toast.success(response?.message ?? "Feedback submitted successfully!", {
         duration: 8000,
       });
+      router.push("/");
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ??

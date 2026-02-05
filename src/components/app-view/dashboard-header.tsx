@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Plus } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CreateInterviewDialog } from "@/components/app-view/create-interview/create-interview-dialog";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "../logo";
@@ -14,6 +20,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
   const [isCreateInterviewOpen, setIsCreateInterviewOpen] = useState(false);
   const router = useRouter();
+  const initial = (userName?.trim() || "U").charAt(0).toUpperCase();
 
   return (
     <>
@@ -61,7 +68,7 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-3 h-9">
-          <Button
+          {/* <Button
             variant="secondary"
             size="default"
             className="h-9 px-4 rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
@@ -69,23 +76,41 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
           >
             <Plus className="w-4 h-4" />
             Create interview
-          </Button>
+          </Button> */}
 
           {/* <button className="p-0 hover:bg-[rgba(0,0,0,0.05)] rounded-lg transition-colors">
             <Bell className="w-6 h-6 text-[#02563d]" strokeWidth={1.5} />
           </button> */}
 
-          {/* User Avatar */}
-          <div
-            className="px-1"
-            onClick={() => router.push("/app-view/profile")}
-          >
-            <div className="w-9 h-9 bg-[rgba(2,86,61,0.1)] rounded-full flex items-center justify-center">
-              <span className="text-sm font-normal text-[#02563d] tracking-[-0.15px]">
-                JD
-              </span>
-            </div>
-          </div>
+          {/* User avatar — click to open menu with Logout */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="rounded-full p-0.5 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#02563d] focus:ring-offset-2 transition-opacity"
+                aria-label="Account menu"
+              >
+                <div className="w-9 h-9 rounded-full bg-[#02563d]/10 flex items-center justify-center">
+                  <span className="text-sm font-medium text-[#02563d]">
+                    {initial}
+                  </span>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={6}
+              className="w-40 rounded-lg border border-[#e5e5e5] bg-white p-1 shadow-md"
+            >
+              <DropdownMenuItem
+                onClick={() => router.push("/")}
+                className="cursor-pointer gap-2 rounded-md px-3 py-2 text-sm text-[#dc2626] focus:bg-red-50 focus:text-[#dc2626]"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

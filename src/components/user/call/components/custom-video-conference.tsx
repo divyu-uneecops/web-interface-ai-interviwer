@@ -8,7 +8,7 @@ import {
   useDataChannel,
 } from "@livekit/components-react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 interface CustomVideoConferenceProps {
@@ -32,6 +32,8 @@ export function CustomVideoConference({
   const [chatMessages, setChatMessages] = useState<
     Array<{ text: string; from: string; timestamp: number }>
   >([]);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMicEnabled(isMicrophoneEnabled ?? true);
@@ -108,7 +110,20 @@ export function CustomVideoConference({
     } catch (error) {
       console.error("Error processing data channel message:", error);
     }
-  }, [message, localParticipant, agentParticipant]); // Include dependencies
+  }, [message, localParticipant, agentParticipant]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current && chatContainerRef.current) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        });
+      }, 100);
+    }
+  }, [chatMessages]);
 
   // Check if agent is speaking
   useEffect(() => {
@@ -200,14 +215,14 @@ export function CustomVideoConference({
                 const maxHeight = isCenter
                   ? 64
                   : index === 1 || index === 3
-                  ? 40
-                  : 24;
+                    ? 40
+                    : 24;
                 const dynamicHeight = maxHeight * Math.max(level, 0.15);
                 const opacity = isCenter
                   ? 1
                   : index === 1 || index === 3
-                  ? 0.7
-                  : 0.4;
+                    ? 0.7
+                    : 0.4;
                 const width = isCenter ? "16px" : "12px";
 
                 return (
@@ -240,52 +255,93 @@ export function CustomVideoConference({
               </span>
               <span className="text-xs text-gray-500">
                 {chatMessages?.length > 0
-                  ? `${chatMessages?.length} message${
-                      chatMessages?.length > 1 ? "s" : ""
-                    }`
+                  ? `${chatMessages?.length} message${chatMessages?.length > 1 ? "s" : ""
+                  }`
                   : "Waiting for messages..."}
               </span>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 px-3 py-3 space-y-2 overflow-y-auto">
+          <div
+            ref={chatContainerRef}
+            className="flex-1 min-h-0 px-3 py-3 space-y-2 overflow-y-auto scroll-smooth"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "#cbd5e1 transparent",
+            }}
+          >
             {chatMessages.length === 0 ? (
               <p className="text-xs text-gray-400 text-center mt-6">
                 No messages yet. The interviewer's messages will appear here.
               </p>
             ) : (
-              chatMessages.map((msg, index) => {
-                const isLocal = msg.from === localParticipant?.identity;
-                const senderName = isLocal ? "You" : "Interviewer";
+              <>
+                {chatMessages.map((msg, index) => {
+                  const isLocal = msg.from === localParticipant?.identity;
+                  const senderName = isLocal ? "You" : "Interviewer";
 
-                return (
-                  <div
-                    key={`${msg.timestamp}-${index}`}
-                    className={`flex ${
-                      isLocal ? "justify-end" : "justify-start"
-                    }`}
-                  >
+                  // Determine if this message sender is currently speaking
+                  const isCurrentlySpeaking = isLocal
+                    ? isUserSpeaking
+                    : isAgentSpeaking;
+
+                  // Check if this is the last message from this sender
+                  const isLastMessageFromSender = index === chatMessages.length - 1 ||
+                    (index < chatMessages.length - 1 &&
+                      chatMessages[index + 1].from !== msg.from);
+
+                  return (
                     <div
-                      className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs shadow-sm ${
-                        isLocal
-                          ? "bg-[#02563d] text-white rounded-br-sm"
-                          : "bg-gray-100 text-gray-900 rounded-bl-sm"
-                      }`}
+                      key={`${msg.timestamp}-${index}`}
+                      className={`flex ${isLocal ? "justify-end" : "justify-start"
+                        } animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                      style={{
+                        animationDelay: `${index * 50}ms`,
+                      }}
                     >
                       <div
-                        className={`mb-0.5 font-medium ${
-                          isLocal ? "text-white/80" : "text-gray-600"
-                        }`}
+                        className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs shadow-sm transition-all duration-300 ${isLocal
+                          ? "bg-[#02563d] text-white rounded-br-sm"
+                          : "bg-gray-100 text-gray-900 rounded-bl-sm"
+                          } ${isCurrentlySpeaking && isLastMessageFromSender
+                            ? isLocal
+                              ? "ring-2 ring-[#02563d] ring-opacity-60 shadow-lg shadow-[#02563d]/20 animate-pulse"
+                              : "ring-2 ring-blue-400 ring-opacity-60 shadow-lg shadow-blue-400/20 animate-pulse"
+                            : ""
+                          }`}
                       >
-                        {senderName}
-                      </div>
-                      <div className="whitespace-pre-wrap break-words">
-                        {msg.text}
+                        <div
+                          className={`mb-0.5 font-medium flex items-center gap-1.5 ${isLocal ? "text-white/80" : "text-gray-600"
+                            }`}
+                        >
+                          <span>{senderName}</span>
+                          {isCurrentlySpeaking && isLastMessageFromSender && (
+                            <span
+                              className={`inline-flex items-center gap-1 ${isLocal ? "text-white/70" : "text-gray-500"
+                                }`}
+                            >
+                              <span className="relative flex h-2 w-2">
+                                <span
+                                  className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isLocal ? "bg-white/60" : "bg-blue-400"
+                                    }`}
+                                />
+                                <span
+                                  className={`relative inline-flex h-2 w-2 rounded-full ${isLocal ? "bg-white/80" : "bg-blue-500"
+                                    }`}
+                                />
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                        <div className="whitespace-pre-wrap break-words">
+                          {msg.text}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </>
             )}
           </div>
         </div>
@@ -302,9 +358,8 @@ export function CustomVideoConference({
             aria-label={isMicEnabled ? "Mute microphone" : "Unmute microphone"}
           >
             <div
-              className={`relative ${
-                isMicEnabled ? "text-gray-700" : "text-red-500"
-              }`}
+              className={`relative ${isMicEnabled ? "text-gray-700" : "text-red-500"
+                }`}
             >
               {isMicEnabled ? (
                 <Mic className="w-5 h-5 transition-transform group-hover:scale-110" />

@@ -231,7 +231,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
 
   // Render Interview Complete Screen
   if (flowState === "interview-complete") {
-    return <InterviewCompleteFlow />;
+    return <InterviewCompleteFlow interviewId={interviewId} />;
   }
 
   return null;

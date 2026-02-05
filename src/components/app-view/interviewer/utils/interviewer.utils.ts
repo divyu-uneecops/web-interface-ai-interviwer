@@ -1,3 +1,4 @@
+import { mapInterviewerImage } from "../constants/interviewer.constants";
 import {
   APIInterviewerItem,
   APIInterviewerValue,
@@ -54,10 +55,7 @@ export const transformAPIInterviewerItemToInterviewer = (
     personalityTraits?.find((trait: any) => trait?.key === "speed")?.value || 0;
 
   // Determine image URL based on voice or avatar
-  let imageUrl = "/interviewer-male.jpg"; // default
-  if (voice === "Female") {
-    imageUrl = "/interviewer-female.jpg";
-  }
+  let imageUrl = mapInterviewerImage(voice, roundType); // default
 
   return {
     id: item?.id || "",

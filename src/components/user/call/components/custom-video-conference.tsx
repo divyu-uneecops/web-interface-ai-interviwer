@@ -7,7 +7,7 @@ import {
   ConnectionStateToast,
   useDataChannel,
 } from "@livekit/components-react";
-import { Mic, MicOff, PhoneOff, MessageSquare, User } from "lucide-react";
+import { Mic, MicOff, PhoneOff, MessageSquare } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -46,6 +46,13 @@ export function CustomVideoConference({
   const [isMicEnabled, setIsMicEnabled] = useState(isMicrophoneEnabled ?? true);
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  const [showUserSpeaking, setShowUserSpeaking] = useState(false);
+  const [showAgentSpeaking, setShowAgentSpeaking] = useState(false);
+  const speakCooldownRef = useRef<{
+    user: ReturnType<typeof setTimeout> | null;
+    agent: ReturnType<typeof setTimeout> | null;
+  }>({ user: null, agent: null });
+  const SPEAK_COOLDOWN_MS = 1400;
   const [audioLevels, setAudioLevels] = useState([0, 0, 0, 0, 0]);
   const [chatMessages, setChatMessages] = useState<
     Array<{ text: string; from: string; timestamp: number }>
@@ -132,8 +139,8 @@ export function CustomVideoConference({
 
   useEffect(() => {
     if (
-      chatMessages?.length > 0 &&
       chatContainerRef?.current &&
+      (chatMessages?.length > 0 || showUserSpeaking || showAgentSpeaking) &&
       isUserAtBottom
     ) {
       const container = chatContainerRef.current;
@@ -148,7 +155,7 @@ export function CustomVideoConference({
         clearTimeout(t2);
       };
     }
-  }, [chatMessages, isUserAtBottom]);
+  }, [chatMessages, isUserAtBottom, showUserSpeaking, showAgentSpeaking]);
 
   useEffect(() => {
     if (!agentParticipant) {
@@ -173,6 +180,45 @@ export function CustomVideoConference({
     }, 100);
     return () => clearInterval(interval);
   }, [localParticipant]);
+
+  // Cooldown: keep speaking row visible briefly after pause to avoid flicker
+  useEffect(() => {
+    if (isUserSpeaking) {
+      if (speakCooldownRef.current.user) {
+        clearTimeout(speakCooldownRef.current.user);
+        speakCooldownRef.current.user = null;
+      }
+      setShowUserSpeaking(true);
+    } else {
+      speakCooldownRef.current.user = setTimeout(() => {
+        setShowUserSpeaking(false);
+        speakCooldownRef.current.user = null;
+      }, SPEAK_COOLDOWN_MS);
+    }
+    return () => {
+      if (speakCooldownRef.current.user)
+        clearTimeout(speakCooldownRef.current.user);
+    };
+  }, [isUserSpeaking]);
+
+  useEffect(() => {
+    if (isAgentSpeaking) {
+      if (speakCooldownRef.current.agent) {
+        clearTimeout(speakCooldownRef.current.agent);
+        speakCooldownRef.current.agent = null;
+      }
+      setShowAgentSpeaking(true);
+    } else {
+      speakCooldownRef.current.agent = setTimeout(() => {
+        setShowAgentSpeaking(false);
+        speakCooldownRef.current.agent = null;
+      }, SPEAK_COOLDOWN_MS);
+    }
+    return () => {
+      if (speakCooldownRef.current.agent)
+        clearTimeout(speakCooldownRef.current.agent);
+    };
+  }, [isAgentSpeaking]);
 
   useEffect(() => {
     const isActive = isUserSpeaking || isAgentSpeaking;
@@ -201,8 +247,6 @@ export function CustomVideoConference({
       console.error("Error toggling microphone:", error);
     }
   };
-
-  const isActive = isUserSpeaking || isAgentSpeaking;
 
   return (
     <>
@@ -233,51 +277,10 @@ export function CustomVideoConference({
             />
             <span>Interview in progress</span>
           </div>
-          {isActive && (
-            <span className="text-xs text-[#71717a]">
-              {isUserSpeaking ? "You're speaking" : "Interviewer speaking"}
-            </span>
-          )}
         </div>
 
-        {/* Main content: presence + chat */}
-        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-0 md:gap-6 px-4 md:px-6 py-4 md:py-5">
-          {/* Presence / audio visualization — compact, left or top */}
-          <div className="shrink-0 flex items-center justify-center py-6 md:py-0 md:min-w-[200px]">
-            {isActive ? (
-              <div
-                className="flex items-end justify-center gap-1.5 h-16 px-6 py-3 rounded-2xl bg-white border border-[#e5e5e5] shadow-sm"
-                aria-hidden
-              >
-                {audioLevels.map((level, i) => {
-                  const isCenter = i === 2;
-                  const maxH = isCenter ? 48 : i === 1 || i === 3 ? 32 : 20;
-                  const h = Math.max(maxH * Math.max(level, 0.15), 6);
-                  const color = isUserSpeaking ? BRAND.primary : "#0ea5e9";
-                  return (
-                    <div
-                      key={i}
-                      className="rounded-full transition-all duration-75 ease-out"
-                      style={{
-                        width: isCenter ? 10 : 8,
-                        height: h,
-                        backgroundColor: color,
-                        opacity: isCenter ? 1 : 0.7,
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2 text-[#a1a1aa]">
-                <div className="rounded-full bg-[#f4f4f5] p-3">
-                  <User className="w-8 h-8 text-[#d4d4d8]" strokeWidth={1.5} />
-                </div>
-                <span className="text-xs">Listening…</span>
-              </div>
-            )}
-          </div>
-
+        {/* Main content: chat */}
+        <div className="flex-1 min-h-0 flex flex-col px-4 md:px-6 py-4 md:py-5">
           {/* Chat — primary content */}
           <div className="flex-1 min-h-0 flex flex-col rounded-2xl border border-[#e5e5e5] bg-white shadow-sm overflow-hidden">
             <div className="shrink-0 flex items-center gap-2 px-4 py-3 border-b border-[#f4f4f5] bg-[#fafafa]">
@@ -314,47 +317,141 @@ export function CustomVideoConference({
                   </p>
                 </div>
               ) : (
-                chatMessages.map((msg, index) => {
-                  const isLocal = msg.from === localParticipant?.identity;
-                  const senderName = isLocal ? "You" : "Interviewer";
-                  const isRecentFromSender =
-                    index ===
-                    chatMessages.map((m) => m.from).lastIndexOf(msg.from);
-                  const isSpeaking = isLocal ? isUserSpeaking : isAgentSpeaking;
-                  const highlight = isRecentFromSender && isSpeaking;
+                <>
+                  {chatMessages.map((msg, index) => {
+                    const isLocal = msg.from === localParticipant?.identity;
+                    const senderName = isLocal ? "You" : "Interviewer";
 
-                  return (
-                    <div
-                      key={`${msg.timestamp}-${index}`}
-                      className={`flex ${
-                        isLocal ? "justify-end" : "justify-start"
-                      }`}
-                    >
+                    return (
                       <div
-                        className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                          isLocal
-                            ? "rounded-br-md bg-[#02563d] text-white"
-                            : "rounded-bl-md bg-[#f4f4f5] text-[#18181b] border border-[#e5e5e5]"
-                        } ${
-                          highlight
-                            ? "ring-2 ring-[#02563d]/30 ring-offset-1"
-                            : ""
+                        key={`${msg.timestamp}-${index}`}
+                        className={`flex ${
+                          isLocal ? "justify-end" : "justify-start"
                         }`}
                       >
                         <div
-                          className={`text-xs font-medium mb-1 ${
-                            isLocal ? "text-white/80" : "text-[#71717a]"
-                          }`}
+                          className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                            isLocal
+                              ? "rounded-br-md bg-[#02563d] text-white"
+                              : "rounded-bl-md bg-[#f4f4f5] text-[#18181b] border border-[#e5e5e5]"
+                          } `}
                         >
-                          {senderName}
+                          <div
+                            className={`text-xs font-medium mb-1 ${
+                              isLocal ? "text-white/80" : "text-[#71717a]"
+                            }`}
+                          >
+                            {senderName}
+                          </div>
+                          <div className="whitespace-pre-wrap wrap-break-word">
+                            {msg.text}
+                          </div>
                         </div>
-                        <div className="whitespace-pre-wrap wrap-break-word">
-                          {msg.text}
+                      </div>
+                    );
+                  })}
+                  {/* Live speaking row: only the current speaker (You or Interviewer), with cooldown to avoid flicker */}
+                  {showUserSpeaking && (
+                    <div className="flex justify-end pt-1">
+                      <div className="max-w-[85%] md:max-w-[75%] rounded-2xl rounded-br-md px-4 py-2.5 bg-[#02563d] text-white">
+                        <div className="text-xs font-medium mb-1.5 text-white/80">
+                          You
+                        </div>
+                        <div
+                          className="flex items-end justify-center gap-1 h-8"
+                          aria-hidden
+                        >
+                          {isUserSpeaking
+                            ? audioLevels.map((level, i) => {
+                                const isCenter = i === 2;
+                                const maxH = isCenter
+                                  ? 20
+                                  : i === 1 || i === 3
+                                  ? 14
+                                  : 10;
+                                const h = Math.max(
+                                  maxH * Math.max(level, 0.15),
+                                  4
+                                );
+                                return (
+                                  <div
+                                    key={i}
+                                    className="rounded-full transition-all duration-75 ease-out"
+                                    style={{
+                                      width: isCenter ? 6 : 5,
+                                      height: h,
+                                      backgroundColor: "rgba(255,255,255,0.9)",
+                                      opacity: isCenter ? 1 : 0.8,
+                                    }}
+                                  />
+                                );
+                              })
+                            : [0.3, 0.5, 0.4, 0.5, 0.3].map((q, i) => (
+                                <div
+                                  key={i}
+                                  className="rounded-full animate-pulse transition-opacity duration-300"
+                                  style={{
+                                    width: 5,
+                                    height: 8 + q * 8,
+                                    backgroundColor: "rgba(255,255,255,0.5)",
+                                  }}
+                                />
+                              ))}
                         </div>
                       </div>
                     </div>
-                  );
-                })
+                  )}
+                  {showAgentSpeaking && (
+                    <div className="flex justify-start pt-1">
+                      <div className="max-w-[85%] md:max-w-[75%] rounded-2xl rounded-bl-md px-4 py-2.5 bg-[#f4f4f5] text-[#18181b] border border-[#e5e5e5]">
+                        <div className="text-xs font-medium mb-1.5 text-[#71717a]">
+                          Interviewer
+                        </div>
+                        <div
+                          className="flex items-end justify-center gap-1 h-8"
+                          aria-hidden
+                        >
+                          {isAgentSpeaking
+                            ? audioLevels.map((level, i) => {
+                                const isCenter = i === 2;
+                                const maxH = isCenter
+                                  ? 20
+                                  : i === 1 || i === 3
+                                  ? 14
+                                  : 10;
+                                const h = Math.max(
+                                  maxH * Math.max(level, 0.15),
+                                  4
+                                );
+                                return (
+                                  <div
+                                    key={i}
+                                    className="rounded-full transition-all duration-75 ease-out"
+                                    style={{
+                                      width: isCenter ? 6 : 5,
+                                      height: h,
+                                      backgroundColor: BRAND.primary,
+                                      opacity: isCenter ? 1 : 0.8,
+                                    }}
+                                  />
+                                );
+                              })
+                            : [0.3, 0.5, 0.4, 0.5, 0.3].map((q, i) => (
+                                <div
+                                  key={i}
+                                  className="rounded-full animate-pulse transition-opacity duration-300"
+                                  style={{
+                                    width: 5,
+                                    height: 8 + q * 8,
+                                    backgroundColor: "rgba(2, 86, 61, 0.3)",
+                                  }}
+                                />
+                              ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

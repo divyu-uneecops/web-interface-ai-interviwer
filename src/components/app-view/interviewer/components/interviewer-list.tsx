@@ -24,9 +24,12 @@ import { transformAPIResponseToInterviewers } from "../utils/interviewer.utils";
 import { useAppSelector } from "@/store/hooks";
 
 const PAGE_LIMIT = 12; // 4 columns x 3 rows
+const SEARCH_DEBOUNCE_MS = 400;
 
 export function InterviewerList() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
   const [pagination, setPagination] = useState<APIPaginationInfo>({
@@ -46,9 +49,8 @@ export function InterviewerList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [interviewerDetail, setInterviewerDetail] =
     useState<Interviewer | null>(null);
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
   const { mappingValues } = useAppSelector((state) => state.interviewers);
-
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
     {
@@ -80,22 +82,60 @@ export function InterviewerList() {
     },
   ];
 
-  // Fetch interviewers when filters change (initial load and reset)
+  // Debounce search input -> searchKeyword
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Fetch interviewers when filters or search keyword change (initial load and reset)
   useEffect(() => {
     setCurrentOffset(0);
     fetchInterviewers(0, true);
-  }, [appliedFilters]);
+  }, [appliedFilters, searchKeyword]);
 
-  // Fetch more interviewers when offset changes (lazy loading)
+  // Fetch more when offset changes to a positive value (scroll loaded next page)
   useEffect(() => {
-    if (
-      currentOffset > 0 &&
-      pagination.nextOffset !== null &&
-      pagination?.nextOffset >= pagination?.total
-    ) {
+    if (currentOffset > 0) {
       fetchInterviewers(currentOffset, false);
     }
   }, [currentOffset]);
+
+  // Handle scroll for lazy loading (same pattern as create-round-modal Select Interviewer)
+  useEffect(() => {
+    const container = listContainerRef?.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+      // Load more when scrolled 80% down
+      if (
+        scrollPercentage >= 0.8 &&
+        pagination.nextOffset !== null &&
+        pagination?.nextOffset < pagination?.total &&
+        !isLoading &&
+        !isLoadingMore
+      ) {
+        setCurrentOffset(pagination?.nextOffset);
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [pagination?.nextOffset, isLoading, isLoadingMore]);
 
   const fetchInterviewers = async (
     offset: number,
@@ -118,6 +158,7 @@ export function InterviewerList() {
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: offset,
+        ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
       const response = await interviewerService.getInterviewers(params, {
@@ -198,19 +239,13 @@ export function InterviewerList() {
 
   const handleCreateInterviewer = () => {
     setCurrentOffset(0);
-
-    if (currentOffset === 0) {
-      fetchInterviewers(0, true);
-    }
+    fetchInterviewers(0, true);
   };
 
   const handleUpdateInterviewer = () => {
     setInterviewerDetail(null);
     setCurrentOffset(0);
-
-    if (currentOffset === 0) {
-      fetchInterviewers(0, true);
-    }
+    fetchInterviewers(0, true);
   };
 
   const handleEditInterviewer = async (interviewer: Interviewer) => {
@@ -222,40 +257,6 @@ export function InterviewerList() {
     setAppliedFilters(filters);
     setCurrentOffset(0); // Reset to first page when filters are applied
   };
-
-  // Intersection Observer for lazy loading
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const target = entries[0];
-        if (
-          target.isIntersecting &&
-          pagination.nextOffset !== null &&
-          !isLoading &&
-          !isLoadingMore &&
-          pagination?.nextOffset < pagination?.total
-        ) {
-          setCurrentOffset(pagination.nextOffset);
-        }
-      },
-      {
-        root: null,
-        rootMargin: "100px",
-        threshold: 0.1,
-      }
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -294,73 +295,79 @@ export function InterviewerList() {
         </div>
       </div>
 
-      {/* Interviewers Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, index: number) => (
-            <div
-              key={index}
-              className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
-            >
-              <div className="w-full aspect-square rounded bg-gray-200 mb-1" />
-              <div className="h-4 bg-gray-200 rounded mb-2" />
-              <div className="h-3 bg-gray-200 rounded mb-1" />
-              <div className="h-3 bg-gray-200 rounded mb-4" />
-              <div className="h-9 bg-gray-200 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <>
-          {interviewers?.length > 0 && (
-            <>
-              <div className="grid grid-cols-4 gap-6">
-                {interviewers?.map((interviewer: Interviewer) => (
-                  <InterviewerCard
-                    key={interviewer?.id}
-                    interviewer={interviewer}
-                    onEdit={() => {
-                      handleEditInterviewer(interviewer);
-                    }}
-                  />
+      {/* Interviewers Grid - scrollable container for lazy loading (same as create-round-modal Select Interviewer) */}
+      <div
+        ref={listContainerRef}
+        className="max-h-[calc(100vh-220px)] overflow-y-auto space-y-6"
+        style={{ scrollbarWidth: "thin" }}
+      >
+        {isLoading ? (
+          <div className="grid grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, index: number) => (
+              <div
+                key={index}
+                className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
+              >
+                <div className="w-full aspect-square rounded bg-gray-200 mb-1" />
+                <div className="h-4 bg-gray-200 rounded mb-2" />
+                <div className="h-3 bg-gray-200 rounded mb-1" />
+                <div className="h-3 bg-gray-200 rounded mb-4" />
+                <div className="h-9 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {interviewers?.length > 0 && (
+              <>
+                <div className="grid grid-cols-4 gap-6">
+                  {interviewers?.map((interviewer: Interviewer) => (
+                    <InterviewerCard
+                      key={interviewer?.id}
+                      interviewer={interviewer}
+                      onEdit={() => {
+                        handleEditInterviewer(interviewer);
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Empty State */}
+            {interviewers?.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-[#737373]">
+                  {appliedFilters?.roundType?.length > 0 ||
+                  appliedFilters?.language?.length > 0 ||
+                  appliedFilters?.voice?.length > 0 ||
+                  searchQuery
+                    ? "Try adjusting your filters or search query to find what you're looking for."
+                    : "No interviewers found"}
+                </p>
+              </div>
+            )}
+
+            {/* Loading More Indicator */}
+            {isLoadingMore && (
+              <div className="grid grid-cols-4 gap-6 mt-6">
+                {Array.from({ length: 4 }).map((_, index: number) => (
+                  <div
+                    key={`loading-more-${index}`}
+                    className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
+                  >
+                    <div className="w-full aspect-square rounded bg-gray-200 mb-1" />
+                    <div className="h-4 bg-gray-200 rounded mb-2" />
+                    <div className="h-3 bg-gray-200 rounded mb-1" />
+                    <div className="h-3 bg-gray-200 rounded mb-4" />
+                    <div className="h-9 bg-gray-200 rounded" />
+                  </div>
                 ))}
               </div>
-            </>
-          )}
-
-          {/* Empty State */}
-          {interviewers?.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-[#737373]">No interviewers found</p>
-            </div>
-          )}
-
-          {/* Loading More Indicator */}
-          {isLoadingMore && (
-            <div className="grid grid-cols-4 gap-6 mt-6">
-              {Array.from({ length: 4 }).map((_, index: number) => (
-                <div
-                  key={`loading-more-${index}`}
-                  className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col animate-pulse"
-                >
-                  <div className="w-full aspect-square rounded bg-gray-200 mb-1" />
-                  <div className="h-4 bg-gray-200 rounded mb-2" />
-                  <div className="h-3 bg-gray-200 rounded mb-1" />
-                  <div className="h-3 bg-gray-200 rounded mb-4" />
-                  <div className="h-9 bg-gray-200 rounded" />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Sentinel element for Intersection Observer */}
-          {pagination?.nextOffset !== null &&
-            !isLoading &&
-            pagination?.nextOffset < pagination?.total && (
-              <div ref={observerTarget} className="h-10 w-full" />
             )}
-        </>
-      )}
+          </>
+        )}
+      </div>
 
       {/* Create Interviewer Modal */}
       {isCreateModalOpen && (

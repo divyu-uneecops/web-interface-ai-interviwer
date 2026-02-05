@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Plus, Search, MoreHorizontal, Eye, Calendar } from "lucide-react";
 import { toast } from "sonner";
@@ -29,8 +29,12 @@ import { statusStyles } from "../constants/interview.constants";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import { interviewService } from "../services/interview.service";
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 export default function InterviewsList() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [interviews, setInterviews] = useState<InterviewDetail[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -58,9 +62,26 @@ export default function InterviewsList() {
     },
   ];
 
+  // Debounce search input -> searchKeyword
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchInterviews();
-  }, [currentOffset, appliedFilters]);
+  }, [currentOffset, appliedFilters, searchKeyword]);
 
   const fetchInterviews = async () => {
     setIsLoading(true);
@@ -76,6 +97,7 @@ export default function InterviewsList() {
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: currentOffset,
+        ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
       const response = await interviewService.getInterviewsFromView(params, {
@@ -269,10 +291,7 @@ export default function InterviewsList() {
             type="text"
             placeholder="Search"
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e?.target?.value);
-              setCurrentOffset(0);
-            }}
+            onChange={(e) => setSearchQuery(e?.target?.value)}
             className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
           />
         </div>
@@ -315,7 +334,15 @@ export default function InterviewsList() {
         emptyState={
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-[#737373] mx-auto mb-4" />
-            <p className="text-[#737373] text-sm">No interviews found</p>
+            <p className="text-[#737373] text-sm font-medium">
+              No interviews found
+            </p>
+            {(appliedFilters?.status?.length > 0 || searchQuery) && (
+              <p className="text-[#737373] text-sm mt-1">
+                Try adjusting your filters or search query to find what
+                you&apos;re looking for.
+              </p>
+            )}
           </div>
         }
         rowActions={renderRowActions}

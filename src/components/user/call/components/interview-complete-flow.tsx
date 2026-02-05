@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { CircleCheckBig } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Logo } from "@/components/logo";
+import { Header } from "@/components/header";
 
 export function InterviewCompleteFlow() {
   const [feedback, setFeedback] = useState("");
@@ -20,28 +20,28 @@ export function InterviewCompleteFlow() {
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="pt-8 pb-8">
-          <Logo />
-        </div>
-
-        <div className="flex flex-col items-center gap-8">
-          <Card className="w-full max-w-2xl border border-[#e5e5e5] rounded-[14px] p-12 bg-white text-center">
+      <Header isUser={true} />
+      <div className="max-w-[738px] mx-auto mt-[20px] px-[12px]">
+        <div className="flex flex-col items-center gap-[12px]">
+          <div>
+            <CircleCheckBig className="w-20 h-20" />
+          </div>
+          <div>
+            <h1 className="text-[20px] font-bold leading-[28px] text-[#0a0a0a]">
+              Interview Complete!
+            </h1>
+          </div>
+          {/* Success card - pixel-perfect with guidelines-flow card style */}
+          <Card className="w-full border border-[#e5e5e5] rounded-[14px] px-[12px] py-[16px] bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] text-center">
             <div className="flex flex-col items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-[#0a0a0a] flex items-center justify-center">
-                <Check className="w-10 h-10 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-[#0a0a0a] mb-3">
-                  Interview Complete!
-                </h1>
-                <p className="font-semibold text-[#0a0a0a] mb-2">
+              <div className="flex flex-col items-center">
+                <p className="text-[14px] font-medium leading-[20px] text-[#0a0a0a]">
                   We appreciate your time!
                 </p>
-                <p className="text-sm text-[#717182] mb-1">
+                <p className="text-[14px] font-normal leading-[20px] text-[#717182]">
                   Your responses have been successfully submitted.
                 </p>
-                <p className="text-sm text-[#717182]">
+                <p className="text-[14px] font-normal leading-[20px] text-[#717182]">
                   Our team will review your interview and share next steps with
                   you soon.
                 </p>
@@ -49,38 +49,42 @@ export function InterviewCompleteFlow() {
             </div>
           </Card>
 
-          <Card className="w-full max-w-2xl border border-[#e5e5e5] rounded-[14px] p-6 bg-white">
+          {/* Feedback card - matches guidelines-flow card + auth-flow inputs */}
+          <Card className="w-full border border-[#e5e5e5] rounded-[14px] px-[24px] py-[20px] bg-white shadow-[0_1px_2px_0_rgba(2,86,61,0.12)]">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-[#0a0a0a]">
+                <label className="text-[14px] font-medium leading-[14px] text-[#0a0a0a]">
                   How was your experience with AI interviewer?
                 </label>
                 <Textarea
                   placeholder="Write text here..."
                   value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  className="min-h-32"
+                  onChange={(e) => setFeedback(e?.target?.value)}
+                  className="min-h-[120px] rounded-md border border-[#e5e5e5] bg-white px-3 py-2 text-[14px] leading-5 text-[#0a0a0a] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] focus-visible:border-[#A3A3A3] focus-visible:ring-[#02563d]/50"
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-[#0a0a0a]">
+                <label className="text-[14px] font-medium leading-[14px] text-[#0a0a0a]">
                   Rate AI interviewer
                 </label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
+                      type="button"
                       onClick={() => setRating(star)}
-                      className="w-8 h-8 flex items-center justify-center"
+                      className="w-8 h-8 flex items-center justify-center rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#02563d]/30 focus-visible:ring-offset-1"
+                      aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                     >
                       <svg
-                        className={`w-6 h-6 ${
+                        className={`w-6 h-6 transition-colors ${
                           star <= rating
                             ? "fill-[#02563d] text-[#02563d]"
                             : "fill-none stroke-[#e5e5e5] text-[#e5e5e5]"
                         }`}
                         viewBox="0 0 24 24"
+                        aria-hidden
                       >
                         <path
                           strokeLinecap="round"
@@ -96,7 +100,7 @@ export function InterviewCompleteFlow() {
 
               <Button
                 onClick={handleSubmit}
-                className="self-end h-11 bg-[#02563d] text-white font-medium rounded-md hover:bg-[#02563d]/90"
+                className="self-end h-11 bg-[#02563d] text-white text-base font-medium leading-5 rounded-md shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] hover:bg-[#02563d]/90"
               >
                 Submit
               </Button>

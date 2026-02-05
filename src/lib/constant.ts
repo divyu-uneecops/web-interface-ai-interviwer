@@ -47,4 +47,7 @@ export const API_ENDPOINTS = {
     CANCEL: "/api/objects/interviews/records/{id}/cancel",
     VERIFY_APPLICANT: "/api/interviews/{id}/verify-applicant",
   },
+  FEEDBACK: {
+    SAVE: "/api/v2/forminstances",
+  },
 };

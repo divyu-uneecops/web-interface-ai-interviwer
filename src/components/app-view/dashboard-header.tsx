@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
   const [isCreateInterviewOpen, setIsCreateInterviewOpen] = useState(false);
   const router = useRouter();
+  const accountMenuId = useId();
   const initial = (userName?.trim() || "U").charAt(0).toUpperCase();
 
   return (
@@ -87,6 +88,7 @@ export function DashboardHeader({ userName = "Rahul" }: DashboardHeaderProps) {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
+                id={accountMenuId}
                 className="rounded-full p-0.5 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#02563d] focus:ring-offset-2 transition-opacity"
                 aria-label="Account menu"
               >

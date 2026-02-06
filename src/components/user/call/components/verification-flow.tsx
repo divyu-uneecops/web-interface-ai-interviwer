@@ -119,11 +119,10 @@ export function VerificationFlow({
         {/* Title block: 24px top, 8px between title and subtitle */}
         <div className="mb-[10px] text-center">
           <h1 className="text-[20px] font-bold leading-[28px] text-[#0a0a0a]">
-            Voice & video verification
+            Video verification
           </h1>
           <p className="mt-2 text-[14px] font-normal leading-[20px] text-[#0a0a0a]">
-            Let&apos;s test your microphone and camera before starting the
-            interview
+            Let&apos;s test your camera before starting the interview
           </p>
         </div>
 

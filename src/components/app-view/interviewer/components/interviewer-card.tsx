@@ -20,7 +20,7 @@ export function InterviewerCard({ interviewer, onEdit }: InterviewerCardProps) {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
         />
         {/* Badge positioned at bottom of image */}
-        <div className="absolute bottom-2 left-0">
+        <div className="absolute bottom-2 left-0 px-2">
           <Badge
             variant="outline"
             className="bg-white border-[#e5e5e5] text-[#0a0a0a] text-xs font-semibold px-2 py-0.5 rounded-md"

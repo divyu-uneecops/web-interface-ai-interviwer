@@ -299,10 +299,13 @@ export function CreateRoundModal({
   useEffect(() => {
     setCurrentOffset(0);
     setInterviewers([]);
+    fetchInterviewers(0, false);
   }, [formik?.values?.roundType, formik?.values?.language]);
 
   useEffect(() => {
-    fetchInterviewers(currentOffset, currentOffset > 0);
+    if (currentOffset > 0) {
+      fetchInterviewers(currentOffset, true);
+    }
   }, [currentOffset]);
 
   // Handle scroll for lazy loading
@@ -318,6 +321,7 @@ export function CreateRoundModal({
       if (
         scrollPercentage >= 0.8 &&
         pagination.nextOffset !== null &&
+        pagination?.nextOffset < pagination?.total &&
         !isLoadingInterviewers
       ) {
         setCurrentOffset(pagination.nextOffset);

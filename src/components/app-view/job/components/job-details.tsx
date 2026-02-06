@@ -66,6 +66,7 @@ import { AddApplicantModal } from "./add-applicant-modal";
 import { useAppSelector } from "@/store/hooks";
 import { isEmpty } from "@/lib/utils";
 import { CreateRoundModal } from "@/components/shared/components/create-round-modal";
+import { ScheduleInterviewDialog } from "./schedule-interview-dialog";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -130,6 +131,10 @@ export default function JobDetails() {
     limit: 10,
   });
   const [currentRoundsOffset, setCurrentRoundsOffset] = useState(0);
+  const [scheduleInterviewDialogOpen, setScheduleInterviewDialogOpen] =
+    useState(false);
+  const [scheduleInterviewRound, setScheduleInterviewRound] =
+    useState<Round | null>(null);
 
   const PAGE_LIMIT = 10;
 
@@ -546,10 +551,14 @@ export default function JobDetails() {
         id: "quickAction",
         header: "Quick action",
         align: "center",
-        cell: () => (
+        cell: (round) => (
           <Button
             variant="outline"
             className="h-9 px-4 py-2 text-sm font-medium bg-[#f5f5f5] border-0 text-[#171717] hover:bg-[#f5f5f5] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] rounded-md"
+            onClick={() => {
+              setScheduleInterviewRound(round);
+              setScheduleInterviewDialogOpen(true);
+            }}
           >
             Schedule interview
           </Button>
@@ -1213,6 +1222,23 @@ export default function JobDetails() {
           }}
         />
       )}
+
+      {/* Schedule Interview Dialog */}
+      <ScheduleInterviewDialog
+        open={scheduleInterviewDialogOpen}
+        onOpenChange={(open) => {
+          setScheduleInterviewDialogOpen(open);
+          if (!open) setScheduleInterviewRound(null);
+        }}
+        round={scheduleInterviewRound}
+        jobId={(params?.id as string) || ""}
+        jobTitle={job?.title}
+        applicants={applicants}
+        onSuccess={() => {
+          fetchRounds();
+          fetchStats();
+        }}
+      />
     </div>
   );
 }

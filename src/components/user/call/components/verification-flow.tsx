@@ -129,7 +129,7 @@ export function VerificationFlow({
 
         {/* Card: 14px radius, 1px border, 24px padding */}
         <Card className="w-full rounded-[14px] border border-[#e5e5e5] bg-white p-6 shadow-none">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
             {/* Video: 16:9, #f5f5f5, 8px radius */}
             <div className="relative w-full overflow-hidden rounded-lg bg-[#f5f5f5] [aspect-ratio:16/9]">
               <video
@@ -145,24 +145,16 @@ export function VerificationFlow({
                 }}
               />
             </div>
-
-            {/* Authorization: 16px semibold, 24px line-height */}
-            <p className="text-[20px] font-bold leading-[28px] text-[#0a0a0a]">
-              {authorizationStatement}
-            </p>
           </div>
 
           {/* Hint card: #fafafa, 14px radius, 16px padding */}
-          <div className="mt-6 rounded-[14px] border border-[#e5e5e5] p-4">
-            <p className="text-[14px] font-medium leading-[14px] text-[#0A0A0A]">
-              Tap{" "}
-              <span className="text-[#02563D]">
-                &quot;Start recording&quot;
-              </span>{" "}
-              to begin, and read the statement shown.
-            </p>
-            <p className="mt-2 text-[14px] font-normal leading-[20px] text-[#737373]">
-              {authorizationStatement}
+          <div className="mt-2">
+            <p className="text-[18px] font-semibold leading-[18px]">
+              Please face the camera directly with your full face clearly
+              visible, ensure only one person is in the frame, avoid side
+              angles, masks, or any obstructions, then Tap{" "}
+              <span className="text-[#02563D]">&quot;Start&quot;</span> to
+              begin.
             </p>
           </div>
         </Card>
@@ -174,7 +166,7 @@ export function VerificationFlow({
               onClick={() => onStartRecording()}
               className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white hover:bg-[#02563d]/90"
             >
-              Start recording
+              Start
             </Button>
           </div>
         )}
@@ -185,7 +177,7 @@ export function VerificationFlow({
               disabled
               className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white opacity-50"
             >
-              Recording...
+              Verifying...
             </Button>
           </div>
         )}

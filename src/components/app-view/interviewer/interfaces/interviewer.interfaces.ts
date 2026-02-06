@@ -15,6 +15,7 @@ export interface InterviewerFormData {
   skills: string[];
   roundType: string;
   language: string;
+  avatar: string;
   personality: {
     empathy: number;
     rapport: number;

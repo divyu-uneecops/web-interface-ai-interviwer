@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import { toast } from "sonner";
 import { useState } from "react";
 import { X } from "lucide-react";
+import Image from "next/image";
 
 import {
   Dialog,
@@ -36,11 +37,7 @@ import {
   CreateInterviewerModalProps,
   InterviewerFormData,
 } from "../interfaces/interviewer.interfaces";
-import {
-  voiceOptions,
-  roundTypeOptions,
-  languageOptions,
-} from "../constants/interviewer.constants";
+import { avatarOptions } from "../constants/interviewer.constants";
 
 const validate = (values: InterviewerFormData) => {
   const errors: Partial<Record<keyof InterviewerFormData, string>> = {};
@@ -84,6 +81,7 @@ export function CreateInterviewerModal({
       skills: interviewerDetail?.skills || [],
       roundType: interviewerDetail?.roundType || "",
       language: interviewerDetail?.language || "",
+      avatar: interviewerDetail?.avatar || "",
       personality: {
         empathy: interviewerDetail?.personality?.empathy || 0,
         rapport: interviewerDetail?.personality?.rapport || 0,
@@ -224,6 +222,47 @@ export function CreateInterviewerModal({
                 {formik.touched.voice && formik.errors.voice && (
                   <p className="text-sm text-red-500">{formik.errors.voice}</p>
                 )}
+              </div>
+            </div>
+
+            {/* Select Interviewer Avatar - Card based, filtered by Voice (Male/Female) */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium text-[#0a0a0a] leading-5">
+                Select Interviewer Avatar
+              </Label>
+              <div
+                className="flex gap-2 flex-wrap max-h-[200px] overflow-y-auto"
+                style={{ scrollbarWidth: "thin" }}
+              >
+                {(formik.values.voice
+                  ? avatarOptions.filter((opt) =>
+                      opt.label.startsWith(formik.values.voice)
+                    )
+                  : avatarOptions
+                ).map((option) => (
+                  <button
+                    key={option?.value}
+                    type="button"
+                    onClick={() =>
+                      formik.setFieldValue("avatar", option?.value)
+                    }
+                    className={`border rounded p-1 flex flex-col items-center gap-1 w-[70px] transition-all ${
+                      formik?.values?.avatar === option?.value
+                        ? "border-[#02563d] bg-[#f0f5f2] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]"
+                        : "border-[#d1d1d1]"
+                    }`}
+                  >
+                    <div className="relative rounded w-[62px] h-[62px] overflow-hidden">
+                      <Image
+                        src={option?.value}
+                        alt={option?.label}
+                        fill
+                        className="object-cover"
+                        sizes="62px"
+                      />
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
 

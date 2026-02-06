@@ -393,6 +393,7 @@ export function InterviewerList() {
             skills: interviewerDetail?.interviewerSkills || [],
             roundType: interviewerDetail?.roundType || "",
             language: interviewerDetail?.language || "",
+            avatar: interviewerDetail?.avatar || "",
             personality: interviewerDetail?.personality || {
               empathy: 0,
               rapport: 0,

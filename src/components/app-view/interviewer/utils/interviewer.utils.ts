@@ -54,8 +54,8 @@ export const transformAPIInterviewerItemToInterviewer = (
   const speed =
     personalityTraits?.find((trait: any) => trait?.key === "speed")?.value || 0;
 
-  // Determine image URL based on voice or avatar
-  let imageUrl = mapInterviewerImage(voice, roundType); // default
+  // Determine image URL: API avatarUrl first, then fallback from voice/roundType
+  const avatarUrl = valuesMap?.get("avatarUrl");
 
   return {
     id: item?.id || "",
@@ -63,7 +63,7 @@ export const transformAPIInterviewerItemToInterviewer = (
     voice: voice || "",
     language: language || "",
     description: description || "",
-    avatar: imageUrl || "",
+    avatar: avatarUrl || "",
     roundType: roundType || "",
     interviewerSkills: requiredSkills || [],
     personality: {
@@ -176,6 +176,11 @@ export const transformToInterviewerCreatePayload = (
       value: values?.voice || "",
     },
     {
+      propertyId: "6985806ca5d62230806a8cee",
+      key: "avatarUrl",
+      value: values?.avatar,
+    },
+    {
       propertyId: "69525848c9ba83a076aac423",
       key: "personalityTraits",
       value: personalityTraits,
@@ -207,6 +212,7 @@ export const transformToInterviewerCreatePayload = (
       "695257b4c9ba83a076aac41b",
       "69525848c9ba83a076aac423",
       "695754a9c9ba83a076aac57d",
+      "6985806ca5d62230806a8cee",
     ],
     flows: [
       {
@@ -312,6 +318,16 @@ export const transformToInterviewerUpdatePayload = (
       value: values.voice || "",
     });
     propertyIds.push("695257b4c9ba83a076aac41b");
+  }
+
+  // Avatar / avatarUrl
+  if (isTouched("avatar") && values.avatar) {
+    valuesArray.push({
+      propertyId: "6985806ca5d62230806a8cee",
+      key: "avatarUrl",
+      value: values.avatar,
+    });
+    propertyIds.push("6985806ca5d62230806a8cee");
   }
 
   // Personality Traits - if any trait is touched, include all traits

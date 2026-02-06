@@ -27,3 +27,39 @@ export const mapInterviewerImage = (voice: string, roundType: string) => {
   };
   return map[`${voiceKey}-${roundTypeKey}`];
 };
+
+/** Avatar options for Select Interviewer Avatar (card-based picker) */
+export const avatarOptions = [
+  {
+    value: "/Gemini_Generated_Image_ildp20ildp20ildp.png",
+    label: "Male",
+  },
+  {
+    value: "/Gemini_Generated_Image_5v8ngq5v8ngq5v8n.png",
+    label: "Female",
+  },
+  {
+    value: "/Gemini_Generated_Image_iz4pqgiz4pqgiz4p.png",
+    label: "Male",
+  },
+  {
+    value: "/Gemini_Generated_Image_bgo1xsbgo1xsbgo1.png",
+    label: "Female",
+  },
+  {
+    value: "/Gemini_Generated_Image_vqt5c7vqt5c7vqt5.png",
+    label: "Male",
+  },
+  {
+    value: "/Gemini_Generated_Image_kux1xckux1xckux1.png",
+    label: "Female",
+  },
+  {
+    value: "/Gemini_Generated_Image_va4aetva4aetva4a.png",
+    label: "Male",
+  },
+  {
+    value: "/Gemini_Generated_Image_vnfqoqvnfqoqvnfq.png",
+    label: "Female",
+  },
+];

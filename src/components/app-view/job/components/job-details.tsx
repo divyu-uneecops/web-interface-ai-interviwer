@@ -376,6 +376,9 @@ export default function JobDetails() {
               : []),
           ],
         },
+        sort: {
+          createdOn: "DESC",
+        },
         appId: "69521cd1c9ba83a076aac3ae",
       });
       const result = transformAPIResponseToApplicants(
@@ -438,6 +441,9 @@ export default function JobDetails() {
               type: "text",
             },
           ],
+        },
+        sort: {
+          createdOn: "DESC",
         },
         appId: "69521cd1c9ba83a076aac3ae",
       });

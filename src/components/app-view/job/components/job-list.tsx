@@ -328,6 +328,9 @@ export default function JobList() {
               : []),
           ],
         },
+        sort: {
+          createdOn: "DESC",
+        },
         appId: "69521cd1c9ba83a076aac3ae",
       });
       const result = transformAPIResponseToJobs(response?.data, response?.page);

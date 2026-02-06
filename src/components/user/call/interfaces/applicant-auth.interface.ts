@@ -12,6 +12,7 @@ export interface ApplicantAuthFormValues {
 }
 
 export interface StartInterviewResponse {
+  agentJoined: boolean;
   success: boolean;
   token: string;
   room: string;

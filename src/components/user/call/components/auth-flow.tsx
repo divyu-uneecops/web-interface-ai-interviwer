@@ -95,6 +95,13 @@ export function AuthFlow({ onAuthenticated, interviewId }: AuthFlowProps) {
           interviewId: interviewId ?? "",
         });
 
+        if (!response?.agentJoined) {
+          toast.error("Something went wrong. Please try again.", {
+            duration: 8000,
+          });
+          return;
+        }
+
         if (!response?.success) {
           toast.error("Failed to start interview. Please try again.", {
             duration: 5000,

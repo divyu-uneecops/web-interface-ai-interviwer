@@ -57,7 +57,6 @@ export function VerificationFlow({
   companyName,
 }: VerificationFlowProps) {
   const [howItWorksOpen, setHowItWorksOpen] = useState(true);
-  const authorizationStatement = `I, ${applicantName}, authorize ${companyName} to record and use my voice for verification, as per the platform's privacy policy.`;
 
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {
@@ -70,7 +69,7 @@ export function VerificationFlow({
   }, [videoRef, state]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen bg-neutral-50">
       <Dialog open={howItWorksOpen} onOpenChange={setHowItWorksOpen}>
         <DialogContent
           showCloseButton={false}
@@ -114,90 +113,81 @@ export function VerificationFlow({
 
       <Header isUser={true} />
 
-      {/* Main content - pixel-perfect layout (Figma 1293-8524, 1293-8610, 1293-9045) */}
-      <div className="mx-auto w-full max-w-[738px] p-3 pt-[10px]">
-        {/* Title block: 24px top, 8px between title and subtitle */}
-        <div className="mb-[10px] text-center">
-          <h1 className="text-[20px] font-bold leading-[28px] text-[#0a0a0a]">
+      <div className="mx-auto w-full max-w-[680px] px-4 pt-6 pb-10">
+        <header className="mb-6 text-center">
+          <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
             Video verification
           </h1>
-          <p className="mt-2 text-[14px] font-normal leading-[20px] text-[#0a0a0a]">
+          <p className="mt-1.5 text-sm text-neutral-600">
             Let&apos;s test your camera before starting the interview
           </p>
-        </div>
+        </header>
 
-        {/* Card: 14px radius, 1px border, 24px padding */}
-        <Card className="w-full rounded-[14px] border border-[#e5e5e5] bg-white p-6 shadow-none">
-          <div className="flex flex-col">
-            {/* Video: 16:9, #f5f5f5, 8px radius */}
-            <div className="relative w-full overflow-hidden rounded-lg bg-[#f5f5f5] [aspect-ratio:16/9]">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="h-full w-full object-cover"
-                onLoadedMetadata={(e) => {
-                  e.currentTarget.play().catch((error) => {
-                    console.error("Error playing video on load:", error);
-                  });
-                }}
-              />
-            </div>
+        <Card className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+          <div className="relative w-full overflow-hidden bg-neutral-100 aspect-video">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="h-full w-full object-cover"
+              onLoadedMetadata={(e) => {
+                e.currentTarget.play().catch((error) => {
+                  console.error("Error playing video on load:", error);
+                });
+              }}
+            />
           </div>
-
-          {/* Hint card: #fafafa, 14px radius, 16px padding */}
-          <div className="mt-2">
-            <p className="text-[18px] font-semibold leading-[18px]">
-              Please face the camera directly with your full face clearly
-              visible, ensure only one person is in the frame, avoid side
-              angles, masks, or any obstructions, then Tap{" "}
-              <span className="text-[#02563D]">&quot;Start&quot;</span> to
-              begin.
+          <div className="px-5">
+            <p className="text-sm leading-relaxed text-neutral-700">
+              Face the camera directly with your full face visible. Ensure only
+              one person is in frame and avoid side angles, masks, or
+              obstructions. Tap{" "}
+              <span className="font-semibold text-[#02563d]">
+                &quot;Start&quot;
+              </span>{" "}
+              to begin.
             </p>
           </div>
         </Card>
 
-        {/* CTA: 24px mt, 44px height, 14px radius */}
-        {state === "ready" && (
-          <div className="flex justify-center">
+        <div className="mt-4 flex justify-center">
+          {state === "ready" && (
             <Button
-              onClick={() => onStartRecording()}
-              className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white hover:bg-[#02563d]/90"
+              onClick={onStartRecording}
+              className="h-11 min-w-[120px] rounded-xl bg-[#02563d] px-6 text-sm font-medium text-white hover:bg-[#02563d]/90 focus-visible:ring-2 focus-visible:ring-[#02563d]/20"
             >
               Start
             </Button>
-          </div>
-        )}
+          )}
 
-        {state === "recording" && (
-          <div className="flex justify-center">
+          {state === "recording" && (
             <Button
               disabled
-              className="mt-3 h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white opacity-50"
+              className="h-11 min-w-[120px] cursor-not-allowed rounded-xl bg-[#02563d]/70 px-6 text-sm font-medium text-white"
             >
-              Verifying...
+              Verifying…
             </Button>
-          </div>
-        )}
+          )}
 
-        {state === "completed" && (
-          <div className="mt-3 flex gap-4 justify-center">
-            <Button
-              onClick={onRetry}
-              variant="outline"
-              className="h-11 rounded-[8px] border border-[#e5e5e5] bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-[#fafafa]"
-            >
-              Retry
-            </Button>
-            <Button
-              onClick={onContinue}
-              className="h-11 rounded-[8px] bg-[#02563d] text-[14px] font-medium text-white hover:bg-[#02563d]/90"
-            >
-              Continue <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
-        )}
+          {state === "completed" && (
+            <div className="flex gap-3">
+              <Button
+                onClick={onRetry}
+                variant="outline"
+                className="h-11 rounded-xl border-neutral-200 bg-white px-5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
+              >
+                Retry
+              </Button>
+              <Button
+                onClick={onContinue}
+                className="h-11 rounded-xl bg-[#02563d] px-5 text-sm font-medium text-white hover:bg-[#02563d]/90 focus-visible:ring-2 focus-visible:ring-[#02563d]/20"
+              >
+                Continue <ChevronRight className="ml-1.5 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

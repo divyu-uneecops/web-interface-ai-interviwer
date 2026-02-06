@@ -1224,21 +1224,19 @@ export default function JobDetails() {
       )}
 
       {/* Schedule Interview Dialog */}
-      <ScheduleInterviewDialog
-        open={scheduleInterviewDialogOpen}
-        onOpenChange={(open) => {
-          setScheduleInterviewDialogOpen(open);
-          if (!open) setScheduleInterviewRound(null);
-        }}
-        round={scheduleInterviewRound}
-        jobId={(params?.id as string) || ""}
-        jobTitle={job?.title}
-        applicants={applicants}
-        onSuccess={() => {
-          fetchRounds();
-          fetchStats();
-        }}
-      />
+      {scheduleInterviewDialogOpen && (
+        <ScheduleInterviewDialog
+          open={scheduleInterviewDialogOpen}
+          onOpenChange={(open) => {
+            setScheduleInterviewDialogOpen(open);
+            if (!open) setScheduleInterviewRound(null);
+          }}
+          round={scheduleInterviewRound}
+          jobId={(params?.id as string) || ""}
+          jobTitle={job?.title}
+          onSuccess={() => {}}
+        />
+      )}
     </div>
   );
 }

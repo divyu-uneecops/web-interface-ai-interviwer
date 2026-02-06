@@ -39,7 +39,6 @@ export interface ScheduleInterviewDialogProps {
   round: Round | null;
   jobId: string;
   jobTitle?: string;
-  applicants?: Applicant[];
   onSuccess?: () => void;
 }
 
@@ -55,7 +54,6 @@ const LINK_VALIDITY_OPTIONS = [
   { value: "3days", label: "3 Days" },
   { value: "7days", label: "7 Days" },
   { value: "30days", label: "30 Days" },
-  { value: "never", label: "Never Expires" },
 ];
 
 export function ScheduleInterviewDialog({
@@ -64,7 +62,6 @@ export function ScheduleInterviewDialog({
   round,
   jobId,
   jobTitle = "",
-  applicants: initialApplicants = [],
   onSuccess,
 }: ScheduleInterviewDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -292,8 +289,6 @@ export function ScheduleInterviewDialog({
     onOpenChange(false);
   };
 
-  const roundName = round?.name ?? "this round";
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -304,10 +299,6 @@ export function ScheduleInterviewDialog({
           <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
             Schedule interview
           </DialogTitle>
-          <DialogDescription className="text-sm text-[#737373] leading-5">
-            Select applicants to schedule interview for {roundName}
-            {jobTitle ? ` · ${jobTitle}` : ""}
-          </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">

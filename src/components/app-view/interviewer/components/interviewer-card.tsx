@@ -8,12 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { InterviewerCardProps } from "../interfaces/interviewer.interfaces";
 
 export function InterviewerCard({ interviewer, onEdit }: InterviewerCardProps) {
+  const avatarUrl = interviewer?.avatar
+    ? interviewer?.avatar
+    : `/Gemini_Generated_Image_ildp20ildp20ildp.png`;
+
   return (
     <div className="bg-white border border-[#d1d1d1] rounded p-2 flex flex-col">
       {/* Image Container with Badge */}
       <div className="relative w-full aspect-square rounded overflow-hidden mb-1">
         <Image
-          src={interviewer?.avatar}
+          src={avatarUrl}
           alt={interviewer?.name}
           fill
           className="object-cover"

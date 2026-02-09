@@ -52,6 +52,7 @@ export const validateInviteForm = (values: InviteFormValues) => {
 
 export function InviteTeamMemberModal({
   isOpen,
+  roles,
   onClose,
   onSuccess,
 }: InviteModalProps) {
@@ -66,10 +67,9 @@ export function InviteTeamMemberModal({
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const roleId = ROLE_ID_MAP[values.role] ?? values.role;
         await userService.inviteUsers({
-          roleIds: [roleId],
-          emails: [values.email.trim()],
+          roleIds: [values?.role?.trim()],
+          emails: [values?.email?.trim()],
         });
         toast.success("Invitation sent successfully.", { duration: 5000 });
         formik.resetForm();
@@ -151,8 +151,11 @@ export function InviteTeamMemberModal({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                {/* <SelectItem value="member">Member</SelectItem> */}
+                {roles?.map((role) => (
+                  <SelectItem key={role?.id} value={role?.id}>
+                    {role?.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

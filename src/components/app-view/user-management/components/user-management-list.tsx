@@ -33,6 +33,7 @@ import {
   formatRole,
   formatUserName,
 } from "../utils/user-management.utils";
+import { useAppSelector } from "@/store/hooks";
 
 const SEARCH_DEBOUNCE_MS = 400;
 const PAGE_LIMIT = 15;
@@ -51,6 +52,8 @@ export default function UserManagementList() {
   });
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { roles } = useAppSelector((state) => state.userManagement);
 
   // Debounce search input -> searchKeyword (same as job-list)
   useEffect(() => {
@@ -259,6 +262,7 @@ export default function UserManagementList() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSuccess={fetchUsers}
+          roles={roles}
         />
       )}
     </div>

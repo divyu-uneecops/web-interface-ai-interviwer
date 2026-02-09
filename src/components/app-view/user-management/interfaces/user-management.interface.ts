@@ -5,6 +5,7 @@ export interface InviteFormValues {
 
 export interface InviteModalProps {
   isOpen: boolean;
+  roles: Record<string, any>[];
   onClose: () => void;
   onSuccess?: () => void;
 }

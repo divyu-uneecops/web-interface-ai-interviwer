@@ -50,4 +50,7 @@ export const API_ENDPOINTS = {
   FEEDBACK: {
     SAVE: "/api/v2/forminstances",
   },
+  USER: {
+    LIST: "/admin/orgs/{orgId}/apps/{appId}/users",
+  },
 };

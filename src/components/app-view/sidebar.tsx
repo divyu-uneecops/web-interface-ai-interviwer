@@ -22,7 +22,7 @@ const navigation = [
     icon: CircleUser,
   },
   { name: "Interviews", href: "/app-view/interviews", icon: FileText },
-  { name: "User Management", href: "/app-view/role-management", icon: Users },
+  { name: "User Management", href: "/app-view/user-management", icon: Users },
   // { name: "Billing", href: "/app-view/billing", icon: CreditCard },
 ];
 

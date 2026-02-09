@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronRight, Check, Clock } from "lucide-react";
+import { ChevronRight, Check, Clock, AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Header } from "@/components/header";
 import { InterviewFlowState } from "../types/flow.types";
+import { useFaceValidation } from "../hooks/useFaceValidation";
 
 import { LiveKitRoom } from "@livekit/components-react";
 import { CustomVideoConference } from "./custom-video-conference";
@@ -73,6 +74,11 @@ export function InterviewActiveFlow({
   const exitFullscreenCountRef = useRef(0);
   const totalDurationSecondsRef = useRef(0);
   const fiveMinReminderShownRef = useRef(false);
+
+  const faceValidationActive =
+    !showTipsModal && timeRemainingSeconds !== null && timeRemainingSeconds > 0;
+  const { warning: faceWarning, warningMessage: faceWarningMessage } =
+    useFaceValidation({ videoRef, active: faceValidationActive });
 
   const endInterview = useCallback(() => {
     if (document?.fullscreenElement) {
@@ -212,7 +218,7 @@ export function InterviewActiveFlow({
                     )}
                   </div>
                 </div>
-                <div className="flex-1 min-h-0 rounded-xl overflow-hidden bg-[#0a0a0a] border border-[#e5e5e5]">
+                <div className="flex-1 min-h-0 rounded-xl overflow-hidden bg-[#0a0a0a] border border-[#e5e5e5] relative">
                   <video
                     ref={videoRef}
                     autoPlay
@@ -225,6 +231,16 @@ export function InterviewActiveFlow({
                       });
                     }}
                   />
+                  {faceWarningMessage && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-3 py-2 bg-amber-500/95 text-amber-950 text-sm font-medium rounded-b-xl"
+                      role="alert"
+                      aria-live="polite"
+                    >
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>{faceWarningMessage}</span>
+                    </div>
+                  )}
                 </div>
                 <p className="mt-3 mx-auto text-sm font-medium text-[#0a0a0a] truncate">
                   {interviewDetails?.applicant?.name}

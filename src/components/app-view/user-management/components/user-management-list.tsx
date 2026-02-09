@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Search, MoreHorizontal, Eye, UserPlus } from "lucide-react";
+import { Search, MoreHorizontal, Eye, UserPlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -189,6 +189,10 @@ export default function UserManagementList() {
         <DropdownMenuItem>
           <Eye className="h-4 text-[#737373]" />
           View details
+        </DropdownMenuItem>
+        <DropdownMenuItem variant="destructive">
+          <Trash2 className="h-4" />
+          Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { MoreHorizontal, Eye, UserPlus } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,12 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable, Column } from "@/components/shared/components/data-table";
 import { StatusTag } from "@/components/ui/status-tag";
-import { InviteTeamMemberModal } from "@/components/app-view/invite-modal";
-import { userService } from "./services/user.service";
-import { toast } from "sonner";
-import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import {
   Empty,
   EmptyHeader,
@@ -23,7 +20,12 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 
-const SEARCH_DEBOUNCE_MS = 400;
+import { DataTable, Column } from "@/components/shared/components/data-table";
+import { InviteTeamMemberModal } from "@/components/app-view/invite-modal";
+import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
+
+import { userService } from "../services/user.service";
+
 const PAGE_LIMIT = 15;
 
 type ApiUser = {
@@ -146,23 +148,23 @@ export default function UserManagementList() {
         align: "center",
         accessor: (user) => formatRole(user),
       },
-      {
-        id: "status",
-        header: "Status",
-        align: "center",
-        width: "125px",
-        cell: () => (
-          <div className="flex justify-center">
-            <StatusTag variant="success">Active</StatusTag>
-          </div>
-        ),
-      },
-      {
-        id: "joinedOn",
-        header: "Joined on",
-        align: "center",
-        accessor: () => "--",
-      },
+      // {
+      //   id: "status",
+      //   header: "Status",
+      //   align: "center",
+      //   width: "125px",
+      //   cell: () => (
+      //     <div className="flex justify-center">
+      //       <StatusTag variant="success">Active</StatusTag>
+      //     </div>
+      //   ),
+      // },
+      // {
+      //   id: "joinedOn",
+      //   header: "Joined on",
+      //   align: "center",
+      //   accessor: () => "--",
+      // },
     ],
     []
   );
@@ -208,7 +210,7 @@ export default function UserManagementList() {
       <DataTable<ApiUser>
         data={users}
         columns={columns}
-        getRowId={(user) => user.id}
+        getRowId={(user) => user?.id}
         pagination={pagination}
         currentOffset={currentOffset}
         onPaginationChange={setCurrentOffset}

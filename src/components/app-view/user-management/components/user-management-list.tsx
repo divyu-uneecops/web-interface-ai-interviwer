@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { MoreHorizontal, Eye, UserPlus } from "lucide-react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { Search, MoreHorizontal, Eye, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StatusTag } from "@/components/ui/status-tag";
+
 import {
   Empty,
   EmptyHeader,
@@ -26,7 +26,9 @@ import { DataTableSkeleton } from "@/components/shared/components/data-table-ske
 
 import { userService } from "../services/user.service";
 import { InviteTeamMemberModal } from "./invite-modal";
+import { StatusTag } from "@/components/ui/status-tag";
 
+const SEARCH_DEBOUNCE_MS = 400;
 const PAGE_LIMIT = 15;
 
 type ApiUser = {
@@ -57,6 +59,9 @@ function formatRole(user: ApiUser): string {
 }
 
 export default function UserManagementList() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [users, setUsers] = useState<ApiUser[]>([]);
   const [pagination, setPagination] = useState({
@@ -68,9 +73,26 @@ export default function UserManagementList() {
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Debounce search input -> searchKeyword (same as job-list)
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchKeyword(searchQuery.trim());
+      setCurrentOffset(0);
+      searchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   useEffect(() => {
     fetchUsers();
-  }, [currentOffset]);
+  }, [currentOffset, searchKeyword]);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -85,6 +107,7 @@ export default function UserManagementList() {
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: currentOffset,
+        ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
       const response = await userService.getUsers(params);
@@ -149,17 +172,22 @@ export default function UserManagementList() {
         align: "center",
         accessor: (user) => formatRole(user),
       },
-      // {
-      //   id: "status",
-      //   header: "Status",
-      //   align: "center",
-      //   width: "125px",
-      //   cell: () => (
-      //     <div className="flex justify-center">
-      //       <StatusTag variant="success">Active</StatusTag>
-      //     </div>
-      //   ),
-      // },
+      {
+        id: "status",
+        header: "Status",
+        align: "center",
+        width: "125px",
+        cell: (user) =>
+          user?.userId ? (
+            <div className="flex justify-center">
+              <StatusTag variant="active">Active</StatusTag>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <StatusTag variant="pending">Pending</StatusTag>
+            </div>
+          ),
+      },
       // {
       //   id: "joinedOn",
       //   header: "Joined on",
@@ -195,7 +223,18 @@ export default function UserManagementList() {
   return (
     <div className="space-y-6">
       {/* Page Header - same layout as job-list */}
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#e5e5e5] w-[245px]">
+          <Search className="w-4 h-4 text-[#737373]" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e?.target?.value)}
+            className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
+          />
+        </div>
+
         <div className="flex items-center gap-3">
           <Button onClick={() => setIsModalOpen(true)}>
             Invite team member
@@ -221,7 +260,9 @@ export default function UserManagementList() {
             <EmptyHeader>
               <EmptyTitle>No users found</EmptyTitle>
               <EmptyDescription>
-                Invite team members to get started
+                {searchKeyword
+                  ? "Try adjusting your search query."
+                  : "Invite team members to get started."}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

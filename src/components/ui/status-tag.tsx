@@ -1,7 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export type StatusTagVariant = "success" | "warning" | "neutral";
+export type StatusTagVariant =
+  | "success"
+  | "warning"
+  | "neutral"
+  | "active"
+  | "pending";
 
 export interface StatusTagProps {
   children: React.ReactNode;
@@ -13,6 +18,8 @@ const variantStyles: Record<StatusTagVariant, string> = {
   success: "bg-[#def2eb] text-[#0e4230]",
   warning: "bg-[#fff5d7] text-[#665830]",
   neutral: "bg-[#e5e5e5] text-[#000000]",
+  active: "bg-[#DEF2EB] text-[#0E4230]",
+  pending: "bg-[#FFF5D7] text-[#665830]",
 };
 
 export function StatusTag({
@@ -32,4 +39,3 @@ export function StatusTag({
     </span>
   );
 }
-

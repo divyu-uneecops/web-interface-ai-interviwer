@@ -53,5 +53,6 @@ export const API_ENDPOINTS = {
   USER: {
     LIST: "/admin/orgs/{orgId}/apps/{appId}/users",
     INVITE: "/admin/orgs/{orgId}/users",
+    ROLES_LIST: "/admin/orgs/{orgId}/roles",
   },
 };

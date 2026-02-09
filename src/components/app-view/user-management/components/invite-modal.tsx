@@ -24,6 +24,8 @@ import {
   InviteFormValues,
 } from "../interfaces/user-management.interface";
 import { isValidEmail } from "@/lib/utils";
+import { userService, ROLE_ID_MAP } from "../services/user.service";
+import { toast } from "sonner";
 
 const initialValues: InviteFormValues = {
   email: "",
@@ -48,7 +50,11 @@ export const validateInviteForm = (values: InviteFormValues) => {
   return errors;
 };
 
-export function InviteTeamMemberModal({ isOpen, onClose }: InviteModalProps) {
+export function InviteTeamMemberModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: InviteModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formik = useFormik<InviteFormValues>({
@@ -60,9 +66,21 @@ export function InviteTeamMemberModal({ isOpen, onClose }: InviteModalProps) {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // TODO: call invite API with values.email, values.role
-        onClose();
+        const roleId = ROLE_ID_MAP[values.role] ?? values.role;
+        await userService.inviteUsers({
+          roleIds: [roleId],
+          emails: [values.email.trim()],
+        });
+        toast.success("Invitation sent successfully.", { duration: 5000 });
         formik.resetForm();
+        onSuccess?.();
+        onClose();
+      } catch (error: any) {
+        const message =
+          error?.response?.data?.message ??
+          error?.message ??
+          "Failed to send invitation. Please try again.";
+        toast.error(message, { duration: 5000 });
       } finally {
         setIsSubmitting(false);
       }

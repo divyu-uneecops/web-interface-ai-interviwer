@@ -6,4 +6,5 @@ export interface InviteFormValues {
 export interface InviteModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }

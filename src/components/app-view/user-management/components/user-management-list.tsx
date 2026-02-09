@@ -234,6 +234,7 @@ export default function UserManagementList() {
         <InviteTeamMemberModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onSuccess={fetchUsers}
         />
       )}
     </div>

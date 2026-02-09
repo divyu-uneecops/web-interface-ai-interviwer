@@ -27,36 +27,15 @@ import { DataTableSkeleton } from "@/components/shared/components/data-table-ske
 import { userService } from "../services/user.service";
 import { InviteTeamMemberModal } from "./invite-modal";
 import { StatusTag } from "@/components/ui/status-tag";
+import { ApiUser } from "../types/user-management.types";
+import {
+  formatPhone,
+  formatRole,
+  formatUserName,
+} from "../utils/user-management.utils";
 
 const SEARCH_DEBOUNCE_MS = 400;
 const PAGE_LIMIT = 15;
-
-type ApiUser = {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: { number: string; countryCode: string };
-  userId?: string;
-  appRoles?: string[];
-};
-
-function formatUserName(user: ApiUser): string {
-  const parts = [user.firstName, user.lastName].filter(Boolean);
-  return parts.length > 0 ? parts.join(" ") : "--";
-}
-
-function formatPhone(user: ApiUser): string {
-  const p = user.phoneNumber;
-  if (!p?.number) return "--";
-  return p.countryCode ? `${p.countryCode} ${p.number}` : p.number;
-}
-
-function formatRole(user: ApiUser): string {
-  const roles = user.appRoles;
-  if (!roles?.length) return "--";
-  return roles.join(", ");
-}
 
 export default function UserManagementList() {
   const [searchQuery, setSearchQuery] = useState("");

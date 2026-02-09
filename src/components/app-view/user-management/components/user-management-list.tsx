@@ -187,11 +187,7 @@ export default function UserManagementList() {
     </DropdownMenu>
   );
 
-  const handleInvite = (data: {
-    email: string;
-    role: string;
-    permissions: Record<string, Record<string, boolean>>;
-  }) => {
+  const handleInvite = (data: { email: string; role: string }) => {
     console.log("Inviting user:", data);
     // Here you would typically call an API to send the invitation
   };
@@ -234,11 +230,12 @@ export default function UserManagementList() {
       />
 
       {/* Invite Modal */}
-      <InviteTeamMemberModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleInvite}
-      />
+      {isModalOpen && (
+        <InviteTeamMemberModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { X } from "lucide-react";
+import { useState } from "react";
+import { useFormik } from "formik";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,147 +11,141 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  InviteModalProps,
+  InviteFormValues,
+} from "../interfaces/user-management.interface";
+import { isValidEmail } from "@/lib/utils";
 
-interface InviteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: InviteFormData) => void;
-}
-
-interface InviteFormData {
-  email: string;
-  role: string;
-  permissions: {
-    userManagement: {
-      addUsers: boolean;
-      editDetails: boolean;
-      givePermissions: boolean;
-      removeUsers: boolean;
-    };
-    jobPosting: {
-      createJobPost: boolean;
-      editJobPost: boolean;
-      removeJobPost: boolean;
-      trackJobPosting: boolean;
-    };
-    candidateManagement: {
-      addCandidates: boolean;
-      editCandidates: boolean;
-      removeCandidates: boolean;
-      downloadResume: boolean;
-    };
-    interviewScheduling: {
-      createInterview: boolean;
-      scheduleInterview: boolean;
-      reviewFeedbacks: boolean;
-      trackProgress: boolean;
-    };
-  };
-}
-
-const initialPermissions: InviteFormData["permissions"] = {
-  userManagement: {
-    addUsers: false,
-    editDetails: false,
-    givePermissions: false,
-    removeUsers: false,
-  },
-  jobPosting: {
-    createJobPost: false,
-    editJobPost: false,
-    removeJobPost: false,
-    trackJobPosting: false,
-  },
-  candidateManagement: {
-    addCandidates: false,
-    editCandidates: false,
-    removeCandidates: false,
-    downloadResume: false,
-  },
-  interviewScheduling: {
-    createInterview: false,
-    scheduleInterview: false,
-    reviewFeedbacks: false,
-    trackProgress: false,
-  },
+const initialValues: InviteFormValues = {
+  email: "",
+  role: "",
 };
 
-export function InviteTeamMemberModal({
-  isOpen,
-  onClose,
-  onSubmit,
-}: InviteModalProps) {
-  const [email, setEmail] = React.useState("");
-  const [role, setRole] = React.useState("");
+export const validateInviteForm = (values: InviteFormValues) => {
+  const errors: Partial<Record<keyof InviteFormValues, string>> = {};
 
-  const handleClose = () => {
-    setEmail("");
-    setRole("");
-    onClose();
+  // Email validation
+  if (!values.email || values?.email?.trim()?.length === 0) {
+    errors.email = "Email address is required";
+  } else if (!isValidEmail(values?.email?.trim())) {
+    errors.email = "Please enter a valid email address";
+  }
+
+  // Role validation
+  if (!values.role || values?.role?.trim()?.length === 0) {
+    errors.role = "Role is required";
+  }
+
+  return errors;
+};
+
+export function InviteTeamMemberModal({ isOpen, onClose }: InviteModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const formik = useFormik<InviteFormValues>({
+    initialValues,
+    validate: validateInviteForm,
+    validateOnChange: true,
+    validateOnBlur: true,
+    validateOnMount: false,
+    onSubmit: async (values) => {
+      setIsSubmitting(true);
+      try {
+        // TODO: call invite API with values.email, values.role
+        onClose();
+        formik.resetForm();
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+  });
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      formik.resetForm();
+      onClose();
+    }
   };
-
-  const handleSubmit = () => {
-    onSubmit({ email, role, permissions: initialPermissions });
-    handleClose();
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/30 z-40" onClick={handleClose} />
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-[779px] sm:max-w-[779px]">
+        <DialogHeader>
+          <DialogTitle className="text-[#0a0a0a]">
+            Invite team member
+          </DialogTitle>
+          <DialogDescription className="text-[#737373]">
+            Send an invitation to join your team
+          </DialogDescription>
+        </DialogHeader>
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-[10px] shadow-xl border border-[#e5e5e5] w-full max-w-[779px] p-6 relative">
-          {/* Close Button */}
-          <button
-            onClick={handleClose}
-            className="absolute right-4 top-4 text-[#737373] hover:text-[#0a0a0a] transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          {/* Header */}
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-[#0a0a0a]">
-              Invite team member
-            </h2>
-            <p className="text-sm text-[#737373]">
-              Send an invitation to join your team
-            </p>
+        <form onSubmit={formik.handleSubmit} className="space-y-4 py-2">
+          <div className="flex flex-col gap-2">
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              label="Email"
+              placeholder="rohan@gmail.com"
+              required
+              value={formik?.values?.email}
+              onChange={formik?.handleChange}
+              onBlur={formik?.handleBlur}
+              disabled={isSubmitting}
+              error={
+                formik?.touched?.email && formik?.errors?.email
+                  ? formik?.errors?.email
+                  : undefined
+              }
+              className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 text-sm leading-5 text-[#0a0a0a] placeholder:text-[#737373]"
+            />
           </div>
 
-          <div className="space-y-4">
-            <p className="text-sm font-medium mb-2">Email</p>
-            <Input
-              type="email"
-              placeholder="rohan@gmail.com"
-              value={email}
-              onChange={(e) => setEmail(e?.target?.value)}
-            />
-
-            <p className="text-sm font-medium mb-2">Role</p>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger className="w-full">
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="role"
+              className="text-sm font-medium text-[#0a0a0a]"
+            >
+              Role <span className="text-destructive ml-1">*</span>
+            </label>
+            <Select
+              value={formik?.values?.role}
+              onValueChange={(value) => {
+                formik.setFieldValue("role", value);
+                formik.setFieldTouched("role", true, false);
+              }}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger
+                id="role"
+                className="w-full"
+                onBlur={() => formik.setFieldTouched("role", true)}
+              >
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="member">Member</SelectItem>
+                {/* <SelectItem value="member">Member</SelectItem> */}
               </SelectContent>
             </Select>
-
-            {/* Footer */}
-            <div className="flex justify-end pt-4">
-              <Button onClick={handleSubmit} disabled={!email || !role}>
-                Send invite
-              </Button>
-            </div>
           </div>
-        </div>
-      </div>
-    </>
+
+          <DialogFooter className="pt-4">
+            <Button type="submit" disabled={isSubmitting || !formik?.isValid}>
+              Send invite
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

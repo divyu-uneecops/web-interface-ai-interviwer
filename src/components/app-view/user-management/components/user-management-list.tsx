@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/empty";
 
 import { DataTable, Column } from "@/components/shared/components/data-table";
-import { InviteTeamMemberModal } from "@/components/app-view/invite-modal";
+
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 
 import { userService } from "../services/user.service";
+import { InviteTeamMemberModal } from "./invite-modal";
 
 const PAGE_LIMIT = 15;
 

@@ -1,6 +1,10 @@
 export interface FilterGroup {
   id: string;
   label: string;
+  /** When type is 'text', renders a text search input; otherwise renders option checkboxes. */
+  type?: "select" | "text";
+  /** For type 'text', placeholder for the input. */
+  placeholder?: string;
   options: FilterOption[];
 }
 
@@ -10,7 +14,7 @@ export interface FilterOption {
 }
 
 export interface FilterState {
-  [key: string]: string[];
+  [key: string]: string[] | string;
 }
 
 export interface FilterDropdownProps {

@@ -24,6 +24,12 @@ import { DataTable, Column } from "@/components/shared/components/data-table";
 
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 
+import { FilterDropdown } from "@/components/shared/components/filter-dropdown";
+import {
+  FilterState,
+  FilterGroup,
+} from "@/components/shared/interfaces/shared.interface";
+
 import { userService } from "../services/user.service";
 import { InviteTeamMemberModal } from "./invite-modal";
 import { StatusTag } from "@/components/ui/status-tag";
@@ -52,8 +58,29 @@ export default function UserManagementList() {
   });
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>({
+    email: "",
+    contact: "",
+  });
 
   const { roles } = useAppSelector((state) => state.userManagement);
+
+  const userFilterGroups: FilterGroup[] = [
+    {
+      id: "email",
+      label: "Email",
+      type: "text",
+      placeholder: "Search by email",
+      options: [],
+    },
+    {
+      id: "contact",
+      label: "Contact number",
+      type: "text",
+      placeholder: "Search by contact",
+      options: [],
+    },
+  ];
 
   // Debounce search input -> searchKeyword (same as job-list)
   useEffect(() => {
@@ -74,7 +101,7 @@ export default function UserManagementList() {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentOffset, searchKeyword]);
+  }, [currentOffset, searchKeyword, appliedFilters]);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -86,10 +113,21 @@ export default function UserManagementList() {
       limit: PAGE_LIMIT,
     });
     try {
+      const emailFilter =
+        typeof appliedFilters.email === "string"
+          ? appliedFilters.email?.trim()
+          : "";
+      const contactFilter =
+        typeof appliedFilters.contact === "string"
+          ? appliedFilters.contact?.trim()
+          : "";
+
       const params: Record<string, any> = {
         limit: PAGE_LIMIT,
         offset: currentOffset,
         ...(searchKeyword ? { query: searchKeyword } : {}),
+        ...(emailFilter ? { email: emailFilter } : {}),
+        ...(contactFilter ? { contact: contactFilter } : {}),
       };
 
       const response = await userService.getUsers(params);
@@ -222,6 +260,14 @@ export default function UserManagementList() {
         </div>
 
         <div className="flex items-center gap-3">
+          <FilterDropdown
+            filterGroups={userFilterGroups}
+            onApplyFilters={(filters) => {
+              setAppliedFilters(filters);
+              setCurrentOffset(0);
+            }}
+            initialFilters={appliedFilters}
+          />
           <Button onClick={() => setIsModalOpen(true)}>
             Invite team member
           </Button>
@@ -246,8 +292,12 @@ export default function UserManagementList() {
             <EmptyHeader>
               <EmptyTitle>No users found</EmptyTitle>
               <EmptyDescription>
-                {searchKeyword
-                  ? "Try adjusting your search query."
+                {searchKeyword ||
+                (typeof appliedFilters.email === "string" &&
+                  appliedFilters.email?.trim()) ||
+                (typeof appliedFilters.contact === "string" &&
+                  appliedFilters.contact?.trim())
+                  ? "Try adjusting your search or filters."
                   : "Invite team members to get started."}
               </EmptyDescription>
             </EmptyHeader>

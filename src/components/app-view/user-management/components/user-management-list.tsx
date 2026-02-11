@@ -260,14 +260,14 @@ export default function UserManagementList() {
         </div>
 
         <div className="flex items-center gap-3">
-          <FilterDropdown
+          {/* <FilterDropdown
             filterGroups={userFilterGroups}
             onApplyFilters={(filters) => {
               setAppliedFilters(filters);
               setCurrentOffset(0);
             }}
             initialFilters={appliedFilters}
-          />
+          /> */}
           <Button onClick={() => setIsModalOpen(true)}>
             Invite team member
           </Button>

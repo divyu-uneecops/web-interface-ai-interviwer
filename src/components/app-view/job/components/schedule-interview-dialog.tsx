@@ -393,25 +393,29 @@ export function ScheduleInterviewDialog({
           )}
 
           {/* Applicants Section */}
-          <div className="flex flex-col gap-2">
-            <Label className="text-[14px] font-medium text-[#0a0a0a] leading-[20px]">
+          <div className="flex flex-col gap-4">
+            <div className="text-[14px] text-[#0A0A0A] leading-[14px] font-bold">
+              Select Applicants to share link
+            </div>
+
+            <Label className="text-[14px] font-medium text-[#0A0A0A] leading-[14px]">
               Applicants <span className="text-[#b91c1c]">*</span>
             </Label>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-[10.667px] w-[10.667px] text-[#737373]" />
-              <Input
+            <div className="w-full flex items-center gap-2 px-3 py-2.5 border-b border-[#e5e5e5]">
+              <Search className="w-4 h-4 text-[#737373]" />
+              <input
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 shadow-[0px_1px_2px_0px_rgba(2,86,61,0.12)] border-[#e5e5e5]"
+                className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
               />
             </div>
 
             <div
               ref={listContainerRef}
-              className="border border-[#e5e5e5] rounded-[10px] p-4 max-h-[300px] overflow-y-auto"
+              className="max-h-[300px] overflow-y-auto bg-[#F5F5F5] p-[10px]"
               style={{ scrollbarWidth: "thin" }}
             >
               {isLoadingApplicants ? (
@@ -420,18 +424,18 @@ export function ScheduleInterviewDialog({
                 </div>
               ) : (
                 <div className="flex flex-col gap-0">
-                  <div className="flex items-center gap-3 py-2 border-b border-[#e5e5e5] last:border-b-0">
+                  <div className="flex items-center gap-3 pb-[10px] border-b border-[#e5e5e5]">
                     <Checkbox
                       checked={allSelected}
                       onCheckedChange={handleSelectAll}
                       className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
                     />
-                    <span className="text-[14px] text-[#0a0a0a] font-normal leading-[20px]">
+                    <span className="text-[14px] text-[#0A0A0A] font-medium leading-[14px]">
                       Select all
                     </span>
                     <Badge
                       variant="secondary"
-                      className="ml-auto bg-[#e5e5e5] text-[#0a0a0a] text-[12px] px-2 py-0 h-[18px] font-normal rounded-full leading-[18px]"
+                      className="ml-auto bg-[#e5e5e5] text-[#0a0a0a] text-[12px] px-2 py-0  font-normal rounded-full leading-[16px]"
                     >
                       {pagination.total > 0
                         ? pagination.total
@@ -442,21 +446,21 @@ export function ScheduleInterviewDialog({
 
                   {filteredApplicants.map((applicant) => (
                     <div
-                      key={applicant.id}
-                      className="flex items-center gap-3 py-2 border-b border-[#e5e5e5] last:border-b-0"
+                      key={applicant?.id}
+                      className="flex items-center gap-3 py-2"
                     >
                       <Checkbox
-                        checked={selectedApplicants.has(applicant.id)}
+                        checked={selectedApplicants.has(applicant?.id)}
                         onCheckedChange={(checked) =>
-                          handleApplicantToggle(applicant.id, checked === true)
+                          handleApplicantToggle(applicant?.id, checked === true)
                         }
                         className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
                       />
-                      <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <div className="flex justify-center space-between">
                         <span className="text-[14px] text-[#0a0a0a] font-normal leading-[20px]">
                           {applicant.name || "—"}
                         </span>
-                        <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex items-center gap-4 flex-wrap ml-auto">
                           {applicant.email && (
                             <div className="flex items-center gap-[6px]">
                               <Mail className="w-[14px] h-[14px] text-[#737373] shrink-0" />

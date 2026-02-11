@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronRight, Check, Clock, AlertTriangle } from "lucide-react";
+import {
+  ChevronRight,
+  Check,
+  Clock,
+  AlertTriangle,
+  Maximize2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -63,15 +70,12 @@ export function InterviewActiveFlow({
   serverUrl,
 }: InterviewActiveFlowProps) {
   const [showTipsModal, setShowTipsModal] = useState(true);
-  const [fullscreenWarningType, setFullscreenWarningType] = useState<
-    null | 1 | 2 | 3
-  >(null);
+  const [showFullscreenWarning, setShowFullscreenWarning] = useState(false);
   const [showFiveMinReminder, setShowFiveMinReminder] = useState(false);
   const [timeRemainingSeconds, setTimeRemainingSeconds] = useState<
     number | null
   >(null);
   const hasLiveKitConfig = Boolean(token && serverUrl);
-  const exitFullscreenCountRef = useRef(0);
   const totalDurationSecondsRef = useRef(0);
   const fiveMinReminderShownRef = useRef(false);
 
@@ -91,46 +95,21 @@ export function InterviewActiveFlow({
   }, []);
 
   const handleEnterFullscreen = () => {
-    setFullscreenWarningType(null);
+    setShowFullscreenWarning(false);
     document.documentElement.requestFullscreen().catch(() => {});
   };
 
-  const handleFullscreenWarningClose = () => {
-    if (fullscreenWarningType === 3) {
-      if (document?.fullscreenElement) {
-        document
-          ?.exitFullscreen()
-          ?.catch((err) => console.error("Exit fullscreen error:", err));
-      }
-      onStateChange("interview-complete");
-      onStopCamera();
-    }
-    setFullscreenWarningType(null);
-  };
-
-  // Detect user exiting fullscreen and show escalating warnings in Dialog
+  // Show one penalty warning every time user leaves fullscreen (interview is never ended)
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (document.fullscreenElement !== null) return;
-
-      exitFullscreenCountRef.current += 1;
-      const count = exitFullscreenCountRef.current;
-
-      if (count === 1) {
-        setFullscreenWarningType(1);
-      } else if (count === 2) {
-        setFullscreenWarningType(2);
-      } else {
-        setFullscreenWarningType(3);
-      }
+      setShowFullscreenWarning(true);
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
-
-  const showFullscreenWarningDialog = fullscreenWarningType !== null;
 
   // Initialize total duration from round (used when tips modal closes)
   useEffect(() => {
@@ -269,54 +248,53 @@ export function InterviewActiveFlow({
         </div>
       </div>
 
-      {/* Fullscreen exit warning */}
+      {/* Fullscreen exit warning — one penalty message every time user leaves fullscreen */}
       <Dialog
-        open={showFullscreenWarningDialog}
+        open={showFullscreenWarning}
         onOpenChange={(open) => {
-          if (!open && fullscreenWarningType === 3) {
-            onStateChange("interview-complete");
-            onStopCamera();
-          }
-          if (!open) setFullscreenWarningType(null);
+          if (!open) setShowFullscreenWarning(false);
         }}
       >
         <DialogContent
-          className="max-w-[400px] p-6 rounded-xl"
+          role="alertdialog"
+          aria-describedby="fullscreen-warning-desc"
+          className="max-w-[420px] p-0 overflow-hidden rounded-xl shadow-xl border-l-4 border-l-amber-500 border border-amber-500/20"
           showCloseButton={false}
           onPointerDownOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <DialogHeader className="space-y-1.5">
-            <DialogTitle className="text-base font-semibold text-[#0a0a0a]">
-              {fullscreenWarningType === 1 && "Fullscreen required"}
-              {fullscreenWarningType === 2 && "Final warning"}
-              {fullscreenWarningType === 3 && "Interview ended"}
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-[#737373] leading-relaxed">
-            {fullscreenWarningType === 1 &&
-              "Please stay in fullscreen during the interview. Return to fullscreen to continue."}
-            {fullscreenWarningType === 2 &&
-              "You have exited fullscreen again. Stay in fullscreen for the interview. This is a final warning."}
-            {fullscreenWarningType === 3 &&
-              "Repeatedly exiting fullscreen is not allowed. The interview has been ended and flagged."}
-          </p>
-          <DialogFooter className="gap-2 pt-4">
-            {fullscreenWarningType !== 3 ? (
-              <Button
-                onClick={handleEnterFullscreen}
-                className="h-9 bg-[#02563d] text-white text-sm font-medium hover:bg-[#02563d]/90 rounded-lg"
+          <div className="p-6 pb-4">
+            <div className="flex gap-4">
+              <div
+                className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-amber-100 text-amber-600"
+                aria-hidden
               >
-                Enter fullscreen
-              </Button>
-            ) : (
-              <Button
-                onClick={handleFullscreenWarningClose}
-                className="h-9 bg-[#02563d] text-white text-sm font-medium hover:bg-[#02563d]/90 rounded-lg"
-              >
-                OK
-              </Button>
-            )}
+                <AlertTriangle className="w-6 h-6" strokeWidth={2.25} />
+              </div>
+              <div className="flex-1 min-w-0 pt-0.5">
+                <DialogHeader className="space-y-1 p-0">
+                  <DialogTitle className="text-lg font-semibold tracking-tight text-amber-900">
+                    Leaving fullscreen is a penalty
+                  </DialogTitle>
+                </DialogHeader>
+                <DialogDescription
+                  id="fullscreen-warning-desc"
+                  className="text-sm leading-relaxed mt-1.5 text-amber-800/90"
+                >
+                  You left fullscreen during the interview. This may be recorded
+                  as a penalty. Return to fullscreen to continue.
+                </DialogDescription>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-3 px-6 py-4 bg-[#fafafa] border-t border-[#e5e5e5] rounded-b-xl">
+            <Button
+              onClick={handleEnterFullscreen}
+              className="h-10 px-5 bg-[#02563d] text-white text-sm font-semibold hover:bg-[#02563d]/90 rounded-lg shadow-sm inline-flex items-center gap-2"
+            >
+              <Maximize2 className="w-4 h-4" aria-hidden />
+              Enter fullscreen
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

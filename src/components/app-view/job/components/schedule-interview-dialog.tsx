@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, Mail, Phone } from "lucide-react";
+import { Search, Mail, Phone, Copy } from "lucide-react";
+import { generateInterviewLink } from "@/components/app-view/create-interview/constants";
 import { Badge } from "@/components/ui/badge";
 import {
   Round,
@@ -56,6 +57,8 @@ const LINK_VALIDITY_OPTIONS = [
   { value: "30days", label: "30 Days" },
 ];
 
+const COPY_FEEDBACK_MS = 2000;
+
 export function ScheduleInterviewDialog({
   open,
   onOpenChange,
@@ -72,6 +75,8 @@ export function ScheduleInterviewDialog({
   );
   const [linkValidity, setLinkValidity] = useState("");
   const [notes, setNotes] = useState("");
+  const [interviewLink, setInterviewLink] = useState("");
+  const [copied, setCopied] = useState(false);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -92,6 +97,8 @@ export function ScheduleInterviewDialog({
       setSelectedApplicants(new Set());
       setLinkValidity("");
       setNotes("");
+      setInterviewLink("");
+      setCopied(false);
       setApplicants([]);
       setCurrentOffset(0);
       setPagination({
@@ -102,6 +109,13 @@ export function ScheduleInterviewDialog({
       });
     }
   }, [open]);
+
+  // Generate interview link when dialog opens (for this round/job)
+  useEffect(() => {
+    if (open && jobId && round) {
+      setInterviewLink(generateInterviewLink());
+    }
+  }, [open, jobId, round?.id]);
 
   // Debounce search input -> searchKeyword
   useEffect(() => {
@@ -283,6 +297,18 @@ export function ScheduleInterviewDialog({
     setSelectedApplicants(newSelected);
   };
 
+  const handleCopyLink = async () => {
+    if (!interviewLink) return;
+    try {
+      await navigator.clipboard.writeText(interviewLink);
+      setCopied(true);
+      toast.success("Link copied to clipboard");
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
   const handleSchedule = () => {
     // TODO: integrate with schedule interview API when available
     onSuccess?.();
@@ -295,16 +321,107 @@ export function ScheduleInterviewDialog({
         className="max-w-[779px] sm:max-w-[779px] sm:w-[779px] p-6 gap-4 max-h-[90vh] overflow-y-auto bg-white border border-[#e5e5e5] rounded-[10px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-2px_rgba(0,0,0,0.1)] [&>button]:top-[15px] [&>button]:right-[15px]"
         showCloseButton={true}
       >
-        <DialogHeader className="gap-1.5 text-left pb-0">
-          <DialogTitle className="text-lg font-semibold text-[#0a0a0a] leading-none">
-            Schedule interview
+        <DialogHeader className="gap-[6px] text-left pb-0">
+          <DialogTitle className="text-[18px] font-semibold text-[#0a0a0a] leading-[1.2]">
+            Share interview link
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
+          {/* Interview Link Section — pixel-perfect: explicit px values */}
+          {interviewLink && (
+            <div style={{ width: "100%" }}>
+              <div
+                style={{
+                  backgroundColor: "#f5f5f5",
+                  border: "1px solid #dcdcdc",
+                  borderRadius: 10,
+                  padding: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                <label
+                  htmlFor="schedule-interview-link"
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 400,
+                    color: "#0a0a0a",
+                    lineHeight: "20px",
+                    display: "block",
+                    textAlign: "left",
+                  }}
+                >
+                  Interview link
+                </label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    minHeight: 20,
+                  }}
+                >
+                  <p
+                    id="schedule-interview-link"
+                    style={{
+                      flex: 1,
+                      fontSize: 14,
+                      fontWeight: 400,
+                      color: "#0a0a0a",
+                      lineHeight: "20px",
+                      margin: 0,
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      textAlign: "left",
+                    }}
+                    aria-label={`Interview link: ${interviewLink}`}
+                  >
+                    {interviewLink}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    aria-label={copied ? "Link copied" : "Copy interview link"}
+                    style={{
+                      flexShrink: 0,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      height: 32,
+                      paddingLeft: 12,
+                      paddingRight: 12,
+                      paddingTop: 6,
+                      paddingBottom: 6,
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: "#0a0a0a",
+                      backgroundColor: "#e5e5e5",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      outline: "none",
+                    }}
+                    className="hover:!bg-[#d5d5d5] focus:ring-2 focus:ring-[#02563d] focus:ring-offset-2 focus:outline-none"
+                  >
+                    <Copy
+                      style={{ width: 16, height: 16, flexShrink: 0 }}
+                      aria-hidden="true"
+                    />
+                    <span>{copied ? "Copied!" : "Copy link"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Applicants Section */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium text-[#0a0a0a] leading-none">
+            <Label className="text-[14px] font-medium text-[#0a0a0a] leading-[20px]">
               Applicants <span className="text-[#b91c1c]">*</span>
             </Label>
 
@@ -325,7 +442,7 @@ export function ScheduleInterviewDialog({
               style={{ scrollbarWidth: "thin" }}
             >
               {isLoadingApplicants ? (
-                <div className="py-8 text-center text-sm text-[#737373]">
+                <div className="py-8 text-center text-[14px] text-[#737373] leading-[20px]">
                   Loading applicants…
                 </div>
               ) : (
@@ -336,12 +453,12 @@ export function ScheduleInterviewDialog({
                       onCheckedChange={handleSelectAll}
                       className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
                     />
-                    <span className="text-sm text-[#0a0a0a] font-normal">
+                    <span className="text-[14px] text-[#0a0a0a] font-normal leading-[20px]">
                       Select all
                     </span>
                     <Badge
                       variant="secondary"
-                      className="ml-auto bg-[#e5e5e5] text-[#0a0a0a] text-xs px-2 py-0 h-[18px] font-normal rounded-full"
+                      className="ml-auto bg-[#e5e5e5] text-[#0a0a0a] text-[12px] px-2 py-0 h-[18px] font-normal rounded-full leading-[18px]"
                     >
                       {pagination.total > 0
                         ? pagination.total
@@ -363,22 +480,22 @@ export function ScheduleInterviewDialog({
                         className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
                       />
                       <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <span className="text-sm text-[#0a0a0a] font-normal">
+                        <span className="text-[14px] text-[#0a0a0a] font-normal leading-[20px]">
                           {applicant.name || "—"}
                         </span>
                         <div className="flex items-center gap-4 flex-wrap">
                           {applicant.email && (
-                            <div className="flex items-center gap-1.5">
-                              <Mail className="w-3.5 h-3.5 text-[#737373] shrink-0" />
-                              <span className="text-xs text-[#737373]">
+                            <div className="flex items-center gap-[6px]">
+                              <Mail className="w-[14px] h-[14px] text-[#737373] shrink-0" />
+                              <span className="text-[12px] text-[#737373] leading-[16px]">
                                 {applicant.email}
                               </span>
                             </div>
                           )}
                           {applicant.contact && (
-                            <div className="flex items-center gap-1.5">
-                              <Phone className="w-3.5 h-3.5 text-[#737373] shrink-0" />
-                              <span className="text-xs text-[#737373]">
+                            <div className="flex items-center gap-[6px]">
+                              <Phone className="w-[14px] h-[14px] text-[#737373] shrink-0" />
+                              <span className="text-[12px] text-[#737373] leading-[16px]">
                                 {applicant.contact}
                               </span>
                             </div>
@@ -388,13 +505,13 @@ export function ScheduleInterviewDialog({
                     </div>
                   ))}
                   {filteredApplicants.length === 0 && !isLoadingApplicants && (
-                    <div className="py-6 text-center text-sm text-[#737373]">
+                    <div className="py-6 text-center text-[14px] text-[#737373] leading-[20px]">
                       No applicants found
                     </div>
                   )}
 
                   {isLoadingMore && (
-                    <div className="py-3 text-center text-sm text-[#737373]">
+                    <div className="py-3 text-center text-[14px] text-[#737373] leading-[20px]">
                       Loading more…
                     </div>
                   )}
@@ -405,7 +522,7 @@ export function ScheduleInterviewDialog({
 
           {/* Link Validity Section */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium text-[#0a0a0a] leading-none">
+            <Label className="text-[14px] font-medium text-[#0a0a0a] leading-[20px]">
               Link validity <span className="text-[#b91c1c]">*</span>
             </Label>
             <Select value={linkValidity} onValueChange={setLinkValidity}>
@@ -424,7 +541,7 @@ export function ScheduleInterviewDialog({
 
           {/* Notes Section */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium text-[#0a0a0a] leading-none">
+            <Label className="text-[14px] font-medium text-[#0a0a0a] leading-[20px]">
               Notes
             </Label>
             <Textarea
@@ -441,7 +558,7 @@ export function ScheduleInterviewDialog({
             type="button"
             onClick={handleSchedule}
             disabled={selectedApplicants.size === 0 || !linkValidity}
-            className="h-9 px-4 bg-[#02563d] hover:bg-[#02563d]/90 text-white font-semibold rounded-[10px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] disabled:opacity-50"
+            className="h-9 px-4 text-[14px] font-semibold leading-[20px] bg-[#02563d] hover:bg-[#02563d]/90 text-white rounded-[10px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] disabled:opacity-50"
           >
             Schedule
           </Button>

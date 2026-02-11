@@ -9,34 +9,31 @@ export type FaceWarningType =
   | "face_not_visible"
   | "obstruction";
 
-/** Thresholds for face validation */
-const MIN_FACE_FRACTION = 0.12; // face bbox at least 12% of frame width/height
-const EDGE_MARGIN_FRACTION = 0.05; // bbox should be at least 5% away from frame edges
-const MIN_DETECTION_CONFIDENCE = 0.6; // treat low confidence as possible obstruction
-const FRONTAL_ASPECT_RATIO_MIN = 0.65; // bbox aspect ratio (w/h) for "facing camera"
-const FRONTAL_ASPECT_RATIO_MAX = 1.5;
-const CHECK_INTERVAL_MS = 400; // run detection every ~400ms to avoid blocking UI
-const WARNING_DEBOUNCE_MS = 1200; // show warning after condition persists 1.2s
-const CLEAR_DEBOUNCE_MS = 800; // clear warning after OK for 0.8s
+/** Thresholds */
+const MIN_FACE_FRACTION = 0.12;
+const EDGE_MARGIN_FRACTION = 0.05;
+const CHECK_INTERVAL_MS = 400;
+const WARNING_DEBOUNCE_MS = 1200;
+const CLEAR_DEBOUNCE_MS = 800;
+
+/** Head pose limits (degrees) */
+const MAX_YAW = 18; // left/right
+const MAX_PITCH = 15; // up/down
 
 const WASM_BASE =
   "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/wasm";
+
 const FACE_MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite";
+  "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
 export interface UseFaceValidationOptions {
-  /** Video element to run face detection on (e.g. user's camera) */
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  /** Whether validation is active (e.g. interview started, tips modal closed) */
   active: boolean;
 }
 
 export interface UseFaceValidationResult {
-  /** Current warning to show, or null if OK */
   warning: FaceWarningType | null;
-  /** Whether the detector is still loading */
   isChecking: boolean;
-  /** Human-readable message for the current warning */
   warningMessage: string | null;
 }
 
@@ -57,88 +54,103 @@ export function useFaceValidation({
 }: UseFaceValidationOptions): UseFaceValidationResult {
   const [warning, setWarning] = useState<FaceWarningType | null>(null);
   const [isChecking, setIsChecking] = useState(true);
-  const detectorRef = useRef<Awaited<ReturnType<typeof createDetector>> | null>(
-    null
-  );
+
+  const landmarkerRef = useRef<any>(null);
   const rafRef = useRef<number>(0);
   const lastVideoTimeRef = useRef<number>(-1);
-  const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const clearTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingWarningRef = useRef<FaceWarningType | null>(null);
 
-  async function createDetector() {
-    const { FaceDetector, FilesetResolver } = await import(
+  async function createLandmarker() {
+    const { FaceLandmarker, FilesetResolver } = await import(
       "@mediapipe/tasks-vision"
     );
+
     const vision = await FilesetResolver.forVisionTasks(WASM_BASE);
-    const detector = await FaceDetector.createFromOptions(vision, {
-      baseOptions: { modelAssetPath: FACE_MODEL_URL },
+
+    const landmarker = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: FACE_MODEL_URL,
+      },
       runningMode: "VIDEO",
-      minDetectionConfidence: 0.5,
+      numFaces: 2,
+      outputFaceBlendshapes: false,
+      outputFacialTransformationMatrixes: true,
     });
-    return detector;
+
+    return landmarker;
   }
 
   const evaluateFrame = useCallback(
-    (
-      detector: Awaited<ReturnType<typeof createDetector>>,
-      video: HTMLVideoElement
-    ): FaceWarningType | null => {
+    (landmarker: any, video: HTMLVideoElement): FaceWarningType | null => {
       const timestamp = performance.now();
-      let result: {
-        detections: Array<{
-          boundingBox?: {
-            originX: number;
-            originY: number;
-            width: number;
-            height: number;
-          };
-          categories?: Array<{ score: number }>;
-        }>;
-      };
+      let result;
+
       try {
-        result = detector.detectForVideo(video, timestamp);
+        result = landmarker.detectForVideo(video, timestamp);
       } catch {
         return "no_face";
       }
 
-      const detections = result.detections ?? [];
+      const faces = result.faceLandmarks ?? [];
+      const matrices = result.facialTransformationMatrixes ?? [];
+
       const vw = video.videoWidth || 1;
       const vh = video.videoHeight || 1;
 
-      if (detections.length === 0) return "no_face";
-      if (detections.length > 1) return "multiple_faces";
+      if (faces.length === 0) return "no_face";
+      if (faces.length > 1) return "multiple_faces";
 
-      const d = detections[0];
-      const score = d.categories?.[0]?.score ?? 0;
-      if (score < MIN_DETECTION_CONFIDENCE) return "obstruction";
+      const landmarks = faces[0];
 
-      const box = d.boundingBox;
-      if (!box) return "face_not_visible";
+      // --- Face Size Check ---
+      const xs = landmarks.map((p: any) => p.x * vw);
+      const ys = landmarks.map((p: any) => p.y * vh);
 
-      const { originX, originY, width, height } = box;
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+
       const fracW = width / vw;
       const fracH = height / vh;
 
       if (fracW < MIN_FACE_FRACTION || fracH < MIN_FACE_FRACTION)
         return "face_not_visible";
 
+      // --- Edge Check ---
       const marginW = vw * EDGE_MARGIN_FRACTION;
       const marginH = vh * EDGE_MARGIN_FRACTION;
+
       if (
-        originX < -marginW ||
-        originY < -marginH ||
-        originX + width > vw + marginW ||
-        originY + height > vh + marginH
+        minX < -marginW ||
+        minY < -marginH ||
+        maxX > vw + marginW ||
+        maxY > vh + marginH
       )
         return "face_not_visible";
 
-      const aspectRatio = width / (height || 1);
-      if (
-        aspectRatio < FRONTAL_ASPECT_RATIO_MIN ||
-        aspectRatio > FRONTAL_ASPECT_RATIO_MAX
-      )
+      // --- Head Pose Check ---
+      if (!matrices || matrices.length === 0) return "face_not_visible";
+
+      const matrix = matrices[0].data;
+
+      // Extract approximate yaw & pitch from matrix
+      const yaw = Math.atan2(matrix[8], matrix[0]) * (180 / Math.PI);
+      const pitch = Math.asin(-matrix[9]) * (180 / Math.PI);
+
+      if (Math.abs(yaw) > MAX_YAW || Math.abs(pitch) > MAX_PITCH)
         return "face_not_visible";
+
+      // --- Obstruction Check (basic landmark presence) ---
+      const nose = landmarks[1];
+      const mouth = landmarks[13];
+
+      if (!nose || !mouth) return "obstruction";
 
       return null;
     },
@@ -156,11 +168,10 @@ export function useFaceValidation({
 
     (async () => {
       try {
-        if (!detectorRef.current) {
-          detectorRef.current = await createDetector();
+        if (!landmarkerRef.current) {
+          landmarkerRef.current = await createLandmarker();
         }
-        if (cancelled) return;
-        setIsChecking(false);
+        if (!cancelled) setIsChecking(false);
       } catch (e) {
         console.error("Face validation init error:", e);
         if (!cancelled) setIsChecking(false);
@@ -173,21 +184,18 @@ export function useFaceValidation({
   }, [active]);
 
   useEffect(() => {
-    if (!active || isChecking || !detectorRef.current || !videoRef.current) {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
+    if (!active || isChecking || !landmarkerRef.current || !videoRef.current) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       return;
     }
 
     let lastCheckTime = 0;
 
     function tick() {
-      if (!videoRef.current || !detectorRef.current || !active) return;
+      if (!videoRef.current || !landmarkerRef.current || !active) return;
 
       const videoEl = videoRef.current;
-      if (!videoEl.videoWidth || !videoEl.videoHeight) {
+      if (!videoEl.videoWidth) {
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
@@ -206,33 +214,30 @@ export function useFaceValidation({
       }
       lastVideoTimeRef.current = currentTime;
 
-      const nextWarning = evaluateFrame(detectorRef.current, videoEl);
+      const nextWarning = evaluateFrame(landmarkerRef.current, videoEl);
 
       if (nextWarning !== null) {
         pendingWarningRef.current = nextWarning;
-        if (clearTimeoutRef.current) {
-          clearTimeout(clearTimeoutRef.current);
-          clearTimeoutRef.current = null;
-        }
+
         if (!warningTimeoutRef.current) {
           warningTimeoutRef.current = setTimeout(() => {
-            warningTimeoutRef.current = null;
             setWarning(pendingWarningRef.current);
+            warningTimeoutRef.current = null;
           }, WARNING_DEBOUNCE_MS);
         }
       } else {
         pendingWarningRef.current = null;
+
         if (warningTimeoutRef.current) {
           clearTimeout(warningTimeoutRef.current);
           warningTimeoutRef.current = null;
         }
-        if (warning !== null) {
-          if (!clearTimeoutRef.current) {
-            clearTimeoutRef.current = setTimeout(() => {
-              clearTimeoutRef.current = null;
-              setWarning(null);
-            }, CLEAR_DEBOUNCE_MS);
-          }
+
+        if (warning !== null && !clearTimeoutRef.current) {
+          clearTimeoutRef.current = setTimeout(() => {
+            setWarning(null);
+            clearTimeoutRef.current = null;
+          }, CLEAR_DEBOUNCE_MS);
         }
       }
 
@@ -242,18 +247,9 @@ export function useFaceValidation({
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-      if (warningTimeoutRef.current) {
-        clearTimeout(warningTimeoutRef.current);
-        warningTimeoutRef.current = null;
-      }
-      if (clearTimeoutRef.current) {
-        clearTimeout(clearTimeoutRef.current);
-        clearTimeoutRef.current = null;
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+      if (clearTimeoutRef.current) clearTimeout(clearTimeoutRef.current);
     };
   }, [active, isChecking, evaluateFrame, warning]);
 

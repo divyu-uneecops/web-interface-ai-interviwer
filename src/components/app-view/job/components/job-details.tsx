@@ -1163,12 +1163,12 @@ export default function JobDetails() {
               Whatsapp reminder
             </span>
           </div> */}
-          <Button
+          {/* <Button
             variant="secondary"
             className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
           >
             Share
-          </Button>
+          </Button> */}
         </div>
       </div>
 

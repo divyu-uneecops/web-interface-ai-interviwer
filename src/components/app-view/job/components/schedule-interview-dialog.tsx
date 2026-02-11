@@ -75,7 +75,9 @@ export function ScheduleInterviewDialog({
   );
   const [linkValidity, setLinkValidity] = useState("");
   const [notes, setNotes] = useState("");
-  const [interviewLink, setInterviewLink] = useState("");
+  const [interviewLink, setInterviewLink] = useState(
+    `${window.location.protocol}//${window.location.host}/call/${round?.id}`
+  );
   const [copied, setCopied] = useState(false);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
@@ -109,13 +111,6 @@ export function ScheduleInterviewDialog({
       });
     }
   }, [open]);
-
-  // Generate interview link when dialog opens (for this round/job)
-  useEffect(() => {
-    if (open && jobId && round) {
-      setInterviewLink(generateInterviewLink());
-    }
-  }, [open, jobId, round?.id]);
 
   // Debounce search input -> searchKeyword
   useEffect(() => {

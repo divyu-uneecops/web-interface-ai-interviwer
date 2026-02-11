@@ -223,6 +223,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
         onStopCamera={stopCamera}
         videoRef={videoRef}
         interviewDetails={interviewDetails}
+        interviewId={interviewId}
         token={liveKitConfig?.token}
         serverUrl={liveKitConfig?.serverUrl}
       />

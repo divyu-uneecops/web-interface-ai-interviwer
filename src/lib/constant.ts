@@ -55,4 +55,7 @@ export const API_ENDPOINTS = {
     INVITE: "/admin/orgs/{orgId}/users",
     ROLES_LIST: "/admin/orgs/{orgId}/roles",
   },
+  INTERVIEW_PENALTY: {
+    CREATE: "/api/v2/forminstances",
+  },
 };

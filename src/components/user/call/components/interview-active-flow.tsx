@@ -27,8 +27,10 @@ import { useFaceValidation } from "../hooks/useFaceValidation";
 
 import { LiveKitRoom } from "@livekit/components-react";
 import { CustomVideoConference } from "./custom-video-conference";
+import { applicantAuthService } from "../services/applicant-auth.service";
 
 import "@livekit/components-styles";
+import { buildPenaltyPayload } from "../utils/call.utils";
 
 const REMINDER_THRESHOLD_SECONDS = 5 * 60; // 5 minutes
 const DEFAULT_DURATION_MINUTES = 30;
@@ -59,6 +61,7 @@ interface InterviewActiveFlowProps {
   onStopCamera: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   interviewDetails: any;
+  interviewId: string;
   token?: string | null;
   serverUrl?: string | null;
 }
@@ -68,6 +71,7 @@ export function InterviewActiveFlow({
   onStopCamera,
   videoRef,
   interviewDetails,
+  interviewId,
   token,
   serverUrl,
 }: InterviewActiveFlowProps) {
@@ -80,6 +84,20 @@ export function InterviewActiveFlow({
   const hasLiveKitConfig = Boolean(token && serverUrl);
   const totalDurationSecondsRef = useRef(0);
   const fiveMinReminderShownRef = useRef(false);
+  const lastReportedFaceWarningRef = useRef<string | null>(null);
+
+  const submitPenaltyEvent = (eventType: string) => {
+    const payload = buildPenaltyPayload(
+      interviewId,
+      eventType,
+      Math.floor(Date.now() / 1000)
+    );
+    applicantAuthService
+      .submitPenaltyFormInstance(payload)
+      .catch((err) =>
+        console.error("Penalty form instance submit error:", err)
+      );
+  };
 
   const faceValidationActive =
     !showTipsModal && timeRemainingSeconds !== null && timeRemainingSeconds > 0;
@@ -102,10 +120,12 @@ export function InterviewActiveFlow({
   };
 
   // Show one penalty warning every time user leaves fullscreen (interview is never ended)
+  // and report exit_fullscreen to /api/v2/forminstances
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (document.fullscreenElement !== null) return;
       setShowFullscreenWarning(true);
+      submitPenaltyEvent("exitFullScreen");
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -147,6 +167,17 @@ export function InterviewActiveFlow({
 
     return () => clearInterval(intervalId);
   }, [showTipsModal, timeRemainingSeconds, endInterview]);
+
+  // Report face validation events to /api/v2/forminstances (once per warning type/session)
+  useEffect(() => {
+    if (!faceWarning) {
+      lastReportedFaceWarningRef.current = null;
+      return;
+    }
+    if (lastReportedFaceWarningRef.current === faceWarning) return;
+    lastReportedFaceWarningRef.current = faceWarning;
+    submitPenaltyEvent(faceWarning);
+  }, [faceWarning]);
 
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {

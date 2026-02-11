@@ -33,4 +33,13 @@ export const applicantAuthService = {
       {},
       payload
     ),
+  /** Submit penalty/event form instance (e.g. exit fullscreen, face validation events) to /api/v2/forminstances */
+  submitPenaltyFormInstance: (
+    payload: FeedbackFormInstancePayload
+  ): Promise<{ message?: string }> =>
+    serverInterfaceService.post<{ message?: string }>(
+      API_ENDPOINTS.INTERVIEW_PENALTY.CREATE,
+      {},
+      payload
+    ),
 };

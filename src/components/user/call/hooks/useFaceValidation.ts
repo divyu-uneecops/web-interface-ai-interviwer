@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 /** Warning types for face validation during interview */
 export type FaceWarningType =
-  | "no_face"
-  | "multiple_faces"
-  | "face_not_visible"
+  | "noFace"
+  | "multipleFaces"
+  | "faceNotVisible"
   | "obstruction";
 
 /** Thresholds */
@@ -39,11 +39,11 @@ export interface UseFaceValidationResult {
 
 /** User-facing messages: state + actionable fix + penalty. Helpful tone, concise. */
 const WARNING_MESSAGES: Record<FaceWarningType, string> = {
-  no_face:
+  noFace:
     "We can't see your face. Look at the camera and make sure your face is in frame. This may be recorded as a penalty.",
-  multiple_faces:
+  multipleFaces:
     "More than one face in frame. Please ensure only you are visible to the camera. This may be recorded as a penalty.",
-  face_not_visible:
+  faceNotVisible:
     "Face not clearly visible. Center your face in the frame and look at the camera. This may be recorded as a penalty.",
   obstruction:
     "Face is partially hidden. Remove obstructions and keep your full face visible. This may be recorded as a penalty.",

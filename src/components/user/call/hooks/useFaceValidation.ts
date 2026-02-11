@@ -26,9 +26,13 @@ const WASM_BASE =
 const FACE_MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
+const PENALTY_SUFFIX = " This may be recorded as a penalty.";
+
 export interface UseFaceValidationOptions {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   active: boolean;
+  /** If true, appends penalty sentence to warning message (e.g. for interview-active). Default true. */
+  includePenaltyInMessage?: boolean;
 }
 
 export interface UseFaceValidationResult {
@@ -37,21 +41,22 @@ export interface UseFaceValidationResult {
   warningMessage: string | null;
 }
 
-/** User-facing messages: state + actionable fix + penalty. Helpful tone, concise. */
+/** User-facing messages: state + actionable fix. Helpful tone, concise. */
 const WARNING_MESSAGES: Record<FaceWarningType, string> = {
   noFace:
-    "We can't see your face. Look at the camera and make sure your face is in frame. This may be recorded as a penalty.",
+    "We can't see your face. Look at the camera and make sure your face is in frame.",
   multipleFaces:
-    "More than one face in frame. Please ensure only you are visible to the camera. This may be recorded as a penalty.",
+    "More than one face in frame. Please ensure only you are visible to the camera.",
   faceNotVisible:
-    "Face not clearly visible. Center your face in the frame and look at the camera. This may be recorded as a penalty.",
+    "Face not clearly visible. Center your face in the frame and look at the camera.",
   obstruction:
-    "Face is partially hidden. Remove obstructions and keep your full face visible. This may be recorded as a penalty.",
+    "Face is partially hidden. Remove obstructions and keep your full face visible.",
 };
 
 export function useFaceValidation({
   videoRef,
   active,
+  includePenaltyInMessage = true,
 }: UseFaceValidationOptions): UseFaceValidationResult {
   const [warning, setWarning] = useState<FaceWarningType | null>(null);
   const [isChecking, setIsChecking] = useState(true);
@@ -254,9 +259,15 @@ export function useFaceValidation({
     };
   }, [active, isChecking, evaluateFrame, warning]);
 
+  const baseMessage = warning ? WARNING_MESSAGES[warning] : null;
+  const warningMessage =
+    baseMessage && includePenaltyInMessage
+      ? baseMessage + PENALTY_SUFFIX
+      : baseMessage;
+
   return {
     warning,
     isChecking,
-    warningMessage: warning ? WARNING_MESSAGES[warning] : null,
+    warningMessage,
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, AlertTriangle, ScanFace } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -47,6 +47,7 @@ export function VerificationFlow({
   const { warning, isChecking, warningMessage } = useFaceValidation({
     videoRef,
     active: true,
+    includePenaltyInMessage: false,
   });
 
   const canContinue = !isChecking && !warning;
@@ -129,6 +130,33 @@ export function VerificationFlow({
                 });
               }}
             />
+            {warningMessage && (
+              <div
+                className="absolute bottom-0 left-0 right-0 flex items-start gap-3 px-4 py-3 rounded-b-xl border-t border-amber-300/80 bg-amber-50/98 backdrop-blur-sm shadow-[0_-2px_8px_rgba(0,0,0,0.06)]"
+                role="alert"
+                aria-live="polite"
+                aria-label={`Camera: ${warningMessage}`}
+              >
+                <div
+                  className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-amber-100 text-amber-700 border border-amber-200/80"
+                  aria-hidden
+                >
+                  <ScanFace className="w-5 h-5" strokeWidth={2} />
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-700/90 mb-0.5">
+                    Camera
+                  </p>
+                  <p className="text-sm font-medium text-amber-900 leading-snug">
+                    {warningMessage}
+                  </p>
+                </div>
+                <AlertTriangle
+                  className="w-4 h-4 shrink-0 text-amber-600 mt-1"
+                  aria-hidden
+                />
+              </div>
+            )}
           </div>
           <div className="px-5 py-4">
             <p className="text-sm leading-relaxed text-neutral-700">
@@ -136,14 +164,6 @@ export function VerificationFlow({
               one person is in frame and avoid side angles, masks, or
               obstructions.
             </p>
-            {warningMessage && (
-              <p
-                className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800"
-                role="alert"
-              >
-                {warningMessage}
-              </p>
-            )}
           </div>
         </Card>
 

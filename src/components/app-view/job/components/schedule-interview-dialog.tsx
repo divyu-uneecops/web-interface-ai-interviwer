@@ -333,8 +333,7 @@ export function ScheduleInterviewDialog({
             <div style={{ width: "100%" }}>
               <div
                 style={{
-                  backgroundColor: "#f5f5f5",
-                  border: "1px solid #dcdcdc",
+                  backgroundColor: "#F0F5F3",
                   borderRadius: 10,
                   padding: 16,
                   display: "flex",
@@ -347,20 +346,20 @@ export function ScheduleInterviewDialog({
                   style={{
                     fontSize: 14,
                     fontWeight: 400,
-                    color: "#0a0a0a",
+                    color: "#4A5565",
                     lineHeight: "20px",
                     display: "block",
                     textAlign: "left",
                   }}
                 >
-                  Interview link
+                  Interview Link
                 </label>
                 <div
                   style={{
                     display: "flex",
+                    backgroundColor: "#FFF",
+                    padding: `8px 12px`,
                     alignItems: "center",
-                    gap: 12,
-                    minHeight: 20,
                   }}
                 >
                   <p
@@ -369,7 +368,7 @@ export function ScheduleInterviewDialog({
                       flex: 1,
                       fontSize: 14,
                       fontWeight: 400,
-                      color: "#0a0a0a",
+                      color: "#364153",
                       lineHeight: "20px",
                       margin: 0,
                       minWidth: 0,
@@ -382,38 +381,17 @@ export function ScheduleInterviewDialog({
                   >
                     {interviewLink}
                   </p>
-                  <button
-                    type="button"
+
+                  <div
+                    className="flex items-center gap-2 text-[#02563D] cursor-pointer"
                     onClick={handleCopyLink}
-                    aria-label={copied ? "Link copied" : "Copy interview link"}
-                    style={{
-                      flexShrink: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                      height: 32,
-                      paddingLeft: 12,
-                      paddingRight: 12,
-                      paddingTop: 6,
-                      paddingBottom: 6,
-                      fontSize: 14,
-                      fontWeight: 500,
-                      color: "#0a0a0a",
-                      backgroundColor: "#e5e5e5",
-                      border: "1px solid #e5e5e5",
-                      borderRadius: 6,
-                      cursor: "pointer",
-                      outline: "none",
-                    }}
-                    className="hover:!bg-[#d5d5d5] focus:ring-2 focus:ring-[#02563d] focus:ring-offset-2 focus:outline-none"
                   >
                     <Copy
                       style={{ width: 16, height: 16, flexShrink: 0 }}
                       aria-hidden="true"
                     />
                     <span>{copied ? "Copied!" : "Copy link"}</span>
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>

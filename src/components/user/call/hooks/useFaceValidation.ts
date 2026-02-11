@@ -37,15 +37,16 @@ export interface UseFaceValidationResult {
   warningMessage: string | null;
 }
 
+/** User-facing messages: state + actionable fix + penalty. Helpful tone, concise. */
 const WARNING_MESSAGES: Record<FaceWarningType, string> = {
   no_face:
-    "Face not detected. Please face the camera directly with your full face visible.",
+    "We can't see your face. Look at the camera and make sure your face is in frame. This may be recorded as a penalty.",
   multiple_faces:
-    "Only one person should be in frame. Please ensure no one else is visible.",
+    "More than one face in frame. Please ensure only you are visible to the camera. This may be recorded as a penalty.",
   face_not_visible:
-    "Ensure your full face is visible and you are facing the camera directly.",
+    "Face not clearly visible. Center your face in the frame and look at the camera. This may be recorded as a penalty.",
   obstruction:
-    "Keep your face clearly visible with no masks or obstructions during the interview.",
+    "Face is partially hidden. Remove obstructions and keep your full face visible. This may be recorded as a penalty.",
 };
 
 export function useFaceValidation({

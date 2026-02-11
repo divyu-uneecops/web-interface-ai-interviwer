@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Header } from "@/components/header";
+import { useFaceValidation } from "../hooks/useFaceValidation";
 
 const HOW_IT_WORKS_STEPS = [
   {
@@ -21,52 +22,43 @@ const HOW_IT_WORKS_STEPS = [
   },
   {
     title: "Stay steady and keep your eye towards camera",
-    description: "We'll play back your recording to verify audio quality",
+    description: "Face the camera directly with your full face visible",
   },
   {
-    title: "Read the phrase aloud",
-    description: "Speak clearly when recording the verification phrase",
+    title: "Fulfill any warnings",
+    description: "If a warning appears, follow the instructions to fix it",
   },
   {
-    title: "Confirm or retry",
-    description: "If everything sounds good, proceed to the interview",
+    title: "Continue to interview",
+    description: "Once your face is detected correctly, tap Continue to start",
   },
 ] as const;
 
-type VerificationState = "ready" | "recording" | "completed";
-
 interface VerificationFlowProps {
-  state: VerificationState;
-  onStartRecording: () => void;
-  onRetry: () => void;
   onContinue: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  recordingProgress: number;
-  applicantName: string;
-  companyName: string;
 }
 
 export function VerificationFlow({
-  state,
-  onStartRecording,
-  onRetry,
   onContinue,
   videoRef,
-  recordingProgress = 0,
-  applicantName,
-  companyName,
 }: VerificationFlowProps) {
   const [howItWorksOpen, setHowItWorksOpen] = useState(true);
+  const { warning, isChecking, warningMessage } = useFaceValidation({
+    videoRef,
+    active: true,
+  });
 
-  // Ensure video plays when component mounts and stream is available
+  const canContinue = !isChecking && !warning;
+
   useEffect(() => {
     const video = videoRef?.current;
-    if (video && video?.srcObject) {
+    if (video?.srcObject) {
       video.play().catch((error) => {
         console.error("Error playing video:", error);
       });
     }
-  }, [videoRef, state]);
+  }, [videoRef]);
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -138,55 +130,31 @@ export function VerificationFlow({
               }}
             />
           </div>
-          <div className="px-5">
+          <div className="px-5 py-4">
             <p className="text-sm leading-relaxed text-neutral-700">
               Face the camera directly with your full face visible. Ensure only
               one person is in frame and avoid side angles, masks, or
-              obstructions. Tap{" "}
-              <span className="font-semibold text-[#02563d]">
-                &quot;Start&quot;
-              </span>{" "}
-              to begin.
+              obstructions.
             </p>
+            {warningMessage && (
+              <p
+                className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800"
+                role="alert"
+              >
+                {warningMessage}
+              </p>
+            )}
           </div>
         </Card>
 
         <div className="mt-4 flex justify-center">
-          {state === "ready" && (
-            <Button
-              onClick={onStartRecording}
-              className="h-11 min-w-[120px] rounded-xl bg-[#02563d] px-6 text-sm font-medium text-white hover:bg-[#02563d]/90 focus-visible:ring-2 focus-visible:ring-[#02563d]/20"
-            >
-              Start
-            </Button>
-          )}
-
-          {state === "recording" && (
-            <Button
-              disabled
-              className="h-11 min-w-[120px] cursor-not-allowed rounded-xl bg-[#02563d]/70 px-6 text-sm font-medium text-white"
-            >
-              Verifying…
-            </Button>
-          )}
-
-          {state === "completed" && (
-            <div className="flex gap-3">
-              <Button
-                onClick={onRetry}
-                variant="outline"
-                className="h-11 rounded-xl border-neutral-200 bg-white px-5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
-              >
-                Retry
-              </Button>
-              <Button
-                onClick={onContinue}
-                className="h-11 rounded-xl bg-[#02563d] px-5 text-sm font-medium text-white hover:bg-[#02563d]/90 focus-visible:ring-2 focus-visible:ring-[#02563d]/20"
-              >
-                Continue <ChevronRight className="ml-1.5 h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          <Button
+            onClick={onContinue}
+            disabled={!canContinue}
+            className="h-11 min-w-[140px] rounded-xl bg-[#02563d] px-6 text-sm font-medium text-white hover:bg-[#02563d]/90 focus-visible:ring-2 focus-visible:ring-[#02563d]/20 disabled:pointer-events-none disabled:opacity-70"
+          >
+            Continue <ChevronRight className="ml-1.5 h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

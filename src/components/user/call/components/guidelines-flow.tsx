@@ -179,7 +179,7 @@ export function GuidelinesFlow({
           </div>
           {/* Continue Button */}
           <Button
-            onClick={() => onStateChange("verification-ready")}
+            onClick={() => onStateChange("verification")}
             disabled={!canContinue}
             className="h-11 bg-[#02563d] text-white font-medium text-base leading-5 rounded-md hover:bg-[#02563d]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] mx-auto"
           >

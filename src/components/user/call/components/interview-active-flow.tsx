@@ -7,6 +7,7 @@ import {
   Clock,
   AlertTriangle,
   Maximize2,
+  Timer,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -299,33 +300,97 @@ export function InterviewActiveFlow({
         </DialogContent>
       </Dialog>
 
-      {/* 5-minute remaining reminder */}
+      {/* 5-minute remaining — low-time-left urgency dialog */}
       <Dialog
         open={showFiveMinReminder}
         onOpenChange={(open) => !open && handleCloseFiveMinReminder()}
       >
         <DialogContent
-          className="max-w-[400px] p-6 rounded-xl"
+          role="dialog"
           aria-describedby="five-min-reminder-desc"
+          aria-labelledby="five-min-reminder-title"
+          className="max-w-[400px] p-0 overflow-hidden rounded-xl shadow-xl border-l-4 border-l-amber-500 border border-amber-500/20"
+          showCloseButton={false}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <DialogHeader className="space-y-1.5">
-            <DialogTitle className="text-base font-semibold text-[#0a0a0a]">
-              Time reminder
-            </DialogTitle>
-          </DialogHeader>
-          <p
-            id="five-min-reminder-desc"
-            className="text-sm text-[#737373] leading-relaxed"
-          >
-            You have about 5 minutes left in this round. Use the time to wrap up
-            your answers. The interview will end automatically when time is up.
-          </p>
-          <DialogFooter className="pt-4">
+          <div className="p-6 pb-4">
+            {/* Hero: countdown first — "low time" is the main message */}
+            <div className="flex flex-col items-center text-center">
+              <div
+                className="inline-flex items-baseline gap-1.5 rounded-xl bg-amber-50 px-5 py-3 border border-amber-200/80"
+                aria-live="polite"
+                aria-label={`${formatTimeRemaining(
+                  timeRemainingSeconds ?? 0
+                )} remaining`}
+              >
+                <Timer
+                  className="w-5 h-5 text-amber-600 shrink-0 mt-0.5"
+                  aria-hidden
+                />
+                <span className="tabular-nums text-3xl font-bold text-amber-800 tracking-tight">
+                  {formatTimeRemaining(timeRemainingSeconds ?? 0)}
+                </span>
+                <span className="text-sm font-medium text-amber-700/90">
+                  left
+                </span>
+              </div>
+              <DialogHeader className="mt-4 space-y-1 p-0">
+                <DialogTitle
+                  id="five-min-reminder-title"
+                  className="text-base font-semibold text-amber-900"
+                >
+                  Little time left in this round
+                </DialogTitle>
+              </DialogHeader>
+              <DialogDescription
+                id="five-min-reminder-desc"
+                className="text-sm leading-relaxed mt-1.5 text-amber-800/90 max-w-[320px]"
+              >
+                Wrap up your answers. The interview will end automatically when
+                time is up.
+              </DialogDescription>
+            </div>
+            {/* Progress: how much of the round is left — reinforces "low" */}
+            {timeRemainingSeconds !== null &&
+              totalDurationSecondsRef.current > 0 && (
+                <div className="mt-4">
+                  <div
+                    className="h-2 w-full rounded-full bg-amber-100 overflow-hidden"
+                    role="presentation"
+                    aria-hidden
+                  >
+                    <div
+                      className="h-full rounded-full bg-amber-500/50 transition-all duration-500 ease-out"
+                      style={{
+                        width: `${Math.max(
+                          0,
+                          Math.min(
+                            100,
+                            (timeRemainingSeconds /
+                              totalDurationSecondsRef.current) *
+                              100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="sr-only">
+                    {Math.round(
+                      (timeRemainingSeconds / totalDurationSecondsRef.current) *
+                        100
+                    )}
+                    % of round time remaining
+                  </p>
+                </div>
+              )}
+          </div>
+          <DialogFooter className="px-6 py-4 bg-amber-50/50 border-t border-amber-200/50 rounded-b-xl">
             <Button
               onClick={handleCloseFiveMinReminder}
-              className="h-9 bg-[#02563d] text-white text-sm font-medium hover:bg-[#02563d]/90 rounded-lg"
+              className="h-10 px-6 bg-amber-600 text-white text-sm font-semibold hover:bg-amber-600/90 rounded-lg shadow-sm"
             >
-              Continue
+              Back to interview
             </Button>
           </DialogFooter>
         </DialogContent>

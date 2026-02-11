@@ -91,7 +91,7 @@ export function useFaceValidation({
       try {
         result = landmarker.detectForVideo(video, timestamp);
       } catch {
-        return "no_face";
+        return "noFace";
       }
 
       const faces = result.faceLandmarks ?? [];
@@ -100,8 +100,8 @@ export function useFaceValidation({
       const vw = video.videoWidth || 1;
       const vh = video.videoHeight || 1;
 
-      if (faces.length === 0) return "no_face";
-      if (faces.length > 1) return "multiple_faces";
+      if (faces.length === 0) return "noFace";
+      if (faces.length > 1) return "multipleFaces";
 
       const landmarks = faces[0];
 
@@ -121,7 +121,7 @@ export function useFaceValidation({
       const fracH = height / vh;
 
       if (fracW < MIN_FACE_FRACTION || fracH < MIN_FACE_FRACTION)
-        return "face_not_visible";
+        return "faceNotVisible";
 
       // --- Edge Check ---
       const marginW = vw * EDGE_MARGIN_FRACTION;
@@ -133,10 +133,10 @@ export function useFaceValidation({
         maxX > vw + marginW ||
         maxY > vh + marginH
       )
-        return "face_not_visible";
+        return "faceNotVisible";
 
       // --- Head Pose Check ---
-      if (!matrices || matrices.length === 0) return "face_not_visible";
+      if (!matrices || matrices.length === 0) return "faceNotVisible";
 
       const matrix = matrices[0].data;
 
@@ -145,7 +145,7 @@ export function useFaceValidation({
       const pitch = Math.asin(-matrix[9]) * (180 / Math.PI);
 
       if (Math.abs(yaw) > MAX_YAW || Math.abs(pitch) > MAX_PITCH)
-        return "face_not_visible";
+        return "faceNotVisible";
 
       // --- Obstruction Check (basic landmark presence) ---
       const nose = landmarks[1];

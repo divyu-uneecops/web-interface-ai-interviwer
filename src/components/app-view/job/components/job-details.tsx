@@ -94,6 +94,7 @@ export default function JobDetails() {
   ]);
   const { mappingValues } = useAppSelector((state) => state.jobs);
   const { form } = useAppSelector((state) => state.appState);
+  const { views } = useAppSelector((state) => state.appState);
 
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isEditApplicantModalOpen, setIsEditApplicantModalOpen] =
@@ -279,9 +280,12 @@ export default function JobDetails() {
 
     setIsLoadingJob(true);
     try {
-      const response = await jobService.getJobDetail(params?.id as string, {
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+      const response = await jobService.getJobDetail(
+        { id: params.id, objectId: views?.["jobs"]?.objectId || "" },
+        {
+          appId: "69521cd1c9ba83a076aac3ae",
+        }
+      );
       const transformedJob = transformAPIResponseToJobDetail(
         response,
         params.id
@@ -323,40 +327,61 @@ export default function JobDetails() {
           $and: [jobIdFilter],
         },
       }),
-      jobService.getApplicants(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [jobIdFilter],
+      jobService.getApplicants(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [jobIdFilter],
+          },
         },
-      }),
-      jobService.getInterviews(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            jobIdFilter,
-            {
-              key: "#.records.status",
-              operator: "$in",
-              value: ["Scheduled"],
-              type: "select",
-            },
-          ],
+        {
+          objectId: views?.["applicants"]?.objectId || "",
+          viewId: views?.["applicants"]?.viewId || "",
+        }
+      ),
+      jobService.getInterviews(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              jobIdFilter,
+              {
+                key: "#.records.status",
+                operator: "$in",
+                value: ["Scheduled"],
+                type: "select",
+              },
+            ],
+          },
         },
-      }),
-      jobService.getInterviews(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            jobIdFilter,
-            {
-              key: "#.records.status",
-              operator: "$in",
-              value: ["Completed"],
-              type: "select",
-            },
-          ],
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      ),
+      jobService.getInterviews(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              jobIdFilter,
+              {
+                key: "#.records.status",
+                operator: "$in",
+                value: ["Completed"],
+                type: "select",
+              },
+            ],
+          },
         },
-      }),
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      ),
     ]);
 
     const getTotal = (result: PromiseSettledResult<any>) =>
@@ -425,32 +450,39 @@ export default function JobDetails() {
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
-      const response = await jobService.getApplicants(params_query, {
-        filters: {
-          $and: [
-            {
-              key: "#.records.jobID",
-              operator: "$eq",
-              value: params?.id,
-              type: "text",
-            },
-            ...(appliedFilters.status.length > 0
-              ? [
-                  {
-                    key: "#.records.status",
-                    operator: "$in",
-                    value: appliedFilters.status,
-                    type: "select",
-                  },
-                ]
-              : []),
-          ],
+      const response = await jobService.getApplicants(
+        params_query,
+        {
+          filters: {
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
+              ...(appliedFilters.status.length > 0
+                ? [
+                    {
+                      key: "#.records.status",
+                      operator: "$in",
+                      value: appliedFilters.status,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        sort: {
-          createdOn: "DESC",
-        },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["applicants"]?.objectId || "",
+          viewId: views?.["applicants"]?.viewId || "",
+        }
+      );
       const result = transformAPIResponseToApplicants(
         response.data,
         response.page
@@ -572,7 +604,7 @@ export default function JobDetails() {
         type: "text",
       };
 
-      const response = await interviewService.getInterviewsFromView(
+      const response = await jobService.getInterviews(
         listParams,
         {
           filters: {
@@ -591,6 +623,10 @@ export default function JobDetails() {
             ],
           },
           appId: "69521cd1c9ba83a076aac3ae",
+        },
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
         }
       );
 

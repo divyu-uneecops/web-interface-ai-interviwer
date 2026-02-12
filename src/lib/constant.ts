@@ -10,11 +10,10 @@ export const API_ENDPOINTS = {
   JOB_OPENING: {
     CREATE: "/api/v2/forminstances",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
-    DELETE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
-    DETAIL: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
-    UPDATE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
-    FORM_PROPERTIES:
-      "/api/objects/69521d4cc9ba83a076aac3b8/forms/69521d4cc9ba83a076aac3bb/properties",
+    DELETE: "/api/objects/{objectId}/records/{id}",
+    DETAIL: "/api/objects/{objectId}/records/{id}",
+    UPDATE: "/api/objects/{objectId}/records/{id}",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   APPLICANT: {
     CREATE: "/api/v2/forminstances",

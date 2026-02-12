@@ -514,7 +514,10 @@ export default function JobList() {
   const handleDeleteJob = async (id: string) => {
     if (isEmpty(id)) return;
     try {
-      const response = await jobService.deleteJobOpening(id);
+      const response = await jobService.deleteJobOpening({
+        id: id || "",
+        objectId: views?.["jobs"]?.objectId || "",
+      });
       toast.success(response ? response : "An unknown error occurred", {
         duration: 8000, // 8 seconds
       });

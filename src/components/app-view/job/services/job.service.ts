@@ -26,17 +26,17 @@ export const jobService = {
       payload,
       signal
     ),
-  deleteJobOpening: (id: string) =>
+  deleteJobOpening: (urlIds: { id: string; objectId: string }) =>
     serverInterfaceService.delete(
-      buildUrl(API_ENDPOINTS.JOB_OPENING.DELETE, { id })
+      buildUrl(API_ENDPOINTS.JOB_OPENING.DELETE, urlIds)
     ),
   getJobDetail: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     params?: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.get(
-      buildUrl(API_ENDPOINTS.JOB_OPENING.DETAIL, { id }),
+      buildUrl(API_ENDPOINTS.JOB_OPENING.DETAIL, urlIds),
       params,
       signal
     ),

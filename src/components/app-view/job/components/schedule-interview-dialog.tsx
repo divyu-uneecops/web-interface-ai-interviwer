@@ -424,60 +424,68 @@ export function ScheduleInterviewDialog({
                 </div>
               ) : (
                 <div className="flex flex-col gap-0">
-                  <div className="flex items-center gap-3 pb-[10px] border-b border-[#e5e5e5]">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={handleSelectAll}
-                      className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
-                    />
-                    <span className="text-[14px] text-[#0A0A0A] font-medium leading-[14px]">
-                      Select all
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="ml-auto bg-[#e5e5e5] text-[#0a0a0a] text-[12px] px-2 py-0  font-normal rounded-full leading-[16px]"
-                    >
-                      {pagination.total > 0
-                        ? pagination.total
-                        : applicants.length}{" "}
-                      Applicants
-                    </Badge>
+                  <div className="flex items-center pb-[10px] border-b border-[#e5e5e5] justify-between">
+                    <div className="flex gap-3">
+                      <Checkbox
+                        checked={allSelected}
+                        onCheckedChange={handleSelectAll}
+                        className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
+                      />
+                      <span className="text-[14px] text-[#0A0A0A] font-medium leading-[14px]">
+                        Select all
+                      </span>
+                    </div>
+                    <div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-[#e5e5e5] text-[#0a0a0a] text-[12px] px-2 py-0  font-normal rounded-full leading-[16px]"
+                      >
+                        {pagination.total > 0
+                          ? pagination.total
+                          : applicants.length}{" "}
+                        Applicants
+                      </Badge>
+                    </div>
                   </div>
 
                   {filteredApplicants.map((applicant) => (
                     <div
                       key={applicant?.id}
-                      className="flex items-center gap-3 py-2"
+                      className="flex items-center py-2 justify-between"
                     >
-                      <Checkbox
-                        checked={selectedApplicants.has(applicant?.id)}
-                        onCheckedChange={(checked) =>
-                          handleApplicantToggle(applicant?.id, checked === true)
-                        }
-                        className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
-                      />
-                      <div className="flex justify-center space-between">
+                      <div className="flex gap-3">
+                        <Checkbox
+                          checked={selectedApplicants.has(applicant?.id)}
+                          onCheckedChange={(checked) =>
+                            handleApplicantToggle(
+                              applicant?.id,
+                              checked === true
+                            )
+                          }
+                          className="border-[#e5e5e5] data-[state=checked]:bg-[#02563d] data-[state=checked]:border-[#02563d]"
+                        />
                         <span className="text-[14px] text-[#0a0a0a] font-normal leading-[20px]">
                           {applicant.name || "—"}
                         </span>
-                        <div className="flex items-center gap-4 flex-wrap ml-auto">
-                          {applicant.email && (
-                            <div className="flex items-center gap-[6px]">
-                              <Mail className="w-[14px] h-[14px] text-[#737373] shrink-0" />
-                              <span className="text-[12px] text-[#737373] leading-[16px]">
-                                {applicant.email}
-                              </span>
-                            </div>
-                          )}
-                          {applicant.contact && (
-                            <div className="flex items-center gap-[6px]">
-                              <Phone className="w-[14px] h-[14px] text-[#737373] shrink-0" />
-                              <span className="text-[12px] text-[#737373] leading-[16px]">
-                                {applicant.contact}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                      </div>
+
+                      <div className="flex gap-4 flex-wrap">
+                        {applicant.email && (
+                          <div className="flex items-center gap-[6px]">
+                            <Mail className="w-[14px] h-[14px] text-[#737373] shrink-0" />
+                            <span className="text-[14px] text-[#737373] leading-[20px]">
+                              {applicant.email}
+                            </span>
+                          </div>
+                        )}
+                        {applicant.contact && (
+                          <div className="flex items-center gap-[6px]">
+                            <Phone className="w-[14px] h-[14px] text-[#737373] shrink-0" />
+                            <span className="text-[14px] text-[#737373] leading-[20px]">
+                              {applicant.contact}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

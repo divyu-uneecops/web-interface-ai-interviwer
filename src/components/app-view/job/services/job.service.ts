@@ -79,6 +79,16 @@ export const jobService = {
       buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, { id }),
       payload
     ),
+  createInterviewFormInstance: (
+    payload: Record<string, any>,
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.post(
+      API_ENDPOINTS.INTERVIEW.CREATE,
+      {},
+      payload,
+      signal
+    ),
   getInterviews: (
     params: Record<string, any>,
     payload: Record<string, any>,

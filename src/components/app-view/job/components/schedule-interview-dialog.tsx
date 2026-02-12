@@ -59,6 +59,145 @@ const LINK_VALIDITY_OPTIONS = [
 
 const COPY_FEEDBACK_MS = 2000;
 
+// Interview form instance (forminstances) constants — property IDs from form schema
+const SCHEDULE_INTERVIEW_FORM_ID = "6960b980c9ba83a076aac8a0";
+const SCHEDULE_INTERVIEW_PROPERTY_IDS = [
+  "6960bae9c9ba83a076aac8a4",
+  "6960bb55c9ba83a076aac8a6",
+  "6960bb8cc9ba83a076aac8a7",
+  "6960bc56c9ba83a076aac8aa",
+  "6960bcfcc9ba83a076aac8ae",
+  "6960bd1ec9ba83a076aac8af",
+  "6960c795c9ba83a076aac8b1",
+  "6968b19ac90d705a920ddbec",
+  "6968b256c90d705a920ddbf0",
+  "6968b28bc90d705a920ddbf1",
+  "6968b2e2c90d705a920ddbf2",
+  "69732b4c1641f4dea8f6600a",
+  "6989bedefdb0e9975c9f5e8e",
+  "6989bf0abd6acbd1fd13d199",
+  "6989bf73dfb659edb0bec752",
+  "6989bfc7d2fcbec3ff44e4aa",
+  "6989c0cadfb659edb0bec755",
+  "698d5c25b598b586ab9c9589",
+  "698d5c47bd6acbd1fd13d1ac",
+  "698d5ce9bb2ef527cbb8244e",
+  "698d5d0d2d28552b6f555924",
+];
+
+function mapLinkValidityToV2(value: string): string {
+  const opt = LINK_VALIDITY_OPTIONS.find((o) => o.value === value);
+  return opt ? opt.label : value;
+}
+
+function buildScheduleInterviewPayload(
+  applicant: Applicant,
+  options: {
+    roundId: string;
+    interviewerId: string;
+    formUser: string[];
+    jobId: string;
+    linkValidityV2: string;
+    notes: string;
+    interviewLink: string;
+    createdAt: number;
+  }
+): Record<string, unknown> {
+  const {
+    roundId,
+    interviewerId,
+    formUser,
+    jobId,
+    linkValidityV2,
+    notes,
+    interviewLink,
+    createdAt,
+  } = options;
+
+  const categoryScoresValue = [
+    { propertyId: "6989c016dd395e99bbbb74a8", key: "technical" },
+    { propertyId: "6989c051dfb659edb0bec753", key: "communication" },
+    { propertyId: "6989c0702d28552b6f555906", key: "problemSolving" },
+    { propertyId: "6989c08cdfb659edb0bec754", key: "leadership" },
+    { propertyId: "6989c0a41fccaff8d0e0bf2e", key: "cultureFit" },
+  ];
+
+  const values = [
+    {
+      propertyId: "6960bae9c9ba83a076aac8a4",
+      key: "applicantEmail",
+      value: applicant?.id,
+    },
+    {
+      propertyId: "6960bb55c9ba83a076aac8a6",
+      key: "roundName",
+      value: roundId,
+    },
+    {
+      propertyId: "6960bb8cc9ba83a076aac8a7",
+      key: "interviewerName",
+      value: interviewerId,
+    },
+    {
+      propertyId: "6960bc56c9ba83a076aac8aa",
+      key: "status",
+      value: "Scheduled",
+    },
+    { propertyId: "6960bcfcc9ba83a076aac8ae", key: "score", value: 0 },
+    {
+      propertyId: "6960bd1ec9ba83a076aac8af",
+      key: "formUser",
+      value: formUser,
+    },
+    {
+      propertyId: "6960c795c9ba83a076aac8b1",
+      key: "jobTitle",
+      value: jobId,
+    },
+    { propertyId: "6968b19ac90d705a920ddbec", key: "jobId", value: jobId },
+    { propertyId: "6968b256c90d705a920ddbf0", key: "roundId", value: roundId },
+    {
+      propertyId: "6968b28bc90d705a920ddbf1",
+      key: "interviewerId",
+      value: interviewerId,
+    },
+    {
+      propertyId: "6968b2e2c90d705a920ddbf2",
+      key: "applicantId",
+      value: applicant?.id,
+    },
+    {
+      propertyId: "6989c0cadfb659edb0bec755",
+      key: "categoryScores",
+      value: categoryScoresValue,
+    },
+    {
+      propertyId: "698d5c25b598b586ab9c9589",
+      key: "v2LinkValidity",
+      value: linkValidityV2,
+    },
+    { propertyId: "698d5c47bd6acbd1fd13d1ac", key: "v2Notes", value: notes },
+    {
+      propertyId: "698d5ce9bb2ef527cbb8244e",
+      key: "createdAt",
+      value: createdAt,
+    },
+    {
+      propertyId: "698d5d0d2d28552b6f555924",
+      key: "interviewLink",
+      value: interviewLink,
+    },
+  ];
+
+  return {
+    values,
+    propertyIds: SCHEDULE_INTERVIEW_PROPERTY_IDS,
+    flows: [{ stageId: "1", status: "PENDING" }],
+    status: "PENDING",
+    formId: SCHEDULE_INTERVIEW_FORM_ID,
+  };
+}
+
 export function ScheduleInterviewDialog({
   open,
   onOpenChange,
@@ -82,6 +221,7 @@ export function ScheduleInterviewDialog({
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
   const [pagination, setPagination] = useState<PaginationState>({
     total: 0,
@@ -304,10 +444,55 @@ export function ScheduleInterviewDialog({
     }
   };
 
-  const handleSchedule = () => {
-    // TODO: integrate with schedule interview API when available
-    onSuccess?.();
-    onOpenChange(false);
+  const handleSchedule = async () => {
+    if (!round || selectedApplicants.size === 0 || !linkValidity) return;
+
+    const selectedApplicantRecords = applicants.filter((a: Applicant) =>
+      selectedApplicants.has(a?.id)
+    );
+    if (selectedApplicantRecords.length === 0) {
+      toast.error("No selected applicants found", { duration: 8000 });
+      return;
+    }
+
+    setIsSubmitting(true);
+    const linkValidityV2 = mapLinkValidityToV2(linkValidity);
+    const createdAt = Math.floor(Date.now() / 1000);
+
+    try {
+      const payloads = selectedApplicantRecords.map((applicant) =>
+        buildScheduleInterviewPayload(applicant, {
+          roundId: round?.id || "",
+          interviewerId: round?.interviewerID ?? "",
+          formUser: ["6936a4d92276e3fc3ac7b13b"],
+          jobId,
+          linkValidityV2,
+          notes,
+          interviewLink,
+          createdAt,
+        })
+      );
+
+      await Promise.all(
+        payloads.map((payload) =>
+          jobService.createInterviewFormInstance(payload as Record<string, any>)
+        )
+      );
+
+      toast.success(
+        `Interview scheduled for ${selectedApplicantRecords.length} applicant(s)`,
+        { duration: 8000 }
+      );
+      onSuccess?.();
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ?? "Failed to schedule interview(s)",
+        { duration: 8000 }
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -542,10 +727,12 @@ export function ScheduleInterviewDialog({
           <Button
             type="button"
             onClick={handleSchedule}
-            disabled={selectedApplicants.size === 0 || !linkValidity}
+            disabled={
+              selectedApplicants.size === 0 || !linkValidity || isSubmitting
+            }
             className="h-9 px-4 text-[14px] font-semibold leading-[20px] bg-[#02563d] hover:bg-[#02563d]/90 text-white rounded-[10px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] disabled:opacity-50"
           >
-            Schedule
+            {isSubmitting ? "Scheduling..." : "Schedule"}
           </Button>
         </div>
       </DialogContent>

@@ -17,10 +17,11 @@ export const jobService = {
   getJobOpenings: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.JOB_OPENING.LIST,
+      buildUrl(API_ENDPOINTS.JOB_OPENING.LIST, urlIds),
       params,
       payload,
       signal
@@ -58,10 +59,11 @@ export const jobService = {
   getApplicants: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.APPLICANT.LIST,
+      buildUrl(API_ENDPOINTS.APPLICANT.LIST, urlIds),
       params,
       payload,
       signal
@@ -92,10 +94,11 @@ export const jobService = {
   getInterviews: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEW.LIST,
+      buildUrl(API_ENDPOINTS.INTERVIEW.LIST, urlIds),
       params,
       payload,
       signal

@@ -75,6 +75,7 @@ export default function JobList() {
     status: [],
   });
   const { mappingValues } = useAppSelector((state) => state.jobs);
+  const { views } = useAppSelector((state) => state.appState);
 
   // Define filter groups for jobs
   const jobFilterGroups: FilterGroup[] = [
@@ -110,40 +111,68 @@ export default function JobList() {
         interviewsScheduledResult,
         interviewsCompletedResult,
       ] = await Promise.allSettled([
-        jobService.getJobOpenings(listParams, {
-          ...appIdPayload,
-          filters: { $and: [] },
-        }),
-        jobService.getApplicants(listParams, {
-          ...appIdPayload,
-          filters: { $and: [] },
-        }),
-        jobService.getInterviews(listParams, {
-          ...appIdPayload,
-          filters: {
-            $and: [
-              {
-                key: "#.records.status",
-                operator: "$in",
-                value: ["Scheduled"],
-                type: "select",
-              },
-            ],
+        jobService.getJobOpenings(
+          listParams,
+          {
+            ...appIdPayload,
+            filters: { $and: [] },
           },
-        }),
-        jobService.getInterviews(listParams, {
-          ...appIdPayload,
-          filters: {
-            $and: [
-              {
-                key: "#.records.status",
-                operator: "$in",
-                value: ["Completed"],
-                type: "select",
-              },
-            ],
+          {
+            objectId: views?.["jobs"]?.objectId || "",
+            viewId: views?.["jobs"]?.viewId || "",
+          }
+        ),
+        jobService.getApplicants(
+          listParams,
+          {
+            ...appIdPayload,
+            filters: { $and: [] },
           },
-        }),
+          {
+            objectId: views?.["applicants"]?.objectId || "",
+            viewId: views?.["applicants"]?.viewId || "",
+          }
+        ),
+        jobService.getInterviews(
+          listParams,
+          {
+            ...appIdPayload,
+            filters: {
+              $and: [
+                {
+                  key: "#.records.status",
+                  operator: "$in",
+                  value: ["Scheduled"],
+                  type: "select",
+                },
+              ],
+            },
+          },
+          {
+            objectId: views?.["interviews"]?.objectId || "",
+            viewId: views?.["interviews"]?.viewId || "",
+          }
+        ),
+        jobService.getInterviews(
+          listParams,
+          {
+            ...appIdPayload,
+            filters: {
+              $and: [
+                {
+                  key: "#.records.status",
+                  operator: "$in",
+                  value: ["Completed"],
+                  type: "select",
+                },
+              ],
+            },
+          },
+          {
+            objectId: views?.["interviews"]?.objectId || "",
+            viewId: views?.["interviews"]?.viewId || "",
+          }
+        ),
       ]);
 
       const getTotal = (result: PromiseSettledResult<any>) =>
@@ -251,16 +280,30 @@ export default function JobList() {
         jobIds.map(async (jobId) => {
           const [applicantsResult, interviewsResult] = await Promise.allSettled(
             [
-              jobService.getApplicants(listParams, {
-                ...appIdPayload,
-                filters: { $and: [jobIdFilter(jobId)] },
-              }),
-              jobService.getInterviews(listParams, {
-                ...appIdPayload,
-                filters: {
-                  $and: [jobIdFilter(jobId)],
+              jobService.getApplicants(
+                listParams,
+                {
+                  ...appIdPayload,
+                  filters: { $and: [jobIdFilter(jobId)] },
                 },
-              }),
+                {
+                  objectId: views?.["applicants"]?.objectId || "",
+                  viewId: views?.["applicants"]?.viewId || "",
+                }
+              ),
+              jobService.getInterviews(
+                listParams,
+                {
+                  ...appIdPayload,
+                  filters: {
+                    $and: [jobIdFilter(jobId)],
+                  },
+                },
+                {
+                  objectId: views?.["interviews"]?.objectId || "",
+                  viewId: views?.["interviews"]?.viewId || "",
+                }
+              ),
             ]
           );
           const applicants = getTotalFromResult(applicantsResult);
@@ -313,26 +356,33 @@ export default function JobList() {
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
-      const response = await jobService.getJobOpenings(params, {
-        filters: {
-          $and: [
-            ...(appliedFilters?.status?.length > 0
-              ? [
-                  {
-                    key: "#.records.status",
-                    operator: "$in",
-                    value: appliedFilters.status,
-                    type: "select",
-                  },
-                ]
-              : []),
-          ],
+      const response = await jobService.getJobOpenings(
+        params,
+        {
+          filters: {
+            $and: [
+              ...(appliedFilters?.status?.length > 0
+                ? [
+                    {
+                      key: "#.records.status",
+                      operator: "$in",
+                      value: appliedFilters.status,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        sort: {
-          createdOn: "DESC",
-        },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["jobs"]?.objectId || "",
+          viewId: views?.["jobs"]?.viewId || "",
+        }
+      );
       const result = transformAPIResponseToJobs(response?.data, response?.page);
       setJobs(result?.jobs);
       setPagination({

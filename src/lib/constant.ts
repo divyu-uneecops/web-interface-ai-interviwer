@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
   },
   JOB_OPENING: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d4cc9ba83a076aac3b8/views/69521d4cc9ba83a076aac3b9/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     DETAIL: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     UPDATE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
   },
   APPLICANT: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d7dc9ba83a076aac3c8/views/69521d7dc9ba83a076aac3c9/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/69521d7dc9ba83a076aac3c8/records/{id}",
     UPDATE: "/api/objects/69521d7dc9ba83a076aac3c8/records/{id}",
     UPLOAD_ATTACHMENT: "/api/storage-accounts/lego/upload",
@@ -44,7 +44,7 @@ export const API_ENDPOINTS = {
   },
   INTERVIEW: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/6960b980c9ba83a076aac89d/views/6960b980c9ba83a076aac89e/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/interviews/records/{id}",
     DETAIL: "/api/objects/interviews/records/{id}",
     DELETE: "/api/objects/interviews/records/{id}",

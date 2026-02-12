@@ -30,8 +30,7 @@ export const API_ENDPOINTS = {
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/69521d56c9ba83a076aac3bc/records/{id}",
     DETAIL: "/api/objects/69521d56c9ba83a076aac3bc/records/{id}",
-    FORM_PROPERTIES:
-      "/api/objects/69521d56c9ba83a076aac3bc/forms/69521d56c9ba83a076aac3bf/properties",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   CREATE_ROUND: {
     CREATE: "/api/v2/forminstances",

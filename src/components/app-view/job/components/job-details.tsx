@@ -1203,7 +1203,7 @@ export default function JobDetails() {
                 value="applicant-interviews"
                 className="flex-1 h-[30px] rounded-lg text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
               >
-                Applicant interviews
+                Interviews
               </TabsTrigger>
             </TabsList>
 

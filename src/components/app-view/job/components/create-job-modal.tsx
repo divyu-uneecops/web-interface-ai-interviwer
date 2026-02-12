@@ -82,7 +82,6 @@ export function CreateJobModal({
   onOpenChange,
   onSuccess,
   mappingValues,
-  views,
   isEditMode = false,
   jobDetail,
   jobId,
@@ -132,10 +131,7 @@ export function CreateJobModal({
         } else {
           // Create mode - create new job
           const payload = transformToCreateJobPayload(values);
-          const response = await jobService.createJobOpening({}, payload, {
-            objectId: views?.["jobs"]?.objectId || "",
-            viewId: views?.["jobs"]?.viewId || "",
-          });
+          const response = await jobService.createJobOpening({}, payload);
           toast.success(response?.message || "Job created successfully", {
             duration: 8000,
           });

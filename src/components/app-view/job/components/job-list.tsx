@@ -75,7 +75,6 @@ export default function JobList() {
     status: [],
   });
   const { mappingValues } = useAppSelector((state) => state.jobs);
-  const { views } = useAppSelector((state) => state.appState);
 
   // Define filter groups for jobs
   const jobFilterGroups: FilterGroup[] = [
@@ -586,7 +585,6 @@ export default function JobList() {
             fetchJobs();
           }}
           mappingValues={mappingValues}
-          views={views}
         />
       )}
 
@@ -599,7 +597,6 @@ export default function JobList() {
             fetchJobs();
           }}
           mappingValues={mappingValues}
-          views={views}
           isEditMode={true}
           jobDetail={{
             title: jobDetail?.title || "",

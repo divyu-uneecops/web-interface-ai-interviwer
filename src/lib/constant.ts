@@ -1,6 +1,7 @@
 export const API_ENDPOINTS = {
   APP: {
     FORM: "/api/orgs/69521ba88ecab90ed22cbcd9/forms",
+    VIEWS: "/api/apps/69521cd1c9ba83a076aac3ae/objects/views",
   },
   AUTH: {
     VERIFY_EMAIL: "/admin/auth/_verify",

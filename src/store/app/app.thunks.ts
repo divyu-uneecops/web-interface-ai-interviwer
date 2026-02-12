@@ -35,6 +35,37 @@ function transformFormResponse(forms: AppFormItem[]): AppFormIds {
   return result;
 }
 
+/** Raw view item from API (views[0]) */
+export interface AppViewItem {
+  _id: string;
+  name: string;
+  objectId: string;
+  [key: string]: unknown;
+}
+
+/** Raw object-with-views from API */
+export interface AppObjectViewsItem {
+  _id: string;
+  name: string;
+  views: AppViewItem[];
+}
+
+/** Refactored: objectId (object _id) + viewId (views[0]._id), keyed by object name */
+export type AppViewIds = Record<string, { objectId: string; viewId: string }>;
+
+function transformViewsResponse(items: AppObjectViewsItem[]): AppViewIds {
+  const list = Array.isArray(items) ? items : [];
+  const result: AppViewIds = {};
+  for (const item of list) {
+    const view0 = item?.views?.[0];
+    if (item?._id && view0?._id && item?.name != null) {
+      const key = nameToKey(item?.name);
+      if (key) result[key] = { objectId: item?._id, viewId: view0?._id };
+    }
+  }
+  return result;
+}
+
 export const fetchForm = createAsyncThunk(
   "app/fetchForm",
   async (_, { rejectWithValue }) => {
@@ -46,6 +77,22 @@ export const fetchForm = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error?.response?.data?.message || "Failed to fetch Form Properties"
+      );
+    }
+  }
+);
+
+export const fetchViews = createAsyncThunk(
+  "app/fetchViews",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await serverInterfaceService.get<AppObjectViewsItem[]>(
+        API_ENDPOINTS.APP.VIEWS
+      );
+      return transformViewsResponse(response ?? []);
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to fetch object views"
       );
     }
   }

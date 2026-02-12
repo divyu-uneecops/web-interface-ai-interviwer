@@ -1,12 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchForm, type AppFormIds } from "./app.thunks";
+import {
+  fetchForm,
+  fetchViews,
+  type AppFormIds,
+  type AppViewIds,
+} from "./app.thunks";
 
 export interface AppState {
   form: AppFormIds;
+  views: AppViewIds;
 }
 
 const initialState: AppState = {
   form: {},
+  views: {},
 };
 
 export const appSlice = createSlice({
@@ -16,6 +23,9 @@ export const appSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchForm.fulfilled, (state, action) => {
       state.form = action.payload;
+    });
+    builder.addCase(fetchViews.fulfilled, (state, action) => {
+      state.views = action.payload;
     });
   },
 });

@@ -27,12 +27,12 @@ export const interviewerService = {
       signal
     ),
   updateInterviewer: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.INTERVIEWER.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.INTERVIEWER.UPDATE, urlIds),
       payload
     ),
 };

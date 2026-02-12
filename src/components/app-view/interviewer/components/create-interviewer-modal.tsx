@@ -66,6 +66,7 @@ export function CreateInterviewerModal({
   onOpenChange,
   onSubmit: onSubmitCallback,
   mappingValues,
+  views,
   isEditMode = false,
   interviewerDetail,
   interviewerId,
@@ -101,7 +102,10 @@ export function CreateInterviewerModal({
             formik.touched
           );
           const response = await interviewerService.updateInterviewer(
-            interviewerId,
+            {
+              id: interviewerId,
+              objectId: views?.interviewers?.objectId || "",
+            },
             payload
           );
           toast.success(

@@ -17,10 +17,11 @@ export const interviewerService = {
   getInterviewers: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEWER.LIST,
+      buildUrl(API_ENDPOINTS.INTERVIEWER.LIST, urlIds),
       params,
       payload,
       signal

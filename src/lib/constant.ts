@@ -28,7 +28,7 @@ export const API_ENDPOINTS = {
   },
   INTERVIEWER: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d56c9ba83a076aac3bc/views/69521d56c9ba83a076aac3bd/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/69521d56c9ba83a076aac3bc/records/{id}",
     DETAIL: "/api/objects/69521d56c9ba83a076aac3bc/records/{id}",
     FORM_PROPERTIES:

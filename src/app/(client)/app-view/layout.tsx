@@ -5,7 +5,7 @@ import { DashboardHeader } from "@/components/app-view/dashboard-header";
 import { usePathname } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { useEffect } from "react";
-import { fetchForm } from "@/store/app/app.thunks";
+import { fetchForm, fetchViews } from "@/store/app/app.thunks";
 import { toast } from "sonner";
 
 export default function DashboardLayout({
@@ -18,6 +18,12 @@ export default function DashboardLayout({
 
   useEffect(() => {
     dispatch(fetchForm())
+      .unwrap()
+      .catch((error: any) => {
+        toast.error(error || "Failed to fetch Form Properties");
+      });
+
+    dispatch(fetchViews())
       .unwrap()
       .catch((error: any) => {
         toast.error(error || "Failed to fetch Form Properties");

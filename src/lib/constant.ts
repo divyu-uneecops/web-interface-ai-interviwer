@@ -1,4 +1,7 @@
 export const API_ENDPOINTS = {
+  APP: {
+    FORM: "/api/orgs/69521ba88ecab90ed22cbcd9/forms",
+  },
   AUTH: {
     VERIFY_EMAIL: "/admin/auth/_verify",
     LOGIN: "/admin/auth/login",

@@ -94,6 +94,7 @@ export default function JobDetails() {
   ]);
   const { mappingValues } = useAppSelector((state) => state.jobs);
   const { form } = useAppSelector((state) => state.appState);
+  const { views } = useAppSelector((state) => state.appState);
 
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isEditApplicantModalOpen, setIsEditApplicantModalOpen] =
@@ -1459,6 +1460,7 @@ export default function JobDetails() {
             fetchJobDetail();
           }}
           mappingValues={mappingValues}
+          views={views}
           isEditMode={true}
           jobDetail={{
             title: job?.title || "",

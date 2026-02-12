@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
   },
   JOB_OPENING: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d4cc9ba83a076aac3b8/views/69521d4cc9ba83a076aac3b9/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     DETAIL: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
     UPDATE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",

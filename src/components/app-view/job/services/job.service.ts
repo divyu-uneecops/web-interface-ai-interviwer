@@ -6,10 +6,11 @@ export const jobService = {
   createJobOpening: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.JOB_OPENING.CREATE,
+      buildUrl(API_ENDPOINTS.JOB_OPENING.CREATE, urlIds),
       params,
       payload,
       signal

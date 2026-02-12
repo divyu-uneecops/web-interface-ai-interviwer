@@ -30,6 +30,7 @@ import {
 import { jobService } from "@/components/app-view/job/services/job.service";
 import { transformAPIResponseToApplicants } from "@/components/app-view/job/utils/job.utils";
 import { toast } from "sonner";
+import { AppFormIds } from "@/store/app/app.thunks";
 
 const PAGE_LIMIT = 12;
 const SEARCH_DEBOUNCE_MS = 400;
@@ -37,9 +38,9 @@ const SEARCH_DEBOUNCE_MS = 400;
 export interface ScheduleInterviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  form: AppFormIds;
   round: Round | null;
   jobId: string;
-  jobTitle?: string;
   onSuccess?: () => void;
 }
 
@@ -60,7 +61,7 @@ const LINK_VALIDITY_OPTIONS = [
 const COPY_FEEDBACK_MS = 2000;
 
 // Interview form instance (forminstances) constants — property IDs from form schema
-const SCHEDULE_INTERVIEW_FORM_ID = "6960b980c9ba83a076aac8a0";
+
 const SCHEDULE_INTERVIEW_PROPERTY_IDS = [
   "6960bae9c9ba83a076aac8a4",
   "6960bb55c9ba83a076aac8a6",
@@ -101,7 +102,8 @@ function buildScheduleInterviewPayload(
     notes: string;
     interviewLink: string;
     createdAt: number;
-  }
+  },
+  formId: string
 ): Record<string, unknown> {
   const {
     roundId,
@@ -194,16 +196,16 @@ function buildScheduleInterviewPayload(
     propertyIds: SCHEDULE_INTERVIEW_PROPERTY_IDS,
     flows: [{ stageId: "1", status: "PENDING" }],
     status: "PENDING",
-    formId: SCHEDULE_INTERVIEW_FORM_ID,
+    formId: formId,
   };
 }
 
 export function ScheduleInterviewDialog({
   open,
   onOpenChange,
+  form,
   round,
   jobId,
-  jobTitle = "",
   onSuccess,
 }: ScheduleInterviewDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -461,16 +463,20 @@ export function ScheduleInterviewDialog({
 
     try {
       const payloads = selectedApplicantRecords.map((applicant) =>
-        buildScheduleInterviewPayload(applicant, {
-          roundId: round?.id || "",
-          interviewerId: round?.interviewerID ?? "",
-          formUser: ["6936a4d92276e3fc3ac7b13b"],
-          jobId,
-          linkValidityV2,
-          notes,
-          interviewLink,
-          createdAt,
-        })
+        buildScheduleInterviewPayload(
+          applicant,
+          {
+            roundId: round?.id || "",
+            interviewerId: round?.interviewerID ?? "",
+            formUser: ["6936a4d92276e3fc3ac7b13b"],
+            jobId,
+            linkValidityV2,
+            notes,
+            interviewLink,
+            createdAt,
+          },
+          form?.["createInterviews"]
+        )
       );
 
       await Promise.all(

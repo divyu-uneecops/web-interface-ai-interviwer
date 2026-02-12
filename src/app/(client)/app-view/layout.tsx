@@ -3,13 +3,26 @@
 import { Sidebar } from "@/components/app-view/sidebar";
 import { DashboardHeader } from "@/components/app-view/dashboard-header";
 import { usePathname } from "next/navigation";
+import { useAppDispatch } from "@/store/hooks";
+import { useEffect } from "react";
+import { fetchForm } from "@/store/app/app.thunks";
+import { toast } from "sonner";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const dispatch = useAppDispatch();
   const pathname = usePathname();
+
+  useEffect(() => {
+    dispatch(fetchForm())
+      .unwrap()
+      .catch((error: any) => {
+        toast.error(error || "Failed to fetch Form Properties");
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">

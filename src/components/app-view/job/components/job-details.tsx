@@ -93,6 +93,7 @@ export default function JobDetails() {
     { label: "Total Interviews Completed", value: 0, icon: "completed" },
   ]);
   const { mappingValues } = useAppSelector((state) => state.jobs);
+  const { form } = useAppSelector((state) => state.appState);
 
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isEditApplicantModalOpen, setIsEditApplicantModalOpen] =
@@ -1571,9 +1572,9 @@ export default function JobDetails() {
             setScheduleInterviewDialogOpen(open);
             if (!open) setScheduleInterviewRound(null);
           }}
+          form={form}
           round={scheduleInterviewRound}
           jobId={(params?.id as string) || ""}
-          jobTitle={job?.title}
           onSuccess={() => {}}
         />
       )}

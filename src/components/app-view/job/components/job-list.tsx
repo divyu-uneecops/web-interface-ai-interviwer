@@ -638,6 +638,7 @@ export default function JobList() {
             fetchJobs();
           }}
           mappingValues={mappingValues}
+          views={views}
         />
       )}
 
@@ -650,6 +651,7 @@ export default function JobList() {
             fetchJobs();
           }}
           mappingValues={mappingValues}
+          views={views}
           isEditMode={true}
           jobDetail={{
             title: jobDetail?.title || "",

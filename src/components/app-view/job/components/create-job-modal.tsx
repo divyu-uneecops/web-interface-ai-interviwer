@@ -82,6 +82,7 @@ export function CreateJobModal({
   onOpenChange,
   onSuccess,
   mappingValues,
+  views,
   isEditMode = false,
   jobDetail,
   jobId,
@@ -124,7 +125,10 @@ export function CreateJobModal({
           });
 
           const payload = transformToUpdateJobPayload(values, dirtyFields);
-          const response = await jobService.updateJobOpening(jobId, payload);
+          const response = await jobService.updateJobOpening(
+            { id: jobId, objectId: views?.["jobs"]?.objectId || "" },
+            payload
+          );
           toast.success(response?.message || "Job updated successfully", {
             duration: 8000,
           });

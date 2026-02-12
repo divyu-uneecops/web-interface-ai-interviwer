@@ -41,12 +41,12 @@ export const jobService = {
       signal
     ),
   updateJobOpening: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.JOB_OPENING.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.JOB_OPENING.UPDATE, urlIds),
       payload
     ),
   createApplicant: (payload: Record<string, any>, signal?: AbortSignal) =>

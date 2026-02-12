@@ -1495,6 +1495,7 @@ export default function JobDetails() {
             fetchJobDetail();
           }}
           mappingValues={mappingValues}
+          views={views}
           isEditMode={true}
           jobDetail={{
             title: job?.title || "",

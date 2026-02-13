@@ -218,7 +218,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.interviewers?.voice?.map(
+                    {mappingValues?.interviewers?.language?.map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}

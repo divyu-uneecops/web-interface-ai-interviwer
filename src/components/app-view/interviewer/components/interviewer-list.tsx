@@ -15,7 +15,6 @@ import { interviewerService } from "../services/interviewer.services";
 import {
   APIPaginationInfo,
   Interviewer,
-  InterviewerFormData,
 } from "../interfaces/interviewer.interfaces";
 import { CreateInterviewerModal } from "./create-interviewer-modal";
 import { InterviewerCard } from "./interviewer-card";
@@ -53,6 +52,7 @@ export function InterviewerList() {
   const { mappingValues } = useAppSelector((state) => state.interviewers);
   const { views } = useAppSelector((state) => state.appState);
   const { form } = useAppSelector((state) => state.appState);
+
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
     {
@@ -77,7 +77,7 @@ export function InterviewerList() {
       id: "voice",
       label: "Voice",
       options:
-        mappingValues?.interviewers?.voice?.map((status: string) => ({
+        mappingValues?.interviewers?.language?.map((status: string) => ({
           value: status,
           label: status,
         })) || [],

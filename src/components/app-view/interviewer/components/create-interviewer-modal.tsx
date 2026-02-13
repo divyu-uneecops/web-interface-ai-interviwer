@@ -218,7 +218,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.interviewers?.language?.map(
+                    {mappingValues?.interviewers?.voice?.map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}
@@ -361,7 +361,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.interviewers?.roundType?.map(
+                    {mappingValues?.createRound?.roundType?.map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}
@@ -385,7 +385,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.interviewers?.language?.map(
+                    {mappingValues?.createRound?.language?.map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}

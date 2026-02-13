@@ -12,10 +12,18 @@ export const fetchFormProperties = createAsyncThunk(
       const { form, views } = state.appState;
       const createRoundObjectId = views?.rounds?.objectId;
       const createRoundFormId = form.createRounds;
+      const interviewersObjectId = views?.interviewers?.objectId;
+      const interviewersFormId = form.createInterviewers;
 
       if (!createRoundObjectId || !createRoundFormId) {
         return rejectWithValue(
           "Create round form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
+        );
+      }
+
+      if (!interviewersObjectId || !interviewersFormId) {
+        return rejectWithValue(
+          "Interviewers form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
       }
 
@@ -26,6 +34,12 @@ export const fetchFormProperties = createAsyncThunk(
             formId: createRoundFormId,
           })
         ),
+        serverInterfaceService.get(
+          buildUrl(API_ENDPOINTS.INTERVIEWER.FROM_PROPERTIES, {
+            objectId: interviewersObjectId,
+            formId: interviewersFormId,
+          })
+        ),
       ]);
 
       // Extract options for jobLevel, industry, and jobType fields
@@ -33,11 +47,11 @@ export const fetchFormProperties = createAsyncThunk(
       const result: Record<string, Record<string, any[]>> = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result["interviewers"] = extractFormProperties(item.value, [
-            "roundType",
-            "language",
-            "voice",
-          ]);
+          result[index === 0 ? "createRound" : "interviewers"] =
+            extractFormProperties(
+              item.value,
+              index === 0 ? ["roundType", "language", "voice"] : ["voice"]
+            );
         }
       });
 

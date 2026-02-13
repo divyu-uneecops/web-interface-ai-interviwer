@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Calendar, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  ChevronLeft,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
@@ -14,6 +20,7 @@ import { formatInterviewDate } from "../utils/interview.utils";
 
 export default function InterviewDetail() {
   const params = useParams();
+  const router = useRouter();
   const [interview, setInterview] = useState<>({
     id: "1",
     candidateName: "John Doe",
@@ -63,24 +70,31 @@ export default function InterviewDetail() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h1 className="text-xl font-bold text-[#0a0a0a] leading-7">
-              {interview.candidateName}
-            </h1>
-            <Badge
-              variant="outline"
-              className={`bg-[#def2eb] font-normal text-xs tracking-[0.3px] rounded-full px-2 py-0 h-6 border-transparent text-[#0e4230]`}
-            >
-              {interview.status}
-            </Badge>
+      <div className="flex justify-between">
+        <div className="flex">
+          <ChevronLeft
+            className="cursor-pointer mr-2"
+            onClick={() => router.back()}
+          />
+
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <h1 className="text-xl font-bold text-[#0a0a0a] leading-7">
+                {interview.candidateName}
+              </h1>
+              <Badge
+                variant="outline"
+                className={`bg-[#def2eb] font-normal text-xs tracking-[0.3px] rounded-full px-2 py-0 h-6 border-transparent text-[#0e4230]`}
+              >
+                {interview.status}
+              </Badge>
+            </div>
+            <p className="text-xs text-[#737373] leading-none">
+              {interview.jobTitle} • {interview.candidateEmail}
+            </p>
           </div>
-          <p className="text-xs text-[#737373] leading-none">
-            {interview.jobTitle} • {interview.candidateEmail}
-          </p>
         </div>
-        <div className="flex flex-col gap-1 items-end">
+        <div className="flex flex-col gap-1 items-start">
           <div className="flex items-center gap-1 text-xs text-[#404040]">
             <Calendar className="w-4 h-4" />
             <span>

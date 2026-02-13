@@ -6,10 +6,11 @@ export const interviewService = {
   getInterviewsFromView: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEW.LIST,
+      buildUrl(API_ENDPOINTS.INTERVIEW.LIST, urlIds),
       params,
       payload,
       signal

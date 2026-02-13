@@ -24,8 +24,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
     null
   );
 
-  const [recordingProgress, setRecordingProgress] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -42,11 +40,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
 
   // Start camera when entering verification flow
   useEffect(() => {
-    const inVerification =
-      flowState === "verification-ready" ||
-      flowState === "verification-recording" ||
-      flowState === "verification-completed";
-    if (inVerification && !streamRef.current) {
+    if (flowState === "verification" && !streamRef.current) {
       startCamera();
     }
   }, [flowState]);
@@ -54,10 +48,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
   // Attach video stream when verification or interview is active
   useEffect(() => {
     const needsStream =
-      flowState === "verification-ready" ||
-      flowState === "verification-recording" ||
-      flowState === "verification-completed" ||
-      flowState === "interview-active";
+      flowState === "verification" || flowState === "interview-active";
     if (needsStream && streamRef?.current && videoRef?.current) {
       if (videoRef?.current?.srcObject !== streamRef?.current) {
         videoRef.current.srcObject = streamRef?.current;
@@ -67,34 +58,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
       }
     }
   }, [flowState]);
-
-  // Start recording when state changes to verification-recording
-  useEffect(() => {
-    if (flowState === "verification-recording" && !isRecording) {
-      setIsRecording(true);
-      setRecordingProgress(0);
-    }
-  }, [flowState, isRecording]);
-
-  // Recording progress simulation
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording && flowState === "verification-recording") {
-      interval = setInterval(() => {
-        setRecordingProgress((prev) => {
-          if (prev >= 100) {
-            setIsRecording(false);
-            setFlowState("verification-completed");
-            return 100;
-          }
-          return prev + 2;
-        });
-      }, 100);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRecording, flowState]);
 
   // Get camera access
   const startCamera = async () => {
@@ -136,12 +99,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
     setFlowState("guidelines");
   };
 
-  const handleVerificationRetry = () => {
-    setRecordingProgress(0);
-    setIsRecording(false);
-    setFlowState("verification-ready");
-  };
-
   const handleVerificationContinue = () => {
     if (!document.fullscreenElement) {
       document?.documentElement
@@ -150,22 +107,6 @@ export default function CallPage({ interviewId }: CallPageProps) {
     }
 
     setFlowState("interview-active");
-  };
-
-  const handleStartVerificationRecording = () => {
-    const stream = streamRef?.current;
-    const hasVideo = stream
-      ?.getVideoTracks?.()
-      .some((t) => t?.readyState === "live");
-    const hasAudio = stream
-      ?.getAudioTracks?.()
-      .some((t) => t?.readyState === "live");
-    if (!hasVideo || !hasAudio) {
-      toast.error("camera and microphone Permission are not given");
-      startCamera();
-      return;
-    }
-    setFlowState("verification-recording");
   };
 
   // Render Authentication Screen
@@ -189,28 +130,11 @@ export default function CallPage({ interviewId }: CallPageProps) {
   }
 
   // Render Voice & Video Verification (VerificationFlow)
-  if (
-    flowState === "verification-ready" ||
-    flowState === "verification-recording" ||
-    flowState === "verification-completed"
-  ) {
-    const verificationState =
-      flowState === "verification-ready"
-        ? "ready"
-        : flowState === "verification-recording"
-        ? "recording"
-        : "completed";
-
+  if (flowState === "verification") {
     return (
       <VerificationFlow
-        state={verificationState}
-        onStartRecording={handleStartVerificationRecording}
-        onRetry={handleVerificationRetry}
         onContinue={handleVerificationContinue}
         videoRef={videoRef}
-        recordingProgress={recordingProgress}
-        applicantName={interviewDetails?.applicant?.name || ""}
-        companyName={companyName}
       />
     );
   }

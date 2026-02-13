@@ -1,4 +1,8 @@
 export const API_ENDPOINTS = {
+  APP: {
+    FORM: "/api/orgs/69521ba88ecab90ed22cbcd9/forms",
+    VIEWS: "/api/apps/69521cd1c9ba83a076aac3ae/objects/views",
+  },
   AUTH: {
     VERIFY_EMAIL: "/admin/auth/_verify",
     LOGIN: "/admin/auth/login",
@@ -8,16 +12,15 @@ export const API_ENDPOINTS = {
   },
   JOB_OPENING: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d4cc9ba83a076aac3b8/views/69521d4cc9ba83a076aac3b9/records",
-    DELETE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
-    DETAIL: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
-    UPDATE: "/api/objects/69521d4cc9ba83a076aac3b8/records/{id}",
-    FORM_PROPERTIES:
-      "/api/objects/69521d4cc9ba83a076aac3b8/forms/69521d4cc9ba83a076aac3bb/properties",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
+    DELETE: "/api/objects/{objectId}/records/{id}",
+    DETAIL: "/api/objects/{objectId}/records/{id}",
+    UPDATE: "/api/objects/{objectId}/records/{id}",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   APPLICANT: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d7dc9ba83a076aac3c8/views/69521d7dc9ba83a076aac3c9/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/69521d7dc9ba83a076aac3c8/records/{id}",
     UPDATE: "/api/objects/69521d7dc9ba83a076aac3c8/records/{id}",
     UPLOAD_ATTACHMENT: "/api/storage-accounts/lego/upload",
@@ -27,23 +30,19 @@ export const API_ENDPOINTS = {
   },
   INTERVIEWER: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/69521d56c9ba83a076aac3bc/views/69521d56c9ba83a076aac3bd/records",
-    UPDATE: "/api/objects/69521d56c9ba83a076aac3bc/records/{id}",
-    DETAIL: "/api/objects/69521d56c9ba83a076aac3bc/records/{id}",
-    FORM_PROPERTIES:
-      "/api/objects/69521d56c9ba83a076aac3bc/forms/69521d56c9ba83a076aac3bf/properties",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
+    UPDATE: "/api/objects/{objectId}/records/{id}",
   },
   CREATE_ROUND: {
     CREATE: "/api/v2/forminstances",
     LIST: "/api/objects/69521d61c9ba83a076aac3c0/views/69521d61c9ba83a076aac3c1/records",
     UPDATE: "/api/objects/69521d61c9ba83a076aac3c0/records/{id}",
     DELETE: "/api/objects/69521d61c9ba83a076aac3c0/records/{id}",
-    FORM_PROPERTIES:
-      "/api/objects/69521d61c9ba83a076aac3c0/forms/69521d61c9ba83a076aac3c3/properties",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   INTERVIEW: {
     CREATE: "/api/v2/forminstances",
-    LIST: "/api/objects/6960b980c9ba83a076aac89d/views/6960b980c9ba83a076aac89e/records",
+    LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/interviews/records/{id}",
     DETAIL: "/api/objects/interviews/records/{id}",
     DELETE: "/api/objects/interviews/records/{id}",

@@ -17,35 +17,36 @@ export const jobService = {
   getJobOpenings: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.JOB_OPENING.LIST,
+      buildUrl(API_ENDPOINTS.JOB_OPENING.LIST, urlIds),
       params,
       payload,
       signal
     ),
-  deleteJobOpening: (id: string) =>
+  deleteJobOpening: (urlIds: { id: string; objectId: string }) =>
     serverInterfaceService.delete(
-      buildUrl(API_ENDPOINTS.JOB_OPENING.DELETE, { id })
+      buildUrl(API_ENDPOINTS.JOB_OPENING.DELETE, urlIds)
     ),
   getJobDetail: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     params?: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.get(
-      buildUrl(API_ENDPOINTS.JOB_OPENING.DETAIL, { id }),
+      buildUrl(API_ENDPOINTS.JOB_OPENING.DETAIL, urlIds),
       params,
       signal
     ),
   updateJobOpening: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.JOB_OPENING.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.JOB_OPENING.UPDATE, urlIds),
       payload
     ),
   createApplicant: (payload: Record<string, any>, signal?: AbortSignal) =>
@@ -58,10 +59,11 @@ export const jobService = {
   getApplicants: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.APPLICANT.LIST,
+      buildUrl(API_ENDPOINTS.APPLICANT.LIST, urlIds),
       params,
       payload,
       signal
@@ -79,13 +81,24 @@ export const jobService = {
       buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, { id }),
       payload
     ),
-  getInterviews: (
-    params: Record<string, any>,
+  createInterviewFormInstance: (
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEW.LIST,
+      API_ENDPOINTS.INTERVIEW.CREATE,
+      {},
+      payload,
+      signal
+    ),
+  getInterviews: (
+    params: Record<string, any>,
+    payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.post(
+      buildUrl(API_ENDPOINTS.INTERVIEW.LIST, urlIds),
       params,
       payload,
       signal

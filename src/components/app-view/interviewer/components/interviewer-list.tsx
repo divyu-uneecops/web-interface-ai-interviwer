@@ -15,7 +15,6 @@ import { interviewerService } from "../services/interviewer.services";
 import {
   APIPaginationInfo,
   Interviewer,
-  InterviewerFormData,
 } from "../interfaces/interviewer.interfaces";
 import { CreateInterviewerModal } from "./create-interviewer-modal";
 import { InterviewerCard } from "./interviewer-card";
@@ -51,6 +50,9 @@ export function InterviewerList() {
     useState<Interviewer | null>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
   const { mappingValues } = useAppSelector((state) => state.interviewers);
+  const { views } = useAppSelector((state) => state.appState);
+  const { form } = useAppSelector((state) => state.appState);
+
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
     {
@@ -75,7 +77,7 @@ export function InterviewerList() {
       id: "voice",
       label: "Voice",
       options:
-        mappingValues?.interviewers?.voice?.map((status: string) => ({
+        mappingValues?.interviewers?.language?.map((status: string) => ({
           value: status,
           label: status,
         })) || [],
@@ -161,46 +163,53 @@ export function InterviewerList() {
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
-      const response = await interviewerService.getInterviewers(params, {
-        filters: {
-          $and: [
-            ...(appliedFilters.roundType.length > 0
-              ? [
-                  {
-                    key: "#.records.roundType",
-                    operator: "$in",
-                    value: appliedFilters.roundType,
-                    type: "select",
-                  },
-                ]
-              : []),
-            ...(appliedFilters.language.length > 0
-              ? [
-                  {
-                    key: "#.records.language",
-                    operator: "$in",
-                    value: appliedFilters.language,
-                    type: "select",
-                  },
-                ]
-              : []),
-            ...(appliedFilters.voice.length > 0
-              ? [
-                  {
-                    key: "#.records.voice",
-                    operator: "$in",
-                    value: appliedFilters.voice,
-                    type: "select",
-                  },
-                ]
-              : []),
-          ],
+      const response = await interviewerService.getInterviewers(
+        params,
+        {
+          filters: {
+            $and: [
+              ...(appliedFilters.roundType.length > 0
+                ? [
+                    {
+                      key: "#.records.roundType",
+                      operator: "$in",
+                      value: appliedFilters.roundType,
+                      type: "select",
+                    },
+                  ]
+                : []),
+              ...(appliedFilters.language.length > 0
+                ? [
+                    {
+                      key: "#.records.language",
+                      operator: "$in",
+                      value: appliedFilters.language,
+                      type: "select",
+                    },
+                  ]
+                : []),
+              ...(appliedFilters.voice.length > 0
+                ? [
+                    {
+                      key: "#.records.voice",
+                      operator: "$in",
+                      value: appliedFilters.voice,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        sort: {
-          createdOn: "DESC",
-        },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["interviewers"]?.objectId || "",
+          viewId: views?.["interviewers"]?.viewId || "",
+        }
+      );
 
       const result = transformAPIResponseToInterviewers(
         response?.data || [],
@@ -379,6 +388,8 @@ export function InterviewerList() {
           onOpenChange={setIsCreateModalOpen}
           onSubmit={handleCreateInterviewer}
           mappingValues={mappingValues}
+          form={form}
+          views={views}
         />
       )}
 
@@ -406,6 +417,8 @@ export function InterviewerList() {
           }}
           interviewerId={interviewerDetail?.id || undefined}
           mappingValues={mappingValues}
+          form={form}
+          views={views}
         />
       )}
     </div>

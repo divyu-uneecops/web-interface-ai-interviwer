@@ -66,6 +66,8 @@ export function CreateInterviewerModal({
   onOpenChange,
   onSubmit: onSubmitCallback,
   mappingValues,
+  views,
+  form,
   isEditMode = false,
   interviewerDetail,
   interviewerId,
@@ -101,7 +103,10 @@ export function CreateInterviewerModal({
             formik.touched
           );
           const response = await interviewerService.updateInterviewer(
-            interviewerId,
+            {
+              id: interviewerId,
+              objectId: views?.interviewers?.objectId || "",
+            },
             payload
           );
           toast.success(
@@ -112,7 +117,10 @@ export function CreateInterviewerModal({
           );
         } else {
           // Create mode - create new interviewer
-          const payload = transformToInterviewerCreatePayload(values);
+          const payload = transformToInterviewerCreatePayload(
+            values,
+            form?.createInterviewers || ""
+          );
           const response = await interviewerService.createInterviewer(
             {},
             payload
@@ -210,7 +218,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.interviewers?.voice?.map(
+                    {mappingValues?.interviewers?.language?.map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}

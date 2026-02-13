@@ -17,21 +17,22 @@ export const interviewerService = {
   getInterviewers: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEWER.LIST,
+      buildUrl(API_ENDPOINTS.INTERVIEWER.LIST, urlIds),
       params,
       payload,
       signal
     ),
   updateInterviewer: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.INTERVIEWER.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.INTERVIEWER.UPDATE, urlIds),
       payload
     ),
 };

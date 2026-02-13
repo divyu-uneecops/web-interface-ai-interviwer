@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Building2,
   Clock,
@@ -16,6 +17,7 @@ import {
   MoreHorizontal,
   Briefcase,
   ChevronLeft,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -66,6 +68,13 @@ import { useAppSelector } from "@/store/hooks";
 import { isEmpty } from "@/lib/utils";
 import { CreateRoundModal } from "@/components/shared/components/create-round-modal";
 import { ScheduleInterviewDialog } from "./schedule-interview-dialog";
+import { InterviewDetail } from "@/components/app-view/interviews/interfaces/interview.interface";
+import {
+  formatInterviewDate,
+  transformAPIResponseToInterviews,
+} from "@/components/app-view/interviews/utils/interview.utils";
+import { statusStyles } from "@/components/app-view/interviews/constants/interview.constants";
+import { interviewService } from "@/components/app-view/interviews/services/interview.service";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -84,6 +93,8 @@ export default function JobDetails() {
     { label: "Total Interviews Completed", value: 0, icon: "completed" },
   ]);
   const { mappingValues } = useAppSelector((state) => state.jobs);
+  const { form } = useAppSelector((state) => state.appState);
+  const { views } = useAppSelector((state) => state.appState);
 
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isEditApplicantModalOpen, setIsEditApplicantModalOpen] =
@@ -135,6 +146,37 @@ export default function JobDetails() {
   const [scheduleInterviewRound, setScheduleInterviewRound] =
     useState<Round | null>(null);
 
+  // Applicant Interviews tab (interviews for this job only)
+  const [jobInterviews, setJobInterviews] = useState<InterviewDetail[]>([]);
+  const [jobInterviewsPagination, setJobInterviewsPagination] = useState({
+    total: 0,
+    nextOffset: null as number | null,
+    previousOffset: null as number | null,
+    limit: 10,
+  });
+  const [currentJobInterviewsOffset, setCurrentJobInterviewsOffset] =
+    useState(0);
+  const [isLoadingJobInterviews, setIsLoadingJobInterviews] = useState(false);
+  const [jobInterviewsSearchQuery, setJobInterviewsSearchQuery] = useState("");
+  const [jobInterviewsSearchKeyword, setJobInterviewsSearchKeyword] =
+    useState("");
+  const jobInterviewsSearchDebounceRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+  const [jobInterviewsAppliedFilters, setJobInterviewsAppliedFilters] =
+    useState<FilterState>({ status: [] });
+  const interviewFilterGroups: FilterGroup[] = [
+    {
+      id: "status",
+      label: "Status",
+      options: [
+        { value: "Scheduled", label: "Scheduled" },
+        { value: "Completed", label: "Completed" },
+        { value: "Cancelled", label: "Cancelled" },
+      ],
+    },
+  ];
+
   const PAGE_LIMIT = 10;
 
   const listParams = { limit: 1, offset: 0 };
@@ -177,6 +219,36 @@ export default function JobDetails() {
     }
   }, [activeTab, params?.id]);
 
+  // Debounce search for applicant interviews tab
+  useEffect(() => {
+    if (jobInterviewsSearchDebounceRef.current) {
+      clearTimeout(jobInterviewsSearchDebounceRef.current);
+    }
+    jobInterviewsSearchDebounceRef.current = setTimeout(() => {
+      setJobInterviewsSearchKeyword(jobInterviewsSearchQuery.trim());
+      setCurrentJobInterviewsOffset(0);
+      jobInterviewsSearchDebounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (jobInterviewsSearchDebounceRef.current) {
+        clearTimeout(jobInterviewsSearchDebounceRef.current);
+      }
+    };
+  }, [jobInterviewsSearchQuery]);
+
+  // Fetch job interviews when on applicant-interviews tab
+  useEffect(() => {
+    if (activeTab === "applicant-interviews" && params?.id) {
+      fetchJobInterviews();
+    }
+  }, [
+    activeTab,
+    params?.id,
+    currentJobInterviewsOffset,
+    jobInterviewsAppliedFilters,
+    jobInterviewsSearchKeyword,
+  ]);
+
   const getStatusTag = (status: ApplicantStatus) => {
     switch (status) {
       case "Interviewed":
@@ -208,9 +280,12 @@ export default function JobDetails() {
 
     setIsLoadingJob(true);
     try {
-      const response = await jobService.getJobDetail(params?.id as string, {
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+      const response = await jobService.getJobDetail(
+        { id: params.id, objectId: views?.["jobs"]?.objectId || "" },
+        {
+          appId: "69521cd1c9ba83a076aac3ae",
+        }
+      );
       const transformedJob = transformAPIResponseToJobDetail(
         response,
         params.id
@@ -252,40 +327,61 @@ export default function JobDetails() {
           $and: [jobIdFilter],
         },
       }),
-      jobService.getApplicants(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [jobIdFilter],
+      jobService.getApplicants(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [jobIdFilter],
+          },
         },
-      }),
-      jobService.getInterviews(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            jobIdFilter,
-            {
-              key: "#.records.status",
-              operator: "$in",
-              value: ["Scheduled"],
-              type: "select",
-            },
-          ],
+        {
+          objectId: views?.["applicants"]?.objectId || "",
+          viewId: views?.["applicants"]?.viewId || "",
+        }
+      ),
+      jobService.getInterviews(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              jobIdFilter,
+              {
+                key: "#.records.status",
+                operator: "$in",
+                value: ["Scheduled"],
+                type: "select",
+              },
+            ],
+          },
         },
-      }),
-      jobService.getInterviews(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            jobIdFilter,
-            {
-              key: "#.records.status",
-              operator: "$in",
-              value: ["Completed"],
-              type: "select",
-            },
-          ],
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      ),
+      jobService.getInterviews(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              jobIdFilter,
+              {
+                key: "#.records.status",
+                operator: "$in",
+                value: ["Completed"],
+                type: "select",
+              },
+            ],
+          },
         },
-      }),
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      ),
     ]);
 
     const getTotal = (result: PromiseSettledResult<any>) =>
@@ -354,32 +450,39 @@ export default function JobDetails() {
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
-      const response = await jobService.getApplicants(params_query, {
-        filters: {
-          $and: [
-            {
-              key: "#.records.jobID",
-              operator: "$eq",
-              value: params?.id,
-              type: "text",
-            },
-            ...(appliedFilters.status.length > 0
-              ? [
-                  {
-                    key: "#.records.status",
-                    operator: "$in",
-                    value: appliedFilters.status,
-                    type: "select",
-                  },
-                ]
-              : []),
-          ],
+      const response = await jobService.getApplicants(
+        params_query,
+        {
+          filters: {
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
+              ...(appliedFilters.status.length > 0
+                ? [
+                    {
+                      key: "#.records.status",
+                      operator: "$in",
+                      value: appliedFilters.status,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        sort: {
-          createdOn: "DESC",
-        },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["applicants"]?.objectId || "",
+          viewId: views?.["applicants"]?.viewId || "",
+        }
+      );
       const result = transformAPIResponseToApplicants(
         response.data,
         response.page
@@ -470,9 +573,110 @@ export default function JobDetails() {
     }
   };
 
+  const fetchJobInterviews = async () => {
+    if (!params?.id || typeof params.id !== "string") {
+      setIsLoadingJobInterviews(false);
+      return;
+    }
+
+    setIsLoadingJobInterviews(true);
+    setJobInterviews([]);
+    setJobInterviewsPagination({
+      total: 0,
+      nextOffset: null,
+      previousOffset: null,
+      limit: PAGE_LIMIT,
+    });
+
+    try {
+      const listParams: Record<string, any> = {
+        limit: PAGE_LIMIT,
+        offset: currentJobInterviewsOffset,
+        ...(jobInterviewsSearchKeyword
+          ? { query: jobInterviewsSearchKeyword }
+          : {}),
+      };
+
+      const jobIdFilter = {
+        key: "#.records.jobId",
+        operator: "$eq",
+        value: params.id,
+        type: "text",
+      };
+
+      const response = await jobService.getInterviews(
+        listParams,
+        {
+          filters: {
+            $and: [
+              jobIdFilter,
+              ...(jobInterviewsAppliedFilters?.status?.length > 0
+                ? [
+                    {
+                      key: "#.records.status",
+                      operator: "$in",
+                      value: jobInterviewsAppliedFilters.status,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
+        },
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      );
+
+      const result = transformAPIResponseToInterviews(
+        response?.data || [],
+        response?.page || {
+          total: 0,
+          nextOffset: null,
+          previousOffset: null,
+          limit: PAGE_LIMIT,
+        }
+      );
+
+      setJobInterviews(result?.interviews || []);
+      setJobInterviewsPagination({
+        total: result?.pagination?.total?.[0] ?? 0,
+        nextOffset: result?.pagination?.nextOffset ?? null,
+        previousOffset: result?.pagination?.previousOffset ?? null,
+        limit: result?.pagination?.limit ?? PAGE_LIMIT,
+      });
+
+      if (currentJobInterviewsOffset === 0) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } catch (error: any) {
+      console.error("Error fetching job interviews:", error);
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch interviews",
+        { duration: 3000 }
+      );
+      setJobInterviews([]);
+      setJobInterviewsPagination({
+        total: 0,
+        nextOffset: null,
+        previousOffset: null,
+        limit: PAGE_LIMIT,
+      });
+    } finally {
+      setIsLoadingJobInterviews(false);
+    }
+  };
+
   const handleApplyFilters = (filters: FilterState) => {
     setAppliedFilters(filters);
     setCurrentApplicantsOffset(0); // Reset to first page when filters are applied
+  };
+
+  const handleApplyJobInterviewFilters = (filters: FilterState) => {
+    setJobInterviewsAppliedFilters(filters);
+    setCurrentJobInterviewsOffset(0);
   };
 
   // Define table columns for applicants
@@ -631,6 +835,118 @@ export default function JobDetails() {
         >
           <Trash2 className="h-4 mr-2" />
           Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  // Applicant Interviews tab: columns (same structure as interviews-list)
+  const jobInterviewColumns: Column<InterviewDetail>[] = useMemo(
+    () => [
+      {
+        id: "applicants",
+        header: "Applicants",
+        align: "left",
+        cell: (interview) => (
+          <span className="text-sm font-normal text-[#0a0a0a]">
+            {typeof interview?.candidateName === "string"
+              ? interview.candidateName
+              : interview?.candidateName?.name}
+          </span>
+        ),
+      },
+      {
+        id: "email",
+        header: "Email",
+        align: "center",
+        cell: (interview) => (
+          <span className="text-sm font-normal text-[#0a0a0a] text-center">
+            {typeof interview?.candidateEmail === "string"
+              ? interview.candidateEmail
+              : interview?.candidateEmail?.label}
+          </span>
+        ),
+      },
+      {
+        id: "round",
+        header: "Round",
+        align: "center",
+        cell: (interview) => (
+          <span className="text-sm font-normal text-[#0a0a0a] text-center">
+            {typeof interview?.roundName === "string"
+              ? interview.roundName
+              : interview?.roundName?.label}
+          </span>
+        ),
+      },
+      {
+        id: "status",
+        header: "Status",
+        align: "center",
+        width: "125px",
+        cell: (interview) => (
+          <div className="flex justify-center">
+            <Badge
+              variant="outline"
+              className={`font-normal text-xs tracking-[0.3px] rounded-full px-2 py-0 h-6 border-transparent ${
+                statusStyles[
+                  interview?.status?.toLowerCase() as keyof typeof statusStyles
+                ]
+              }`}
+            >
+              {interview?.status}
+            </Badge>
+          </div>
+        ),
+      },
+      {
+        id: "score",
+        header: "Score",
+        align: "center",
+        width: "111px",
+        cell: (interview) => (
+          <div className="flex justify-center">
+            {interview?.score !== undefined && interview?.score !== null ? (
+              <span className="text-sm font-normal text-[#0a0a0a]">
+                {interview?.score} %
+              </span>
+            ) : (
+              <span className="text-sm text-[#737373]">-</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "interviewDate",
+        header: "Interview date",
+        align: "center",
+        cell: (interview) => (
+          <span className="text-sm font-normal text-[#0a0a0a] text-center">
+            {formatInterviewDate(interview?.interviewDate)}
+          </span>
+        ),
+      },
+    ],
+    []
+  );
+
+  const renderJobInterviewRowActions = (interview: InterviewDetail) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4 text-[#0a0a0a]" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-[171px] p-1 bg-white border border-[#e5e5e5] rounded-md shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]"
+      >
+        <DropdownMenuItem asChild>
+          <Link href={`/app-view/interviews/${interview?.id}`}>
+            <Eye className="h-4 w-4 text-[#737373]" />
+            View details
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -884,12 +1200,12 @@ export default function JobDetails() {
               Whatsapp reminder
             </span>
           </div> */}
-          <Button
+          {/* <Button
             variant="secondary"
             className="h-9 px-4 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
           >
             Share
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -919,6 +1235,12 @@ export default function JobDetails() {
                 className="flex-1 h-[30px] rounded-lg text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
               >
                 Applicants
+              </TabsTrigger>
+              <TabsTrigger
+                value="applicant-interviews"
+                className="flex-1 h-[30px] rounded-lg text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                Interviews
               </TabsTrigger>
             </TabsList>
 
@@ -1111,6 +1433,56 @@ export default function JobDetails() {
               rowActions={renderApplicantRowActions}
             />
           </TabsContent>
+
+          {/* Applicant Interviews Tab Content */}
+          <TabsContent value="applicant-interviews" className="mt-4 space-y-4">
+            <div className="flex gap-3 items-center">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2.5 border-b border-[#e5e5e5] w-[245px]">
+                <Search className="w-4 h-4 text-[#737373]" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={jobInterviewsSearchQuery}
+                  onChange={(e) =>
+                    setJobInterviewsSearchQuery(e?.target?.value ?? "")
+                  }
+                  className="flex-1 text-sm text-[#737373] bg-transparent border-0 outline-none placeholder:text-[#737373]"
+                />
+              </div>
+
+              <FilterDropdown
+                filterGroups={interviewFilterGroups}
+                onApplyFilters={handleApplyJobInterviewFilters}
+                initialFilters={jobInterviewsAppliedFilters}
+              />
+            </div>
+
+            <DataTable<InterviewDetail>
+              data={jobInterviews ?? []}
+              columns={jobInterviewColumns}
+              getRowId={(interview) => interview?.id}
+              pagination={jobInterviewsPagination}
+              currentOffset={currentJobInterviewsOffset}
+              onPaginationChange={setCurrentJobInterviewsOffset}
+              isLoading={isLoadingJobInterviews}
+              loadingState={<DataTableSkeleton columns={8} rows={11} />}
+              emptyState={
+                <div className="text-center py-12">
+                  <Calendar className="w-12 h-12 text-[#737373] mx-auto mb-4" />
+                  <p className="text-[#737373] text-sm font-medium">
+                    No interviews found for this job
+                  </p>
+                  {(jobInterviewsAppliedFilters?.status?.length > 0 ||
+                    jobInterviewsSearchQuery) && (
+                    <p className="text-[#737373] text-sm mt-1">
+                      Try adjusting your filters or search query.
+                    </p>
+                  )}
+                </div>
+              }
+              rowActions={renderJobInterviewRowActions}
+            />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -1123,6 +1495,7 @@ export default function JobDetails() {
             fetchJobDetail();
           }}
           mappingValues={mappingValues}
+          views={views}
           isEditMode={true}
           jobDetail={{
             title: job?.title || "",
@@ -1236,9 +1609,9 @@ export default function JobDetails() {
             setScheduleInterviewDialogOpen(open);
             if (!open) setScheduleInterviewRound(null);
           }}
+          form={form}
           round={scheduleInterviewRound}
           jobId={(params?.id as string) || ""}
-          jobTitle={job?.title}
           onSuccess={() => {}}
         />
       )}

@@ -67,6 +67,7 @@ export function CreateInterviewerModal({
   onSubmit: onSubmitCallback,
   mappingValues,
   views,
+  form,
   isEditMode = false,
   interviewerDetail,
   interviewerId,
@@ -116,7 +117,10 @@ export function CreateInterviewerModal({
           );
         } else {
           // Create mode - create new interviewer
-          const payload = transformToInterviewerCreatePayload(values);
+          const payload = transformToInterviewerCreatePayload(
+            values,
+            form?.createInterviewers || ""
+          );
           const response = await interviewerService.createInterviewer(
             {},
             payload

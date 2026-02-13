@@ -52,6 +52,7 @@ export function InterviewerList() {
   const listContainerRef = useRef<HTMLDivElement>(null);
   const { mappingValues } = useAppSelector((state) => state.interviewers);
   const { views } = useAppSelector((state) => state.appState);
+  const { form } = useAppSelector((state) => state.appState);
   // Define filter groups for interviewers
   const interviewerFilterGroups: FilterGroup[] = [
     {
@@ -387,6 +388,8 @@ export function InterviewerList() {
           onOpenChange={setIsCreateModalOpen}
           onSubmit={handleCreateInterviewer}
           mappingValues={mappingValues}
+          form={form}
+          views={views}
         />
       )}
 
@@ -414,6 +417,8 @@ export function InterviewerList() {
           }}
           interviewerId={interviewerDetail?.id || undefined}
           mappingValues={mappingValues}
+          form={form}
+          views={views}
         />
       )}
     </div>

@@ -107,7 +107,8 @@ export const transformAPIResponseToInterviewers = (
 };
 
 export const transformToInterviewerCreatePayload = (
-  values: InterviewerFormData
+  values: InterviewerFormData,
+  formId: string
 ) => {
   // Transform skills to API format (array of arrays)
   const interviewerSkills = values?.skills
@@ -221,7 +222,7 @@ export const transformToInterviewerCreatePayload = (
       },
     ],
     status: "PENDING",
-    formId: "69521d56c9ba83a076aac3bf",
+    formId: formId,
   };
 };
 

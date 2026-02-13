@@ -4,6 +4,7 @@ export interface CreateInterviewerModalProps {
   onSubmit: () => void;
   mappingValues: Record<string, Record<string, any[]>>;
   views: Record<string, any>;
+  form: Record<string, any>;
   isEditMode?: boolean;
   interviewerDetail?: InterviewerFormData | null;
   interviewerId?: string;

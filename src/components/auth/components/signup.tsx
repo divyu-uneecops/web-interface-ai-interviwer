@@ -17,18 +17,25 @@ import {
   BarChart3,
   Shield,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { StatsPanel } from "@/components/stats-panel";
 import { validateSignupForm } from "../utils/auth.utils";
 import { SignupFormValues } from "../types/auth.types";
+import { authService } from "../services/auth.service";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const initialValues: SignupFormValues = {
   firstName: "",
   lastName: "",
   email: "",
+  username: "",
   countryCode: "+91",
   phone: "",
   designation: "",
+  password: "",
+  confirmPassword: "",
   companyName: "",
   website: "",
   industry: "",
@@ -37,6 +44,9 @@ const initialValues: SignupFormValues = {
 
 export default function Signup() {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const router = useRouter();
 
   const industries = [
     { value: "technology", label: "Technology" },
@@ -64,7 +74,7 @@ export default function Signup() {
 
         {/* Left Side - Stats Panel */}
         <div className="hidden lg:block w-1/2 h-screen sticky top-0">
-        <StatsPanel />
+          <StatsPanel />
         </div>
         {/* Right Side - Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-12 bg-[#fafafa]">
@@ -76,31 +86,28 @@ export default function Signup() {
               <div className="flex-1 flex items-center">
                 <div className="flex flex-col items-center gap-1">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step >= 1
-                        ? "bg-[#02563d] text-white"
-                        : "bg-slate-200 text-[#45556c]"
-                    }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 1 || step > 1
+                      ? "bg-[#02563d] text-white"
+                      : "bg-slate-200 text-[#45556c]"
+                      }`}
                   >
-                    {step >= 1 ? <CheckCircle className="w-4 h-4" /> : "1"}
+                    {step > 1 ? <CheckCircle className="w-4 h-4" /> : "1"}
                   </div>
                   <span className="text-xs text-[#45556c]">Your Info</span>
                 </div>
                 <div
-                  className={`flex-1 h-0.5 mx-2 ${
-                    step >= 2 ? "bg-[#02563d]" : "bg-slate-200"
-                  }`}
+                  className={`flex-1 h-0.5 mx-2 ${step >= 2 ? "bg-[#02563d]" : "bg-slate-200"
+                    }`}
                 />
               </div>
               <div className="flex flex-col items-center gap-1">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    step >= 2
-                      ? "bg-[#02563d] text-white"
-                      : "bg-slate-200 text-[#45556c]"
-                  }`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 2 || step > 2
+                    ? "bg-[#02563d] text-white"
+                    : "bg-slate-200 text-[#45556c]"
+                    }`}
                 >
-                  2
+                  {step > 2 ? <CheckCircle className="w-4 h-4" /> : "2"}
                 </div>
                 <span className="text-xs text-[#45556c]">Company Setup</span>
               </div>
@@ -110,9 +117,8 @@ export default function Signup() {
             <Formik
               initialValues={initialValues}
               validate={validateSignupForm}
-              onSubmit={(values) => {
-                // Handle form submission - only called when all validations pass
-                console.log("Form submitted:", values);
+              onSubmit={async () => {
+                // Final step submit is handled by the Step 2 button handler.
               }}
               validateOnChange={true}
               validateOnBlur={true}
@@ -130,26 +136,168 @@ export default function Signup() {
                 validateForm,
                 submitForm,
               }: FormikProps<SignupFormValues>) => {
+                type PasswordFieldName = "password" | "confirmPassword";
+
+                const setMaskedFieldValue = (
+                  field: PasswordFieldName,
+                  nextValue: string,
+                  nextCaretPos?: number
+                ) => {
+                  setFieldValue(field, nextValue);
+
+                  // Preserve caret position after rerender (best-effort)
+                  if (typeof window !== "undefined" && typeof nextCaretPos === "number") {
+                    window.requestAnimationFrame(() => {
+                      const el = document.getElementById(field) as HTMLInputElement | null;
+                      if (el && typeof el.setSelectionRange === "function") {
+                        el.setSelectionRange(nextCaretPos, nextCaretPos);
+                      }
+                    });
+                  }
+                };
+
+                const handleAsteriskMaskKeyDown =
+                  (field: PasswordFieldName) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+                    const key = e.key;
+                    const el = e.currentTarget;
+                    const start = el.selectionStart ?? 0;
+                    const end = el.selectionEnd ?? start;
+                    const currentValue = values[field] ?? "";
+
+                    // Allow navigation / modifiers / form controls
+                    const allowedKeys = [
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "ArrowUp",
+                      "ArrowDown",
+                      "Home",
+                      "End",
+                      "Tab",
+                      "Shift",
+                      "Control",
+                      "Alt",
+                      "Meta",
+                      "Escape",
+                      "Enter",
+                    ];
+                    if (allowedKeys.includes(key)) return;
+
+                    // Backspace
+                    if (key === "Backspace") {
+                      e.preventDefault();
+                      if (start === end && start > 0) {
+                        const next = currentValue.slice(0, start - 1) + currentValue.slice(end);
+                        setMaskedFieldValue(field, next, start - 1);
+                        return;
+                      }
+                      const next = currentValue.slice(0, start) + currentValue.slice(end);
+                      setMaskedFieldValue(field, next, start);
+                      return;
+                    }
+
+                    // Delete
+                    if (key === "Delete") {
+                      e.preventDefault();
+                      if (start === end && start < currentValue.length) {
+                        const next =
+                          currentValue.slice(0, start) + currentValue.slice(start + 1);
+                        setMaskedFieldValue(field, next, start);
+                        return;
+                      }
+                      const next = currentValue.slice(0, start) + currentValue.slice(end);
+                      setMaskedFieldValue(field, next, start);
+                      return;
+                    }
+
+                    // Ignore other non-character keys (e.g., F5)
+                    if (key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+
+                    // Insert typed character
+                    e.preventDefault();
+                    const next = currentValue.slice(0, start) + key + currentValue.slice(end);
+                    setMaskedFieldValue(field, next, start + 1);
+                  };
+
+                const handleAsteriskMaskPaste =
+                  (field: PasswordFieldName) => (e: React.ClipboardEvent<HTMLInputElement>) => {
+                    e.preventDefault();
+                    const el = e.currentTarget;
+                    const start = el.selectionStart ?? 0;
+                    const end = el.selectionEnd ?? start;
+                    const currentValue = values[field] ?? "";
+                    const pasted = e.clipboardData.getData("text") ?? "";
+                    const next = currentValue.slice(0, start) + pasted + currentValue.slice(end);
+                    setMaskedFieldValue(field, next, start + pasted.length);
+                  };
+
                 const handleContinue = async () => {
                   if (step === 1) {
                     // Validate step 1 fields (lastName is optional)
-                    const step1Fields = ['firstName', 'email', 'phone', 'designation'] as const;
+                    const step1Fields = ['firstName', 'email', 'username', 'phone', 'designation', 'password', 'confirmPassword'] as const;
                     await setFieldTouched('firstName', true);
                     await setFieldTouched('email', true);
+                    await setFieldTouched('username', true);
                     await setFieldTouched('phone', true);
                     await setFieldTouched('designation', true);
-                    
+                    await setFieldTouched('password', true);
+                    await setFieldTouched('confirmPassword', true);
+
                     const validationErrors = await validateForm();
                     const hasStep1Errors = step1Fields.some(field => validationErrors[field]);
-                    
+
                     // Also check lastName if provided (it's optional but must be valid if filled)
                     if (values.lastName && validationErrors.lastName) {
                       await setFieldTouched('lastName', true);
                       return;
                     }
-                    
-                    if (!hasStep1Errors) {
-                      setStep(2);
+
+                    if (hasStep1Errors) return;
+
+                    // Call register API on "Continue"
+                    setIsSubmitting(true);
+                    try {
+                      const number = (values.phone || "").replace(
+                        /[\s\-\(\)\+\.]/g,
+                        ""
+                      );
+
+                      const formData = new FormData();
+                      formData.append("email", values.email?.trim() || "");
+                      formData.append("username", values.username?.trim() || "");
+                      formData.append("firstName", values.firstName?.trim() || "");
+                      formData.append("lastName", values.lastName?.trim() || "");
+                      formData.append("number", number);
+                      formData.append("countryCode", values.countryCode || "");
+                      formData.append("password", values.password || "");
+
+                      const response = await authService.register(formData);
+
+                      toast.success(
+                        response?.message ?? "Registered successfully. Please verify OTP.",
+                        { duration: 5000 }
+                      );
+                      setIsRegistered(true);
+                      // Store identifier for OTP verification screen
+                      if (typeof window !== "undefined") {
+                        // Start resend cooldown timer (persisted so refresh can't bypass it)
+                        sessionStorage.setItem(
+                          "otpResendAvailableAt",
+                          (Date.now() + 60_000).toString()
+                        );
+                        sessionStorage.setItem(
+                          "emailOrPhone",
+                          (values.email?.trim() || number || "").toString()
+                        );
+                      }
+                      router.push("/verification");
+                    } catch (error: any) {
+                      const errorMessage =
+                        error?.response?.data?.message ||
+                        error?.message ||
+                        "Registration failed. Please try again.";
+                      toast.error(errorMessage, { duration: 8000 });
+                    } finally {
+                      setIsSubmitting(false);
                     }
                   }
                 };
@@ -167,15 +315,37 @@ export default function Signup() {
                   await setFieldTouched('website', true);
                   await setFieldTouched('industry', true);
                   await setFieldTouched('companySize', true);
-                  
+                  // Also ensure password fields are valid before final submission
+                  await setFieldTouched('password', true);
+                  await setFieldTouched('confirmPassword', true);
+                  await setFieldTouched('username', true);
+
                   const validationErrors = await validateForm();
                   const step2Fields = ['companyName', 'website', 'industry', 'companySize'] as const;
+                  const step1RequiredFields = ['firstName', 'email', 'username', 'phone', 'designation', 'password', 'confirmPassword'] as const;
                   const hasStep2Errors = step2Fields.some(field => validationErrors[field]);
-                  
-                  if (!hasStep2Errors) {
-                    // All validations pass, submit the form
-                    submitForm();
+                  const hasStep1Errors = step1RequiredFields.some(field => validationErrors[field]);
+
+                  // Also check lastName if provided (it's optional but must be valid if filled)
+                  if (values.lastName && validationErrors.lastName) {
+                    await setFieldTouched('lastName', true);
+                    return;
                   }
+
+                  if (hasStep2Errors || hasStep1Errors) return;
+
+                  // Step 2 currently doesn't have a backend API in this repo.
+                  // Ensure register was completed on step 1, then move user to login.
+                  if (!isRegistered) {
+                    toast.error("Please complete Step 1 registration first.", {
+                      duration: 5000,
+                    });
+                    setStep(1);
+                    return;
+                  }
+
+                  toast.success("Setup completed. Please login.", { duration: 5000 });
+                  router.push("/login");
                 };
 
                 return (
@@ -230,6 +400,17 @@ export default function Signup() {
                               error={(touched.email || submitCount > 0) && errors.email ? errors.email : undefined}
                               required
                             />
+                            <Input
+                              label="Username"
+                              name="username"
+                              id="username"
+                              placeholder="johndoe"
+                              value={values.username}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              error={(touched.username || submitCount > 0) && errors.username ? errors.username : undefined}
+                              required
+                            />
                             <PhoneInput
                               label="Phone number"
                               required
@@ -241,10 +422,10 @@ export default function Signup() {
                               onPhoneNumberChange={(e) => {
                                 const phoneValue = e.target.value;
                                 setFieldValue("phone", phoneValue);
-                                
+
                                 // Remove all non-digit characters to check length
                                 const digitsOnly = phoneValue.replace(/[\s\-\(\)\+\.]/g, "");
-                                
+
                                 // Show error immediately if more than 10 digits or if field was already touched/submitted
                                 if (digitsOnly.length > 10 || touched.phone || submitCount > 0) {
                                   setFieldTouched("phone", true, false);
@@ -271,6 +452,50 @@ export default function Signup() {
                               onChange={handleChange}
                               onBlur={handleBlur}
                               error={(touched.designation || submitCount > 0) && errors.designation ? errors.designation : undefined}
+                              required
+                            />
+                            <Input
+                              label="Password"
+                              id="password"
+                              name="password"
+                              type="text"
+                              placeholder="********"
+                              value={"*".repeat(values.password?.length ?? 0)}
+                              suppressHydrationWarning
+                              data-lpignore="true"
+                              data-1p-ignore="true"
+                              data-bwignore="true"
+                              onChange={() => {
+                                // Intentionally no-op: value is controlled + masked.
+                                // Actual value updates happen via onKeyDown/onPaste handlers.
+                              }}
+                              onKeyDown={handleAsteriskMaskKeyDown("password")}
+                              onPaste={handleAsteriskMaskPaste("password")}
+                              onBlur={handleBlur}
+                              error={(touched.password || submitCount > 0) && errors.password ? errors.password : undefined}
+                              autoComplete="new-password"
+                              required
+                            />
+                            <Input
+                              label="Confirm password"
+                              id="confirmPassword"
+                              name="confirmPassword"
+                              type="text"
+                              placeholder="********"
+                              value={"*".repeat(values.confirmPassword?.length ?? 0)}
+                              suppressHydrationWarning
+                              data-lpignore="true"
+                              data-1p-ignore="true"
+                              data-bwignore="true"
+                              onChange={() => {
+                                // Intentionally no-op: value is controlled + masked.
+                                // Actual value updates happen via onKeyDown/onPaste handlers.
+                              }}
+                              onKeyDown={handleAsteriskMaskKeyDown("confirmPassword")}
+                              onPaste={handleAsteriskMaskPaste("confirmPassword")}
+                              onBlur={handleBlur}
+                              error={(touched.confirmPassword || submitCount > 0) && errors.confirmPassword ? errors.confirmPassword : undefined}
+                              autoComplete="new-password"
                               required
                             />
                           </>
@@ -318,9 +543,8 @@ export default function Signup() {
                                   }
                                 }}
                               >
-                                <SelectTrigger className={`w-full h-10 border-[#cfd4dc] rounded-lg ${
-                                  (touched.industry || submitCount > 0) && errors.industry ? "border-destructive" : ""
-                                }`}>
+                                <SelectTrigger className={`w-full h-10 border-[#cfd4dc] rounded-lg ${(touched.industry || submitCount > 0) && errors.industry ? "border-destructive" : ""
+                                  }`}>
                                   <SelectValue placeholder="Select industry" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -354,9 +578,8 @@ export default function Signup() {
                                   }
                                 }}
                               >
-                                <SelectTrigger className={`w-full h-10 border-[#cfd4dc] rounded-lg ${
-                                  (touched.companySize || submitCount > 0) && errors.companySize ? "border-destructive" : ""
-                                }`}>
+                                <SelectTrigger className={`w-full h-10 border-[#cfd4dc] rounded-lg ${(touched.companySize || submitCount > 0) && errors.companySize ? "border-destructive" : ""
+                                  }`}>
                                   <SelectValue placeholder="Select company size" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -390,9 +613,19 @@ export default function Signup() {
                             variant="default"
                             className="flex-1"
                             onClick={step === 1 ? handleContinue : handleStep2Submit}
+                            disabled={isSubmitting}
                           >
-                            {step === 1 ? "Continue" : "Complete Setup"}
-                            <ArrowRight className="w-4 h-4 ml-2" />
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                {step === 1 ? "Continue" : "Complete Setup"}
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </>
+                            )}
                           </Button>
                         </div>
 

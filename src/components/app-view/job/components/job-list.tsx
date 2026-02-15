@@ -76,6 +76,7 @@ export default function JobList() {
   });
   const { mappingValues } = useAppSelector((state) => state.jobs);
   const { views } = useAppSelector((state) => state.appState);
+  const { form } = useAppSelector((state) => state.appState);
 
   // Define filter groups for jobs
   const jobFilterGroups: FilterGroup[] = [
@@ -647,6 +648,7 @@ export default function JobList() {
             fetchJobs();
           }}
           mappingValues={mappingValues}
+          form={form}
           views={views}
         />
       )}
@@ -660,6 +662,7 @@ export default function JobList() {
             fetchJobs();
           }}
           mappingValues={mappingValues}
+          form={form}
           views={views}
           isEditMode={true}
           jobDetail={{

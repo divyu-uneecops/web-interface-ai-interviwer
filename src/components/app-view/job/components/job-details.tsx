@@ -1495,6 +1495,7 @@ export default function JobDetails() {
             fetchJobDetail();
           }}
           mappingValues={mappingValues}
+          form={form}
           views={views}
           isEditMode={true}
           jobDetail={{

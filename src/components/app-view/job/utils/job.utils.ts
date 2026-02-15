@@ -80,7 +80,7 @@ export const transformAPIResponseToJobs = (
     return {
       jobs: [],
       pagination: {
-        total: 0,
+        total: [0],
         nextOffset: null,
         previousOffset: null,
         limit: 10,
@@ -93,7 +93,7 @@ export const transformAPIResponseToJobs = (
   return {
     jobs,
     pagination: pagination || {
-      total: jobs.length,
+      total: [jobs.length],
       nextOffset: null,
       previousOffset: null,
       limit: 10,
@@ -188,7 +188,10 @@ export const transformAPIResponseToJobDetail = (
   };
 };
 
-export const transformToCreateJobPayload = (values: JobFormData) => {
+export const transformToCreateJobPayload = (
+  values: JobFormData,
+  formId: string
+) => {
   // Transform skills to API format (array of arrays)
   const requiredSkills = (values.skills || []).map((skill) => [
     {
@@ -285,7 +288,7 @@ export const transformToCreateJobPayload = (values: JobFormData) => {
       },
     ],
     status: "PENDING",
-    formId: "69521d4cc9ba83a076aac3bb",
+    formId: formId,
   };
 };
 
@@ -475,7 +478,7 @@ export const transformAPIResponseToApplicants = (
     return {
       applicants: [],
       pagination: {
-        total: 0,
+        total: [0],
         nextOffset: null,
         previousOffset: null,
         limit: 10,
@@ -490,7 +493,7 @@ export const transformAPIResponseToApplicants = (
   return {
     applicants,
     pagination: pagination || {
-      total: applicants.length,
+      total: [applicants.length],
       nextOffset: null,
       previousOffset: null,
       limit: 10,
@@ -731,7 +734,7 @@ export const transformAPIResponseToRounds = (
     return {
       rounds: [],
       pagination: {
-        total: 0,
+        total: [0],
         nextOffset: null,
         previousOffset: null,
         limit: 10,
@@ -744,7 +747,7 @@ export const transformAPIResponseToRounds = (
   return {
     rounds,
     pagination: pagination || {
-      total: rounds.length,
+      total: [rounds.length],
       nextOffset: null,
       previousOffset: null,
       limit: 10,

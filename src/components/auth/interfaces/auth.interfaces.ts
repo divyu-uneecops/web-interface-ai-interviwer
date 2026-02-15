@@ -20,9 +20,12 @@ export interface SignupFormValues {
   firstName: string;
   lastName: string;
   email: string;
+  username: string;
   countryCode: string;
   phone: string;
   designation: string;
+  password: string;
+  confirmPassword: string;
   companyName: string;
   website: string;
   industry: string;

@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
-import { Form } from "formik";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { Logo } from "@/components/logo";
-import { StatsPanel } from "@/components/stats-panel";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,9 +15,10 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { Logo } from "@/components/logo";
 import { validateVerificationForm } from "../utils/auth.utils";
 import { VerificationFormValues } from "../types/auth.types";
-import { authService } from "@/services/auth.service";
+import { authService } from "../services/auth.service";
 
 const initialValues: VerificationFormValues = {
   verificationCode: "",
@@ -29,6 +27,44 @@ const initialValues: VerificationFormValues = {
 export default function Verification() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
+  const [emailOrPhone, setEmailOrPhone] = useState("");
+  const [resendAvailableAtMs, setResendAvailableAtMs] = useState<number | null>(
+    null
+  );
+
+  const computeRemainingSeconds = (availableAtMs: number) => {
+    const diffMs = availableAtMs - Date.now();
+    return Math.max(0, Math.ceil(diffMs / 1000));
+  };
+
+  // Important: read sessionStorage only after mount to avoid hydration mismatch
+  useEffect(() => {
+    try {
+      setEmailOrPhone(sessionStorage.getItem("emailOrPhone") || "");
+      const storedAvailableAt = sessionStorage.getItem("otpResendAvailableAt");
+      const parsed = storedAvailableAt ? Number(storedAvailableAt) : NaN;
+
+      // If missing/invalid, start a fresh cooldown from now (OTP was just sent before this screen)
+      const availableAt = Number.isFinite(parsed) ? parsed : Date.now() + 60_000;
+      sessionStorage.setItem("otpResendAvailableAt", availableAt.toString());
+
+      setResendAvailableAtMs(availableAt);
+      setResendSeconds(computeRemainingSeconds(availableAt));
+    } catch {
+      setEmailOrPhone("");
+      setResendAvailableAtMs(null);
+      setResendSeconds(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!resendAvailableAtMs) return;
+    const t = window.setInterval(() => {
+      setResendSeconds(computeRemainingSeconds(resendAvailableAtMs));
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [resendAvailableAtMs]);
 
   const formik = useFormik<VerificationFormValues>({
     initialValues,
@@ -41,39 +77,31 @@ export default function Verification() {
       setIsSubmitting(true);
 
       try {
-        // Get email/phone from session storage
-        const emailOrPhone = sessionStorage.getItem("emailOrPhone");
-
         if (!emailOrPhone) {
-          toast.error("Session expired. Please login again.", {
+          toast.error("Session expired. Please sign up again.", {
             duration: 5000,
           });
-          router.push("/login");
+          router.push("/signup");
           return;
         }
 
         // Verify OTP
         const response = await authService.verifyOtp({
-          code: values.verificationCode.replace(/\D/g, ""), // Ensure only digits
-          emailOrPhone: emailOrPhone,
+          identifier: emailOrPhone,
+          otp: values.verificationCode.replace(/\D/g, ""), // Ensure only digits
         });
 
-        // Store token if provided
-        if (response?.token || response?.data?.token) {
-          const token = response?.token || response?.data?.token;
-          // if (typeof window !== "undefined") {
-          localStorage.setItem("authToken", token);
-          sessionStorage.removeItem("emailOrPhone");
-          // }
-        }
+        // Clean up stored identifier after successful verification
+        sessionStorage.removeItem("emailOrPhone");
+        sessionStorage.removeItem("otpResendAvailableAt");
 
         toast.success("Verification successful! Redirecting...", {
           duration: 2000,
         });
 
-        // Redirect to dashboard after successful verification
+        // Redirect to login after successful verification
         setTimeout(() => {
-          router.push("/app-view/dashboard");
+          router.push("/login");
         }, 1000);
       } catch (error: any) {
         const errorMessage =
@@ -105,150 +133,158 @@ export default function Verification() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      {/* Main Content */}
+    <div className="min-h-screen bg-white">
       <div className="flex min-h-screen">
-        {/* Left Side - Stats Panel */}
-        <div className="hidden lg:block w-1/2 h-screen sticky top-0">
-          <StatsPanel />
+        {/* Left Side - Gradient Background with Decorative Elements (same as Login) */}
+        <div className="hidden lg:flex lg:w-1/2 h-screen sticky top-0 bg-gradient-to-b from-[#02563d] to-[#052e16] relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.35] overflow-hidden pointer-events-none">
+            <Image
+              src="/LoginLeftImage.svg"
+              alt="AI Interview Graphic"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </div>
+
         {/* Right Side - Verification Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 min-h-screen">
-          <div className="w-full max-w-md flex flex-col gap-8">
+        <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#fafafa] min-h-screen">
+          <div className="w-full max-w-[440px] flex flex-col gap-8">
             <Logo />
 
-            <div className="flex flex-col gap-1">
-              <Form noValidate onSubmit={formik.handleSubmit}>
-                <Card className="p-6 flex flex-col gap-6">
-                  <CardHeader className="px-0">
-                    <CardTitle>Verify Your Account</CardTitle>
-                    <CardDescription>
-                      Enter the verification code sent to your email or phone
-                      number
+            <div className="flex flex-col gap-2">
+              <form noValidate onSubmit={formik.handleSubmit}>
+                <Card className="border-2 border-[rgba(0,0,0,0.1)] rounded-[14px] p-6 flex flex-col gap-6 bg-white">
+                  <CardHeader className="px-0 flex flex-col gap-[6px]">
+                    <CardTitle className="text-base font-medium leading-4 text-[#0a0a0a] tracking-[-0.3125px]">
+                      Verification code
+                    </CardTitle>
+                    <CardDescription className="text-base font-normal leading-6 text-[#717182] tracking-[-0.3125px]">
+                      Enter the code sent to{" "}
+                      <span className="text-[#0a0a0a]">
+                        {emailOrPhone || "your email"}
+                      </span>
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="px-0 pb-0 flex flex-col gap-4">
-                    <Input
-                      label="Verification code"
-                      id="verification-code"
-                      name="verificationCode"
-                      type="text"
-                      placeholder="000000"
-                      required
-                      value={formik.values.verificationCode}
-                      onChange={handleVerificationCodeChange}
-                      onBlur={(e) => {
-                        formik.handleBlur(e);
-                        formik.setFieldTouched("verificationCode", true);
-                      }}
-                      error={
-                        (formik.touched.verificationCode ||
-                          formik.submitCount > 0) &&
-                        formik.errors.verificationCode
-                          ? formik.errors.verificationCode
-                          : undefined
-                      }
-                      maxLength={6}
-                      disabled={isSubmitting}
-                    />
+                  <CardContent className="px-0 flex flex-col gap-4">
+                    {/* Verification Code Input */}
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="verification-code"
+                        className="text-sm font-medium leading-none text-[#0a0a0a]"
+                      >
+                        Verification code{" "}
+                        <span className="text-[#dc2626]">*</span>
+                      </label>
 
-                    <Button
-                      type="submit"
-                      variant="default"
-                      className="w-full h-10 font-medium"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Verifying...
-                        </>
-                      ) : (
-                        "Verify"
-                      )}
-                    </Button>
+                      <Input
+                        id="verification-code"
+                        name="verificationCode"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        placeholder="000000"
+                        required
+                        value={formik.values.verificationCode}
+                        onChange={handleVerificationCodeChange}
+                        onBlur={(e) => {
+                          formik.handleBlur(e);
+                          formik.setFieldTouched("verificationCode", true);
+                        }}
+                        error={
+                          (formik.touched.verificationCode ||
+                            formik.submitCount > 0) &&
+                            formik.errors.verificationCode
+                            ? formik.errors.verificationCode
+                            : undefined
+                        }
+                        maxLength={6}
+                        disabled={isSubmitting}
+                        className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 py-1 text-sm leading-5 text-[#0a0a0a] placeholder:text-[#737373] shadow-[0_1px_2px_0_rgba(2,86,61,0.12)] outline-none focus:border-[#A3A3A3] focus:shadow-[0_0_0_3px_rgba(2,86,61,0.50)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      />
 
-                    {/* Divider */}
-                    <div className="relative h-4 flex items-center justify-center">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-200" />
-                      </div>
-                      <div className="relative bg-white px-2">
-                        <span className="text-xs text-[#62748e] uppercase">
-                          Or continue with
-                        </span>
+                      {/* Resend Code */}
+                      <div className="flex justify-end text-xs text-[#737373]">
+                        {resendSeconds > 0 ? (
+                          <span>Resend code in {resendSeconds}s</span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-[#02563d] font-medium hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSubmitting || !emailOrPhone}
+                            onClick={async () => {
+                              if (!emailOrPhone) return;
+                              try {
+                                await authService.resendOtp({
+                                  identifier: emailOrPhone,
+                                });
+                                toast.success("OTP resent successfully.", {
+                                  duration: 3000,
+                                });
+                                const availableAt = Date.now() + 60_000;
+                                try {
+                                  sessionStorage.setItem(
+                                    "otpResendAvailableAt",
+                                    availableAt.toString()
+                                  );
+                                } catch {
+                                  // ignore storage errors (e.g. privacy mode)
+                                }
+                                setResendAvailableAtMs(availableAt);
+                                setResendSeconds(
+                                  computeRemainingSeconds(availableAt)
+                                );
+                              } catch (error: any) {
+                                toast.error(
+                                  error?.response?.data?.message ||
+                                  error?.message ||
+                                  "Failed to resend OTP.",
+                                  { duration: 5000 }
+                                );
+                              }
+                            }}
+                          >
+                            Resend code
+                          </button>
+                        )}
                       </div>
                     </div>
 
-                    {/* Social Login Buttons */}
-                    <div className="grid grid-cols-2 gap-3">
+                    {/* Bottom Actions */}
+                    <div className="grid grid-cols-2 gap-3 h-9">
                       <Button
                         type="button"
-                        variant="social"
-                        className="w-full"
+                        variant="outline"
+                        className="w-full h-9 bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-white"
+                        onClick={() => router.push("/signup")}
                         disabled={isSubmitting}
                       >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                            fill="#1C1C1C"
-                          />
-                          <path
-                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                            fill="#1C1C1C"
-                          />
-                          <path
-                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                            fill="#1C1C1C"
-                          />
-                          <path
-                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                            fill="#1C1C1C"
-                          />
-                        </svg>
-                        Google
+                        Back
                       </Button>
+
                       <Button
-                        type="button"
-                        variant="social"
-                        className="w-full"
+                        type="submit"
+                        variant="default"
+                        className="w-full h-9 bg-[#02563d] text-[#fafafa] font-medium text-sm rounded-md shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] hover:bg-[#02563d]/90 disabled:opacity-50"
                         disabled={isSubmitting}
                       >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854V15.47H7.078V12h3.047V9.356c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.234 2.686.234v2.953H15.83c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.469h-2.796v8.385C19.612 22.954 24 17.99 24 12z"
-                            fill="#1C1C1C"
-                          />
-                        </svg>
-                        Facebook
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            Verify <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
-              </Form>
-
-              <div className="flex items-center justify-center gap-1 mt-2">
-                <span className="text-sm text-[#45556c]">
-                  Don&apos;t have an account?
-                </span>
-                <Link
-                  href="/signup"
-                  className="text-sm text-[#02563d] font-medium hover:underline"
-                >
-                  Create an account
-                </Link>
-              </div>
+              </form>
             </div>
           </div>
         </div>

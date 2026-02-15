@@ -118,9 +118,12 @@ export const validateSignupForm = (values: {
   firstName: string;
   lastName: string;
   email: string;
+  username: string;
   countryCode: string;
   phone: string;
   designation: string;
+  password: string;
+  confirmPassword: string;
   companyName: string;
   website: string;
   industry: string;
@@ -151,6 +154,21 @@ export const validateSignupForm = (values: {
     errors.email = "Please enter a valid email address";
   }
 
+  // Username validation
+  if (!values.username || values.username.trim().length === 0) {
+    errors.username = "Username is required";
+  } else {
+    const u = values.username.trim();
+    if (u.length < 3) {
+      errors.username = "Username must be at least 3 characters";
+    } else if (u.length > 30) {
+      errors.username = "Username must be at most 30 characters";
+    } else if (!/^[a-zA-Z0-9._]+$/.test(u)) {
+      errors.username =
+        "Username can only contain letters, numbers, dots, and underscores";
+    }
+  }
+
   // Phone validation
   if (!values.phone || values.phone.trim().length === 0) {
     errors.phone = "Phone number is required";
@@ -165,6 +183,24 @@ export const validateSignupForm = (values: {
   // Designation validation
   if (!values.designation || values.designation.trim().length === 0) {
     errors.designation = "Designation is required";
+  }
+
+  // Password validation
+  if (!values.password || values.password.trim().length === 0) {
+    errors.password = "Password is required";
+  } else if (values.password.trim().length < 8) {
+    errors.password = "Password must be at least 8 characters";
+  }
+
+  // Confirm password validation
+  if (!values.confirmPassword || values.confirmPassword.trim().length === 0) {
+    errors.confirmPassword = "Confirm password is required";
+  } else if (
+    values.password &&
+    values.confirmPassword &&
+    values.password !== values.confirmPassword
+  ) {
+    errors.confirmPassword = "Passwords do not match";
   }
 
   // Company name validation

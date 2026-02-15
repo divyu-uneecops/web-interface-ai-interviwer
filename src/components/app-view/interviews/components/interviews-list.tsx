@@ -28,6 +28,7 @@ import {
 import { statusStyles } from "../constants/interview.constants";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import { interviewService } from "../services/interview.service";
+import { useAppSelector } from "@/store/hooks";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -48,6 +49,7 @@ export default function InterviewsList() {
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
   });
+  const { views } = useAppSelector((state) => state.appState);
 
   // Define filter groups for interviews
   const interviewFilterGroups: FilterGroup[] = [
@@ -100,23 +102,30 @@ export default function InterviewsList() {
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
-      const response = await interviewService.getInterviewsFromView(params, {
-        filters: {
-          $and: [
-            ...(appliedFilters?.status?.length > 0
-              ? [
-                  {
-                    key: "#.records.status",
-                    operator: "$in",
-                    value: appliedFilters.status,
-                    type: "select",
-                  },
-                ]
-              : []),
-          ],
+      const response = await interviewService.getInterviewsFromView(
+        params,
+        {
+          filters: {
+            $and: [
+              ...(appliedFilters?.status?.length > 0
+                ? [
+                    {
+                      key: "#.records.status",
+                      operator: "$in",
+                      value: appliedFilters.status,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      );
 
       // Transform API response
       const result = transformAPIResponseToInterviews(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { v4 as uuidv4 } from "uuid";
 import {
   ChevronRight,
   Check,
@@ -58,22 +59,26 @@ function formatTimeRemaining(seconds: number): string {
 
 interface InterviewActiveFlowProps {
   onStateChange: (state: InterviewFlowState) => void;
-  onStopCamera: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   interviewDetails: any;
   interviewId: string;
   token?: string | null;
   serverUrl?: string | null;
+  /** Screen share video element ref (persisted from call-page); used for penalty screenshots */
+  screenShareVideoRef: React.RefObject<HTMLVideoElement | null>;
+  /** Screen share stream ref from verification flow; used for penalty screenshots */
+  screenShareStreamRef: React.RefObject<MediaStream | null>;
 }
 
 export function InterviewActiveFlow({
   onStateChange,
-  onStopCamera,
   videoRef,
   interviewDetails,
   interviewId,
   token,
   serverUrl,
+  screenShareVideoRef,
+  screenShareStreamRef,
 }: InterviewActiveFlowProps) {
   const [showTipsModal, setShowTipsModal] = useState(true);
   const [showFullscreenWarning, setShowFullscreenWarning] = useState(false);
@@ -86,11 +91,71 @@ export function InterviewActiveFlow({
   const fiveMinReminderShownRef = useRef(false);
   const lastReportedFaceWarningRef = useRef<string | null>(null);
 
-  const submitPenaltyEvent = (eventType: string) => {
+  useEffect(() => {
+    const video = screenShareVideoRef.current;
+    const stream = screenShareStreamRef?.current;
+    if (video && stream) {
+      video.srcObject = stream;
+      video
+        .play()
+        .catch((err) => console.error("Screen share video play:", err));
+    }
+  }, [screenShareStreamRef]);
+
+  const captureFromScreenShareStream = async (): Promise<Blob | null> => {
+    const video = screenShareVideoRef.current;
+    const stream = screenShareStreamRef?.current;
+    if (!video || !stream?.getVideoTracks().length) return null;
+    if (video.videoWidth === 0 || video.videoHeight === 0) return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(video, 0, 0);
+    return new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/png", 0.9)
+    );
+  };
+
+  const uploadBlobAsPenaltyScreenshot = async (
+    blob: Blob,
+    fileName: string
+  ): Promise<string | null> => {
+    const file = new File([blob], fileName, { type: "image/png" });
+    const s3Data = await applicantAuthService.getPenaltyScreenshotUploadUrl({
+      name: fileName,
+      size: file.size,
+    });
+    if (!s3Data?.url || !s3Data?.fields) return null;
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(s3Data.fields)) {
+      formData.append(key, value);
+    }
+    formData.append("file", file);
+    await applicantAuthService.uploadPenaltyScreenshotToS3(
+      s3Data.url,
+      formData
+    );
+    return fileName;
+  };
+
+  const submitPenaltyEvent = async (eventType: string) => {
+    let screenshotPath: string | null = null;
+    const fileName = `${interviewId}/${uuidv4()}.png`;
+
+    if (screenShareStreamRef?.current != null) {
+      const blob = await captureFromScreenShareStream();
+      if (blob) {
+        screenshotPath = await uploadBlobAsPenaltyScreenshot(blob, fileName);
+      }
+    }
+
     const payload = buildPenaltyPayload(
       interviewId,
       eventType,
-      Math.floor(Date.now() / 1000)
+      Math.floor(Date.now() / 1000),
+      screenshotPath
     );
     applicantAuthService
       .submitPenaltyFormInstance(payload)
@@ -104,15 +169,9 @@ export function InterviewActiveFlow({
   const { warning: faceWarning, warningMessage: faceWarningMessage } =
     useFaceValidation({ videoRef, active: faceValidationActive });
 
-  const endInterview = useCallback(() => {
-    if (document?.fullscreenElement) {
-      document
-        ?.exitFullscreen()
-        ?.catch((err) => console.error("Exit fullscreen error:", err));
-    }
+  const endInterview = () => {
     onStateChange("interview-complete");
-    onStopCamera();
-  }, []);
+  };
 
   const handleEnterFullscreen = () => {
     setShowFullscreenWarning(false);
@@ -203,6 +262,15 @@ export function InterviewActiveFlow({
 
   return (
     <>
+      {/* Hidden video for screen share stream; used for penalty screenshots */}
+      <video
+        ref={screenShareVideoRef}
+        autoPlay
+        playsInline
+        muted
+        className="absolute w-px h-px opacity-0 pointer-events-none"
+        aria-hidden
+      />
       <div className="fixed inset-0 flex flex-col h-screen w-screen overflow-hidden bg-[#fafafa]">
         <Header isUser={true} />
         <div className="flex flex-1 min-h-0">

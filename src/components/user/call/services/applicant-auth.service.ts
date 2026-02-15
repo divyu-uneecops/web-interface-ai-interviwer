@@ -42,4 +42,16 @@ export const applicantAuthService = {
       {},
       payload
     ),
+  /** Get S3 presigned POST data for penalty screenshot upload (same pattern as applicant attachment) */
+  getPenaltyScreenshotUploadUrl: (payload: { name: string; size: number }) =>
+    serverInterfaceService.post<{
+      url?: string;
+      fields?: Record<string, string>;
+    }>(API_ENDPOINTS.INTERVIEW_PENALTY.UPLOAD, {}, payload),
+  /** Upload penalty screenshot file to S3 using presigned URL */
+  uploadPenaltyScreenshotToS3: (
+    url: string,
+    formData: FormData,
+    signal?: AbortSignal
+  ) => serverInterfaceService.postFormData(url, formData, true, signal),
 };

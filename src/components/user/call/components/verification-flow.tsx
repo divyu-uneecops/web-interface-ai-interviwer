@@ -18,7 +18,7 @@ import { useFaceValidation } from "../hooks/useFaceValidation";
 const HOW_IT_WORKS_STEPS = [
   {
     title: "Permission access",
-    description: "Give access for microphone and camera",
+    description: "Give access for microphone, camera, and screen share",
   },
   {
     title: "Stay steady and keep your eye towards camera",
@@ -30,27 +30,35 @@ const HOW_IT_WORKS_STEPS = [
   },
   {
     title: "Continue to interview",
-    description: "Once your face is detected correctly, tap Continue to start",
+    description:
+      "Once your face is detected and screen is shared, tap Continue to start",
   },
 ] as const;
 
 interface VerificationFlowProps {
   onContinue: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  screenShareActive: boolean;
+  screenShareError: string | null;
+  onRetryScreenShare: () => void;
 }
 
 export function VerificationFlow({
   onContinue,
   videoRef,
+  screenShareActive,
+  screenShareError,
+  onRetryScreenShare,
 }: VerificationFlowProps) {
   const [howItWorksOpen, setHowItWorksOpen] = useState(true);
+
   const { warning, isChecking, warningMessage } = useFaceValidation({
     videoRef,
     active: true,
     includePenaltyInMessage: false,
   });
 
-  const canContinue = !isChecking && !warning;
+  const canContinue = !isChecking && !warning && screenShareActive;
 
   useEffect(() => {
     const video = videoRef?.current;
@@ -166,6 +174,23 @@ export function VerificationFlow({
             </p>
           </div>
         </Card>
+
+        {screenShareError && (
+          <div className="mt-4 flex flex-col items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+            <p className="text-xs text-amber-800" role="alert">
+              {screenShareError}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onRetryScreenShare}
+              className="text-xs"
+            >
+              Try again
+            </Button>
+          </div>
+        )}
 
         <div className="mt-4 flex justify-center">
           <Button

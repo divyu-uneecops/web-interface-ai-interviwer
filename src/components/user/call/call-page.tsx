@@ -26,6 +26,10 @@ export default function CallPage({ interviewId }: CallPageProps) {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const screenShareVideoRef = useRef<HTMLVideoElement>(null);
+  const screenShareStreamRef = useRef<MediaStream | null>(null);
+  const [screenShareActive, setScreenShareActive] = useState(false);
+  const [screenShareError, setScreenShareError] = useState<string | null>(null);
 
   // Check authentication on mount
   useEffect(() => {
@@ -38,10 +42,11 @@ export default function CallPage({ interviewId }: CallPageProps) {
     // }
   }, []);
 
-  // Start camera when entering verification flow
+  // Start camera and screen share when entering verification flow
   useEffect(() => {
-    if (flowState === "verification" && !streamRef.current) {
-      startCamera();
+    if (flowState === "verification") {
+      if (!streamRef.current) startCamera();
+      if (!screenShareStreamRef.current) startScreenShare();
     }
   }, [flowState]);
 
@@ -86,6 +91,57 @@ export default function CallPage({ interviewId }: CallPageProps) {
       videoRef.current.srcObject = null;
     }
   };
+
+  const startScreenShare = async () => {
+    setScreenShareError(null);
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+      screenShareStreamRef.current?.getTracks().forEach((t) => t.stop());
+      screenShareStreamRef.current = stream;
+      setScreenShareActive(true);
+      if (screenShareVideoRef?.current) {
+        screenShareVideoRef.current.srcObject = stream;
+        screenShareVideoRef.current.play().catch((err) => {
+          console.error("Screen share video play:", err);
+        });
+      }
+      stream.getVideoTracks()[0].onended = () => {
+        stopScreenShare();
+      };
+    } catch (err) {
+      setScreenShareError(
+        err instanceof Error ? err.message : "Failed to share screen"
+      );
+    }
+  };
+
+  const stopScreenShare = () => {
+    if (screenShareStreamRef?.current) {
+      screenShareStreamRef.current.getTracks().forEach((t) => t.stop());
+      screenShareStreamRef.current = null;
+    }
+    if (screenShareVideoRef?.current) {
+      screenShareVideoRef.current.srcObject = null;
+    }
+    setScreenShareActive(false);
+    setScreenShareError(null);
+  };
+
+  // Stop screen share when interview ends
+  useEffect(() => {
+    if (flowState === "interview-complete") {
+      if (document?.fullscreenElement) {
+        document
+          ?.exitFullscreen()
+          ?.catch((err) => console.error("Exit fullscreen error:", err));
+      }
+      stopScreenShare();
+      stopCamera();
+    }
+  }, [flowState]);
 
   const handleAuthenticated = (
     startInterviewResponse: StartInterviewResponse
@@ -135,6 +191,9 @@ export default function CallPage({ interviewId }: CallPageProps) {
       <VerificationFlow
         onContinue={handleVerificationContinue}
         videoRef={videoRef}
+        screenShareActive={screenShareActive}
+        screenShareError={screenShareError}
+        onRetryScreenShare={startScreenShare}
       />
     );
   }
@@ -144,12 +203,13 @@ export default function CallPage({ interviewId }: CallPageProps) {
     return (
       <InterviewActiveFlow
         onStateChange={setFlowState}
-        onStopCamera={stopCamera}
         videoRef={videoRef}
         interviewDetails={interviewDetails}
         interviewId={interviewId}
         token={liveKitConfig?.token}
         serverUrl={liveKitConfig?.serverUrl}
+        screenShareVideoRef={screenShareVideoRef}
+        screenShareStreamRef={screenShareStreamRef}
       />
     );
   }

@@ -57,5 +57,7 @@ export const API_ENDPOINTS = {
   },
   INTERVIEW_PENALTY: {
     CREATE: "/api/v2/forminstances",
+    /** Same storage upload as applicant attachment; use path prefix to distinguish penalty screenshots */
+    UPLOAD: "/api/storage-accounts/lego/upload",
   },
 };

@@ -314,19 +314,26 @@ export default function JobDetails() {
       interviewsScheduledResult,
       interviewsCompletedResult,
     ] = await Promise.allSettled([
-      jobService.getRounds(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [
-            {
-              key: "#.records.jobID",
-              operator: "$eq",
-              value: params?.id,
-              type: "text",
-            },
-          ],
+      jobService.getRounds(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
+            ],
+          },
         },
-      }),
+        {
+          objectId: views?.["rounds"]?.objectId || "",
+          viewId: views?.["rounds"]?.viewId || "",
+        }
+      ),
       jobService.getApplicants(
         listParams,
         {

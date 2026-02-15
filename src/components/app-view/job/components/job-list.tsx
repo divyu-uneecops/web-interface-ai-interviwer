@@ -269,13 +269,6 @@ export default function JobList() {
     if (jobIds?.length === 0) return;
     setLoadingCountsForJobIds((prev) => new Set([...prev, ...(jobIds || [])]));
     try {
-      const jobIdFilter = (jobId: string) => ({
-        key: "#.records.jobID",
-        operator: "$eq",
-        value: jobId,
-        type: "text",
-      });
-
       const settled = await Promise.allSettled(
         jobIds.map(async (jobId) => {
           const [applicantsResult, interviewsResult] = await Promise.allSettled(
@@ -284,7 +277,16 @@ export default function JobList() {
                 listParams,
                 {
                   ...appIdPayload,
-                  filters: { $and: [jobIdFilter(jobId)] },
+                  filters: {
+                    $and: [
+                      {
+                        key: "#.records.jobID",
+                        operator: "$eq",
+                        value: jobId,
+                        type: "text",
+                      },
+                    ],
+                  },
                 },
                 {
                   objectId: views?.["applicants"]?.objectId || "",
@@ -296,7 +298,14 @@ export default function JobList() {
                 {
                   ...appIdPayload,
                   filters: {
-                    $and: [jobIdFilter(jobId)],
+                    $and: [
+                      {
+                        key: "#.records.jobId",
+                        operator: "$eq",
+                        value: jobId,
+                        type: "text",
+                      },
+                    ],
                   },
                 },
                 {

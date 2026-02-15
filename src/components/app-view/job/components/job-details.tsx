@@ -972,7 +972,10 @@ export default function JobDetails() {
   const handleDeleteApplicant = async (id: string) => {
     if (isEmpty(id)) return;
     try {
-      const response = await jobService.deleteApplicant(id);
+      const response = await jobService.deleteApplicant({
+        id,
+        objectId: views?.["applicants"]?.objectId || "",
+      });
       toast.success(response ? response : "Applicant deleted successfully", {
         duration: 8000, // 8 seconds
       });
@@ -1587,6 +1590,8 @@ export default function JobDetails() {
             // Handle applicant submission here
             fetchApplicants();
           }}
+          form={form}
+          views={views}
         />
       )}
 
@@ -1616,6 +1621,8 @@ export default function JobDetails() {
             // Handle applicant update here
             fetchApplicants();
           }}
+          form={form}
+          views={views}
         />
       )}
 

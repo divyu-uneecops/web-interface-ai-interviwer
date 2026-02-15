@@ -138,4 +138,6 @@ export interface AddApplicantModalProps {
   isEditMode?: boolean;
   applicantDetail?: ApplicantForm | null;
   applicantId?: string;
+  form: Record<string, string>;
+  views: Record<string, any>;
 }

@@ -504,7 +504,8 @@ export const transformAPIResponseToApplicants = (
 export const transformApplicantToCreatePayload = (
   values: ApplicantForm,
   jobId: string,
-  attachmentPath?: string
+  attachmentPath: string,
+  formId: string
 ) => {
   const valuesArray: any[] = [];
 
@@ -548,7 +549,7 @@ export const transformApplicantToCreatePayload = (
     valuesArray.push({
       propertyId: "695c928dc9ba83a076aac6cd",
       key: "attachment",
-      value: [`695c928dc9ba83a076aac6cd//${attachmentPath}`],
+      value: [attachmentPath],
     });
   }
 
@@ -588,7 +589,7 @@ export const transformApplicantToCreatePayload = (
       },
     ],
     status: "PENDING",
-    formId: "69521d7dc9ba83a076aac3cb",
+    formId: formId,
   };
 };
 
@@ -640,7 +641,7 @@ export const transformApplicantToUpdatePayload = (
     valuesArray.push({
       propertyId: "695c928dc9ba83a076aac6cd",
       key: "attachment",
-      value: [`attachment//${attachmentPath}`],
+      value: [attachmentPath],
     });
     propertyIds.push("695c928dc9ba83a076aac6cd");
   }

@@ -68,17 +68,17 @@ export const jobService = {
       payload,
       signal
     ),
-  deleteApplicant: (id: string) =>
+  deleteApplicant: (urlIds: Record<string, string>) =>
     serverInterfaceService.delete(
-      buildUrl(API_ENDPOINTS.APPLICANT.DELETE, { id })
+      buildUrl(API_ENDPOINTS.APPLICANT.DELETE, urlIds)
     ),
   updateApplicant: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, urlIds),
       payload
     ),
   createInterviewFormInstance: (

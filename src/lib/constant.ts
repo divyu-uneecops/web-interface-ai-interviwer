@@ -21,8 +21,8 @@ export const API_ENDPOINTS = {
   APPLICANT: {
     CREATE: "/api/v2/forminstances",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
-    DELETE: "/api/objects/69521d7dc9ba83a076aac3c8/records/{id}",
-    UPDATE: "/api/objects/69521d7dc9ba83a076aac3c8/records/{id}",
+    DELETE: "/api/objects/{objectId}/records/{id}",
+    UPDATE: "/api/objects/{objectId}/records/{id}",
     UPLOAD_ATTACHMENT: "/api/storage-accounts/lego/upload",
     UPLOAD_ATTACHMENT_TO_S3:
       "/api/https://cosmocloud-storage-accounts.s3.amazonaws.com/",

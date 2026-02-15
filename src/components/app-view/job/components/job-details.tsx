@@ -878,37 +878,19 @@ export default function JobDetails() {
         id: "applicants",
         header: "Applicants",
         align: "left",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a]">
-            {typeof interview?.candidateName === "string"
-              ? interview.candidateName
-              : interview?.candidateName?.name}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateName,
       },
       {
         id: "email",
         header: "Email",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {typeof interview?.candidateEmail === "string"
-              ? interview.candidateEmail
-              : interview?.candidateEmail?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateEmail?.label,
       },
       {
         id: "round",
         header: "Round",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {typeof interview?.roundName === "string"
-              ? interview.roundName
-              : interview?.roundName?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.roundName?.label,
       },
       {
         id: "status",
@@ -951,11 +933,7 @@ export default function JobDetails() {
         id: "interviewDate",
         header: "Interview date",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {formatInterviewDate(interview?.interviewDate)}
-          </span>
-        ),
+        accessor: (interview) => formatInterviewDate(interview?.interviewDate),
       },
     ],
     []

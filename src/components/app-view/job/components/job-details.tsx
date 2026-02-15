@@ -308,13 +308,6 @@ export default function JobDetails() {
       return;
     }
 
-    const jobIdFilter = {
-      key: "#.records.jobID",
-      operator: "$eq",
-      value: params?.id,
-      type: "text",
-    };
-
     const [
       roundsResult,
       applicantsResult,
@@ -324,7 +317,14 @@ export default function JobDetails() {
       jobService.getRounds(listParams, {
         ...appIdPayload,
         filters: {
-          $and: [jobIdFilter],
+          $and: [
+            {
+              key: "#.records.jobID",
+              operator: "$eq",
+              value: params?.id,
+              type: "text",
+            },
+          ],
         },
       }),
       jobService.getApplicants(
@@ -332,7 +332,14 @@ export default function JobDetails() {
         {
           ...appIdPayload,
           filters: {
-            $and: [jobIdFilter],
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
+            ],
           },
         },
         {
@@ -346,7 +353,12 @@ export default function JobDetails() {
           ...appIdPayload,
           filters: {
             $and: [
-              jobIdFilter,
+              {
+                key: "#.records.jobId",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
               {
                 key: "#.records.status",
                 operator: "$in",
@@ -367,7 +379,12 @@ export default function JobDetails() {
           ...appIdPayload,
           filters: {
             $and: [
-              jobIdFilter,
+              {
+                key: "#.records.jobId",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
               {
                 key: "#.records.status",
                 operator: "$in",
@@ -590,7 +607,7 @@ export default function JobDetails() {
 
     try {
       const listParams: Record<string, any> = {
-        limit: PAGE_LIMIT,
+        limit: 1,
         offset: currentJobInterviewsOffset,
         ...(jobInterviewsSearchKeyword
           ? { query: jobInterviewsSearchKeyword }

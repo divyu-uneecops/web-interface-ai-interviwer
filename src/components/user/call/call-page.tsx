@@ -96,9 +96,21 @@ export default function CallPage({ interviewId }: CallPageProps) {
     setScreenShareError(null);
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: { displaySurface: "monitor" },
         audio: false,
       });
+      const videoTrack = stream.getVideoTracks()[0];
+      const displaySurface = videoTrack?.getSettings?.()?.displaySurface;
+
+      // Only allow full screen (monitor); reject window or browser tab when we can detect it
+      if (displaySurface !== undefined && displaySurface !== "monitor") {
+        stream.getTracks().forEach((t) => t.stop());
+        setScreenShareError(
+          "Please share your entire screen to continue. Window or tab sharing is not allowed."
+        );
+        return;
+      }
+
       screenShareStreamRef.current?.getTracks().forEach((t) => t.stop());
       screenShareStreamRef.current = stream;
       setScreenShareActive(true);
@@ -108,7 +120,7 @@ export default function CallPage({ interviewId }: CallPageProps) {
           console.error("Screen share video play:", err);
         });
       }
-      stream.getVideoTracks()[0].onended = () => {
+      videoTrack.onended = () => {
         stopScreenShare();
       };
     } catch (err) {

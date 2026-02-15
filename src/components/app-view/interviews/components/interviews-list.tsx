@@ -175,41 +175,25 @@ export default function InterviewsList() {
         id: "applicants",
         header: "Applicants",
         align: "left",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a]">
-            {interview?.candidateName?.name}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateName,
       },
       {
         id: "email",
         header: "Email",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.candidateEmail?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateEmail?.label,
       },
       {
         id: "job",
         header: "Job title",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.jobTitle?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.jobTitle?.label,
       },
       {
         id: "round",
         header: "Round",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.roundName?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.roundName?.label,
       },
       {
         id: "status",
@@ -252,11 +236,7 @@ export default function InterviewsList() {
         id: "interviewDate",
         header: "Interview date",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {formatInterviewDate(interview?.interviewDate)}
-          </span>
-        ),
+        accessor: (interview) => formatInterviewDate(interview?.interviewDate),
       },
     ],
     []

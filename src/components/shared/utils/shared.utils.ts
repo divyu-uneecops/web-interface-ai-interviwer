@@ -2,7 +2,8 @@ import { RoundFormData } from "../interfaces/shared.interface";
 
 export const transformToCreateRoundPayload = (
   values: RoundFormData,
-  jobId: string
+  jobId: string,
+  formId: string
 ) => {
   // Skills for round (each as its own array of one object)
   const skillsForRound = (values?.skills || []).map((skill) => [
@@ -186,7 +187,7 @@ export const transformToCreateRoundPayload = (
       },
     ],
     status: "PENDING",
-    formId: "69521d61c9ba83a076aac3c3",
+    formId: formId,
   };
 };
 

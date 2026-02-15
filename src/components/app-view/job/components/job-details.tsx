@@ -550,22 +550,29 @@ export default function JobDetails() {
         offset: currentRoundsOffset,
       };
 
-      const response = await jobService.getRounds(params_query, {
-        filters: {
-          $and: [
-            {
-              key: "#.records.jobID",
-              operator: "$eq",
-              value: params?.id as string,
-              type: "text",
-            },
-          ],
+      const response = await jobService.getRounds(
+        params_query,
+        {
+          filters: {
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id as string,
+                type: "text",
+              },
+            ],
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        sort: {
-          createdOn: "DESC",
-        },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["rounds"]?.objectId || "",
+          viewId: views?.["rounds"]?.viewId || "",
+        }
+      );
       const result = transformAPIResponseToRounds(response.data, response.page);
       setRounds(result.rounds);
       setRoundsPagination({
@@ -994,7 +1001,10 @@ export default function JobDetails() {
   const handleDeleteRound = async (id: string) => {
     if (isEmpty(id)) return;
     try {
-      const response = await jobService.deleteRound(id);
+      const response = await jobService.deleteRound({
+        id,
+        objectId: views?.["rounds"]?.objectId || "",
+      });
       toast.success(response ? response : "Round deleted successfully", {
         duration: 8000, // 8 seconds
       });
@@ -1545,6 +1555,8 @@ export default function JobDetails() {
           }}
           mappingValues={mappingValues}
           jobId={(params?.id as string) || ""}
+          form={form}
+          views={views}
         />
       )}
 
@@ -1577,6 +1589,8 @@ export default function JobDetails() {
             reminderTime: editingRound?.reminderTime || "3 days",
           }}
           roundId={editingRound?.id}
+          form={form}
+          views={views}
         />
       )}
 

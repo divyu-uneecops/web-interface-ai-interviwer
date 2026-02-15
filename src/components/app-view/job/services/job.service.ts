@@ -106,17 +106,18 @@ export const jobService = {
   getRounds: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.CREATE_ROUND.LIST,
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.LIST, urlIds),
       params,
       payload,
       signal
     ),
-  deleteRound: (id: string) =>
+  deleteRound: (urlIds: { id: string; objectId: string }) =>
     serverInterfaceService.delete(
-      buildUrl(API_ENDPOINTS.CREATE_ROUND.DELETE, { id })
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.DELETE, urlIds)
     ),
   uploadApplicantAttachment: (
     payload: Record<string, any>,

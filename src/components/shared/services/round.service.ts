@@ -15,12 +15,24 @@ export const roundService = {
       signal
     ),
   updateRound: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.CREATE_ROUND.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.UPDATE, urlIds),
       payload
+    ),
+  getInterviewers: (
+    params: Record<string, any>,
+    payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
+    signal?: AbortSignal
+  ) =>
+    serverInterfaceService.post(
+      buildUrl(API_ENDPOINTS.INTERVIEWER.LIST, urlIds),
+      params,
+      payload,
+      signal
     ),
 };

@@ -379,6 +379,9 @@ export function CreateRoundModal({
           filters: {
             $and: filterConditions,
           },
+          sort: {
+            createdOn: "DESC",
+          },
           appId: "69521cd1c9ba83a076aac3ae",
         },
 

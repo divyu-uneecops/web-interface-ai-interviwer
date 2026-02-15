@@ -97,7 +97,7 @@ export default function InterviewsList() {
 
     try {
       const params: Record<string, any> = {
-        limit: PAGE_LIMIT,
+        limit: 1,
         offset: currentOffset,
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };

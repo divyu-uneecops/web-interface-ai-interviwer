@@ -20,4 +20,20 @@ export const authService = {
     serverInterfaceService.post(API_ENDPOINTS.AUTH.VERIFY_OTP, undefined, payload),
   resendOtp: (payload: { identifier: string }) =>
     serverInterfaceService.post(API_ENDPOINTS.AUTH.RESEND_OTP, undefined, payload),
+  forgotPasswordRequestOtp: (payload: { email: string }) =>
+    serverInterfaceService.post(
+      API_ENDPOINTS.AUTH.FORGOT_PASSWORD_REQUEST_OTP,
+      undefined,
+      payload
+    ),
+  forgotPasswordVerifyOtp: (payload: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }) =>
+    serverInterfaceService.post(
+      API_ENDPOINTS.AUTH.FORGOT_PASSWORD_VERIFY_OTP,
+      undefined,
+      payload
+    ),
 };

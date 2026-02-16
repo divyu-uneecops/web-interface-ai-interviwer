@@ -9,6 +9,8 @@ export const API_ENDPOINTS = {
     REGISTER: "/admin/auth/register",
     VERIFY_OTP: "/admin/auth/user/verify/verify-otp",
     RESEND_OTP: "/admin/auth/user/verify/request-otp",
+    FORGOT_PASSWORD_REQUEST_OTP: "/admin/auth/forgot-password/request-otp",
+    FORGOT_PASSWORD_VERIFY_OTP: "/admin/auth/forgot-password/verify-otp",
   },
   JOB_OPENING: {
     CREATE: "/api/v2/forminstances",

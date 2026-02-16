@@ -41,6 +41,7 @@ export interface ScheduleInterviewDialogProps {
   form: AppFormIds;
   round: Round | null;
   jobId: string;
+  views: Record<string, any>;
   onSuccess?: () => void;
 }
 
@@ -206,6 +207,7 @@ export function ScheduleInterviewDialog({
   form,
   round,
   jobId,
+  views,
   onSuccess,
 }: ScheduleInterviewDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -347,10 +349,17 @@ export function ScheduleInterviewDialog({
         value: jobId,
         type: "text",
       };
-      const response = await jobService.getApplicants(paramsQuery, {
-        filters: { $and: [jobIdFilter] },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+      const response = await jobService.getApplicants(
+        paramsQuery,
+        {
+          filters: { $and: [jobIdFilter] },
+          appId: "69521cd1c9ba83a076aac3ae",
+        },
+        {
+          objectId: views?.["applicants"]?.objectId || "",
+          viewId: views?.["applicants"]?.viewId || "",
+        }
+      );
       const result = transformAPIResponseToApplicants(
         response?.data ?? [],
         response?.page

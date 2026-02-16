@@ -1638,6 +1638,7 @@ export default function JobDetails() {
           form={form}
           round={scheduleInterviewRound}
           jobId={(params?.id as string) || ""}
+          views={views}
           onSuccess={() => {}}
         />
       )}

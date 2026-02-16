@@ -134,7 +134,8 @@ export function AddApplicantModal({
           const updatePayload = transformApplicantToUpdatePayload(
             values,
             dirtyFields,
-            attachmentPath
+            attachmentPath || "",
+            mappingValues?.applicants || ""
           );
           const response = await jobService.updateApplicant(
             {

@@ -602,7 +602,11 @@ export const transformApplicantToCreatePayload = (
 export const transformApplicantToUpdatePayload = (
   values: ApplicantForm,
   dirtyFields: Partial<Record<keyof ApplicantForm, boolean | any>>,
-  attachmentPath?: string
+  attachmentPath: string,
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   const valuesArray: any[] = [];
   const propertyIds: string[] = [];
@@ -615,41 +619,41 @@ export const transformApplicantToUpdatePayload = (
   // Name
   if (isDirty("name")) {
     valuesArray.push({
-      propertyId: "695c91fec9ba83a076aac6c8",
+      propertyId: mappingValues?.name?.id || "",
       key: "name",
       value: values.name || "",
     });
-    propertyIds.push("695c91fec9ba83a076aac6c8");
+    propertyIds.push(mappingValues?.name?.id || "");
   }
 
   // Email
   if (isDirty("email")) {
     valuesArray.push({
-      propertyId: "695c9244c9ba83a076aac6c9",
+      propertyId: mappingValues?.email?.id || "",
       key: "email",
       value: values.email || "",
     });
-    propertyIds.push("695c9244c9ba83a076aac6c9");
+    propertyIds.push(mappingValues?.email?.id || "");
   }
 
   // Contact/Phone
   if (isDirty("contact")) {
     valuesArray.push({
-      propertyId: "695c9276c9ba83a076aac6ca",
+      propertyId: mappingValues?.phone?.id || "",
       key: "phone",
       value: values.contact || "",
     });
-    propertyIds.push("695c9276c9ba83a076aac6ca");
+    propertyIds.push(mappingValues?.phone?.id || "");
   }
 
   // Attachment
   if (isDirty("attachment") && attachmentPath) {
     valuesArray.push({
-      propertyId: "695c928dc9ba83a076aac6cd",
+      propertyId: mappingValues?.attachment?.id || "",
       key: "attachment",
       value: [attachmentPath],
     });
-    propertyIds.push("695c928dc9ba83a076aac6cd");
+    propertyIds.push(mappingValues?.attachment?.id || "");
   }
 
   return {

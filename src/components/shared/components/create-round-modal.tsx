@@ -260,7 +260,8 @@ export function CreateRoundModal({
 
           const updatePayload = transformToUpdateRoundPayload(
             values,
-            dirtyFields
+            dirtyFields,
+            mappingValues?.createRound
           );
           const response = await roundService.updateRound(
             {

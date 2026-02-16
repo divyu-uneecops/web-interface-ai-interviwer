@@ -188,12 +188,16 @@ export const transformToCreateRoundPayload = (
 
 export const transformToUpdateRoundPayload = (
   values: RoundFormData,
-  touched?: any
+  touched: any,
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   // Skills for round (each as its own array of one object)
   const skillsForRound = (values?.skills || []).map((skill) => [
     {
-      propertyId: "69627d06c9ba83a076aac8f8",
+      propertyId: mappingValues?._skillForRound?.fields?.[0]?._id || "",
       key: "_skill_",
       value: skill,
     },
@@ -211,12 +215,12 @@ export const transformToUpdateRoundPayload = (
             ) {
               return [
                 {
-                  propertyId: "69627d97c9ba83a076aac8fa",
+                  propertyId: mappingValues?._questions?.fields?.[0]?._id || "",
                   key: "_question",
                   value: questionText,
                 },
                 {
-                  propertyId: "69627dcdc9ba83a076aac8fb",
+                  propertyId: mappingValues?._questions?.fields?.[1]?._id || "",
                   key: "_qType",
                   value: "hybrid",
                 },
@@ -239,112 +243,112 @@ export const transformToUpdateRoundPayload = (
   // Round name
   if (isTouched("roundName")) {
     valuesArray.push({
-      propertyId: "69525a92c9ba83a076aac43d",
+      propertyId: mappingValues?.roundName?.id || "",
       key: "roundName",
       value: values?.roundName || "",
     });
-    propertyIds.push("69525a92c9ba83a076aac43d");
+    propertyIds.push(mappingValues?.roundName?.id || "");
   }
 
   // Round type
   if (isTouched("roundType")) {
     valuesArray.push({
-      propertyId: "69525ad1c9ba83a076aac43f",
+      propertyId: mappingValues?.roundType?.id || "",
       key: "roundType",
       value: values?.roundType || "",
     });
-    propertyIds.push("69525ad1c9ba83a076aac43f");
+    propertyIds.push(mappingValues?.roundType?.id || "");
   }
 
   // Round objective
   if (isTouched("roundObjective")) {
     valuesArray.push({
-      propertyId: "69525aefc9ba83a076aac440",
+      propertyId: mappingValues?.roundObjective?.id || "",
       key: "roundObjective",
       value: values?.roundObjective || "",
     });
-    propertyIds.push("69525aefc9ba83a076aac440");
+    propertyIds.push(mappingValues?.roundObjective?.id || "");
   }
 
   // Language
   if (isTouched("language")) {
     valuesArray.push({
-      propertyId: "69525b69c9ba83a076aac443",
+      propertyId: mappingValues?.language?.id || "",
       key: "language",
       value: values?.language || "",
     });
-    propertyIds.push("69525b69c9ba83a076aac443");
+    propertyIds.push(mappingValues?.language?.id || "");
   }
 
   // Duration
   if (isTouched("duration")) {
     valuesArray.push({
-      propertyId: "69525bb8c9ba83a076aac448",
+      propertyId: mappingValues?.duration?.id || "",
       key: "duration",
       value: values?.duration || "",
     });
-    propertyIds.push("69525bb8c9ba83a076aac448");
+    propertyIds.push(mappingValues?.duration?.id || "");
   }
 
   // Question type
   if (isTouched("questionType")) {
     valuesArray.push({
-      propertyId: "69525c85c9ba83a076aac44d",
+      propertyId: mappingValues?.questionsType?.id || "",
       key: "questionsType",
       value: values?.questionType || "",
     });
-    propertyIds.push("69525c85c9ba83a076aac44d");
+    propertyIds.push(mappingValues?.questionsType?.id || "");
   }
 
   // Number of AI questions
   if (isTouched("aiGeneratedQuestions")) {
     valuesArray.push({
-      propertyId: "69525ca7c9ba83a076aac44e",
+      propertyId: mappingValues?.numOfAiQuestions?.id || "",
       key: "numOfAiQuestions",
       value: values?.aiGeneratedQuestions,
     });
-    propertyIds.push("69525ca7c9ba83a076aac44e");
+    propertyIds.push(mappingValues?.numOfAiQuestions?.id || "");
   }
 
   // Interview instructions
   if (isTouched("interviewInstructions")) {
     valuesArray.push({
-      propertyId: "69525dd4c9ba83a076aac454",
+      propertyId: mappingValues?.interviewInstructions?.id || "",
       key: "interviewInstructions",
       value: values?.interviewInstructions || "",
     });
-    propertyIds.push("69525dd4c9ba83a076aac454");
+    propertyIds.push(mappingValues?.interviewInstructions?.id || "");
   }
 
   // Allow skip
   if (isTouched("allowSkip")) {
     valuesArray.push({
-      propertyId: "69525decc9ba83a076aac455",
+      propertyId: mappingValues?.allowSkip?.id || "",
       key: "allowSkip",
       value: values?.allowSkip,
     });
-    propertyIds.push("69525decc9ba83a076aac455");
+    propertyIds.push(mappingValues?.allowSkip?.id || "");
   }
 
   // Send reminder
   if (isTouched("sendReminder")) {
     valuesArray.push({
-      propertyId: "69525e05c9ba83a076aac456",
+      propertyId: mappingValues?.sendReminder?.id || "",
       key: "sendReminder",
       value: values?.sendReminder,
     });
-    propertyIds.push("69525e05c9ba83a076aac456");
+    propertyIds.push(mappingValues?.sendReminder?.id || "");
   }
 
   // Reminder time (if sendReminder is true)
   if (isTouched("sendReminder") && values?.sendReminder) {
     if (isTouched("reminderTime")) {
       valuesArray.push({
-        propertyId: "69525e47c9ba83a076aac457",
+        propertyId: mappingValues?.reminderTime?.id || "",
         key: "reminderTime",
         value: values?.reminderTime,
       });
-      propertyIds.push("69525e47c9ba83a076aac457");
+      propertyIds.push(mappingValues?.reminderTime?.id || "");
     }
   }
 
@@ -352,32 +356,32 @@ export const transformToUpdateRoundPayload = (
   if (isTouched("questionType") && values?.questionType === "hybrid") {
     if (isTouched("customQuestions")) {
       valuesArray.push({
-        propertyId: "69525e6bc9ba83a076aac458",
+        propertyId: mappingValues?.numOfCustomQuestions?.id || "",
         key: "numOfCustomQuestions",
         value: values?.customQuestions,
       });
-      propertyIds.push("69525e6bc9ba83a076aac458");
+      propertyIds.push(mappingValues?.numOfCustomQuestions?.id || "");
     }
   }
 
   // Skills for round
   if (isTouched("skills")) {
     valuesArray.push({
-      propertyId: "69627d2ec9ba83a076aac8f9",
+      propertyId: mappingValues?._skillForRound?.id || "",
       key: "_skillForRound",
       value: skillsForRound,
     });
-    propertyIds.push("69627d2ec9ba83a076aac8f9");
+    propertyIds.push(mappingValues?._skillForRound?.id || "");
   }
 
   // Questions
   if (isTouched("customQuestionTexts") || isTouched("questionType")) {
     valuesArray.push({
-      propertyId: "69627df8c9ba83a076aac8fc",
+      propertyId: mappingValues?._questions?.id || "",
       key: "_questions",
       value: questions,
     });
-    propertyIds.push("69627df8c9ba83a076aac8fc");
+    propertyIds.push(mappingValues?._questions?.id || "");
   }
 
   return {

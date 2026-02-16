@@ -100,7 +100,8 @@ export function CreateInterviewerModal({
           // Edit mode - update existing interviewer
           const payload = transformToInterviewerUpdatePayload(
             values,
-            formik.touched
+            formik.touched,
+            mappingValues?.interviewers ?? {}
           );
           const response = await interviewerService.updateInterviewer(
             {
@@ -119,11 +120,12 @@ export function CreateInterviewerModal({
           // Create mode - create new interviewer
           const payload = transformToInterviewerCreatePayload(
             values,
-            form?.createInterviewers || ""
+            mappingValues?.interviewers ?? {}
           );
           const response = await interviewerService.createInterviewer(
             {},
-            payload
+            payload,
+            { objectId: views?.interviewers?.objectId || "" }
           );
           toast.success(
             response?.message || "Interviewer created successfully",
@@ -218,7 +220,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.interviewers?.voice?.map(
+                    {(mappingValues?.interviewers?.voice?.values ?? []).map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}
@@ -361,7 +363,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.createRound?.roundType?.map(
+                    {(mappingValues?.createRound?.roundType?.values ?? []).map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}
@@ -385,7 +387,7 @@ export function CreateInterviewerModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.createRound?.language?.map(
+                    {(mappingValues?.createRound?.language?.values ?? []).map(
                       (option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}

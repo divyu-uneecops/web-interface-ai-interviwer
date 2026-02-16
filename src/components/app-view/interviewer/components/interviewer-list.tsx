@@ -58,29 +58,32 @@ export function InterviewerList() {
     {
       id: "roundType",
       label: "Round Type",
-      options:
-        mappingValues?.createRound?.roundType?.map((status: string) => ({
+      options: (mappingValues?.createRound?.roundType?.values ?? []).map(
+        (status: string) => ({
           value: status,
           label: status,
-        })) || [],
+        })
+      ),
     },
     {
       id: "language",
       label: "Language",
-      options:
-        mappingValues?.createRound?.language?.map((status: string) => ({
+      options: (mappingValues?.createRound?.language?.values ?? []).map(
+        (status: string) => ({
           value: status,
           label: status,
-        })) || [],
+        })
+      ),
     },
     {
       id: "voice",
       label: "Voice",
-      options:
-        mappingValues?.interviewers?.voice?.map((status: string) => ({
+      options: (mappingValues?.interviewers?.voice?.values ?? []).map(
+        (status: string) => ({
           value: status,
           label: status,
-        })) || [],
+        })
+      ),
     },
   ];
 

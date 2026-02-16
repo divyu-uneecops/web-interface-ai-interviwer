@@ -6,10 +6,11 @@ export const interviewerService = {
   createInterviewer: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEWER.CREATE,
+      buildUrl(API_ENDPOINTS.INTERVIEWER.CREATE, urlIds),
       params,
       payload,
       signal

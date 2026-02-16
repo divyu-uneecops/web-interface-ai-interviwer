@@ -28,7 +28,7 @@ export const API_ENDPOINTS = {
     DOWNLOAD_ATTACHMENT: "/api/storage-accounts/lego/download",
   },
   INTERVIEWER: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/{objectId}/records/{id}",
     FROM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",

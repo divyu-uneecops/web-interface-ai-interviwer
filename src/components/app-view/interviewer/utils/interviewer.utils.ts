@@ -108,14 +108,17 @@ export const transformAPIResponseToInterviewers = (
 
 export const transformToInterviewerCreatePayload = (
   values: InterviewerFormData,
-  formId: string
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   // Transform skills to API format (array of arrays)
   const interviewerSkills = values?.skills
     ?.filter((skill: string) => skill?.trim()?.length > 0)
     ?.map((skill: string) => [
       {
-        propertyId: "69525680c9ba83a076aac417",
+        propertyId: mappingValues?.interviewerSkills?.fields?.[0]?._id || "",
         key: "skill",
         value: skill.trim(),
       },
@@ -124,22 +127,22 @@ export const transformToInterviewerCreatePayload = (
   // Transform personality traits to API format
   const personalityTraits = [
     {
-      propertyId: "695257cdc9ba83a076aac41d",
+      propertyId: mappingValues?.empathy?.fields?.[0]?._id || "",
       key: "empathy",
       value: values?.personality?.empathy || 0,
     },
     {
-      propertyId: "695257e4c9ba83a076aac41e",
+      propertyId: mappingValues?.rapport?.fields?.[1]?._id || "",
       key: "rapport",
       value: values?.personality?.rapport || 0,
     },
     {
-      propertyId: "69525807c9ba83a076aac420",
+      propertyId: mappingValues?.exploration?.fields?.[2]?._id || "",
       key: "exploration",
       value: values?.personality?.exploration || 0,
     },
     {
-      propertyId: "69525827c9ba83a076aac421",
+      propertyId: mappingValues?.speed?.fields?.[3]?._id || "",
       key: "speed",
       value: values?.personality?.speed || 0,
     },
@@ -147,88 +150,82 @@ export const transformToInterviewerCreatePayload = (
 
   const valuesArray = [
     {
-      propertyId: "6952562ac9ba83a076aac413",
+      propertyId: mappingValues?.name?.id || "",
       key: "name",
       value: values?.name || "",
     },
     {
-      propertyId: "69525663c9ba83a076aac416",
+      propertyId: mappingValues?.description?.id || "",
       key: "description",
       value: values?.description || "",
     },
     {
-      propertyId: "695256aac9ba83a076aac418",
+      propertyId: mappingValues?.interviewerSkills?.id || "",
       key: "interviewerSkills",
       value: interviewerSkills || [],
     },
     {
-      propertyId: "69525713c9ba83a076aac419",
+      propertyId: mappingValues?.roundType?.id || "",
       key: "roundType",
       value: values?.roundType || "",
     },
     {
-      propertyId: "6952577bc9ba83a076aac41a",
+      propertyId: mappingValues?.language?.id || "",
       key: "language",
       value: values?.language || "",
     },
     {
-      propertyId: "695257b4c9ba83a076aac41b",
+      propertyId: mappingValues?.voice?.id || "",
       key: "voice",
       value: values?.voice || "",
     },
     {
-      propertyId: "6985806ca5d62230806a8cee",
+      propertyId: mappingValues?.avatarUrl?.id || "",
       key: "avatarUrl",
       value: values?.avatar,
     },
     {
-      propertyId: "69525848c9ba83a076aac423",
+      propertyId: mappingValues?.personalityTraits?.id || "",
       key: "personalityTraits",
       value: personalityTraits,
     },
     {
-      propertyId: "695754a9c9ba83a076aac57d",
+      propertyId: mappingValues?.formUser?.id || "",
       key: "formUser",
       value: ["6936a4d92276e3fc3ac7b13b"],
       //TODO: Needs to Change in future
     },
+    {
+      propertyId: mappingValues?.avatar?.id || "",
+      key: "avatar",
+      value: [],
+    },
   ];
-
-  // Add avatar field (empty array for now, can be updated when file upload is implemented)
-  valuesArray.push({
-    propertyId: "6952564bc9ba83a076aac415",
-    key: "avatar",
-    value: [],
-  });
 
   return {
     values: valuesArray,
     propertyIds: [
-      "6952562ac9ba83a076aac413",
-      "6952564bc9ba83a076aac415",
-      "69525663c9ba83a076aac416",
-      "695256aac9ba83a076aac418",
-      "69525713c9ba83a076aac419",
-      "6952577bc9ba83a076aac41a",
-      "695257b4c9ba83a076aac41b",
-      "69525848c9ba83a076aac423",
-      "695754a9c9ba83a076aac57d",
-      "6985806ca5d62230806a8cee",
+      mappingValues?.name?.id,
+      mappingValues?.description?.id,
+      mappingValues?.interviewerSkills?.id,
+      mappingValues?.roundType?.id,
+      mappingValues?.language?.id,
+      mappingValues?.voice?.id,
+      mappingValues?.avatarUrl?.id,
+      mappingValues?.personalityTraits?.id,
+      mappingValues?.formUser?.id,
+      mappingValues?.avatar?.id,
     ],
-    flows: [
-      {
-        stageId: "1",
-        status: "PENDING",
-      },
-    ],
-    status: "PENDING",
-    formId: formId,
   };
 };
 
 export const transformToInterviewerUpdatePayload = (
   values: InterviewerFormData,
-  touched?: any
+  touched: any,
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   const valuesArray: any[] = [];
   const propertyIds: string[] = [];
@@ -255,21 +252,21 @@ export const transformToInterviewerUpdatePayload = (
   // Name
   if (isTouched("name")) {
     valuesArray.push({
-      propertyId: "6952562ac9ba83a076aac413",
+      propertyId: mappingValues?.name?.id || "",
       key: "name",
       value: values.name || "",
     });
-    propertyIds.push("6952562ac9ba83a076aac413");
+    propertyIds.push(mappingValues?.name?.id || "");
   }
 
   // Description
   if (isTouched("description")) {
     valuesArray.push({
-      propertyId: "69525663c9ba83a076aac416",
+      propertyId: mappingValues?.description?.id || "",
       key: "description",
       value: values.description || "",
     });
-    propertyIds.push("69525663c9ba83a076aac416");
+    propertyIds.push(mappingValues?.description?.id || "");
   }
 
   // Skills
@@ -278,90 +275,90 @@ export const transformToInterviewerUpdatePayload = (
       .filter((skill: string) => skill.trim().length > 0)
       .map((skill: string) => [
         {
-          propertyId: "69525680c9ba83a076aac417",
+          propertyId: mappingValues?.interviewerSkills?.fields?.[0]?._id || "",
           key: "skill",
           value: skill.trim(),
         },
       ]);
     valuesArray.push({
-      propertyId: "695256aac9ba83a076aac418",
+      propertyId: mappingValues?.interviewerSkills?.id || "",
       key: "interviewerSkills",
       value: interviewerSkills || [],
     });
-    propertyIds.push("695256aac9ba83a076aac418");
+    propertyIds.push(mappingValues?.interviewerSkills?.id || "");
   }
 
   // Round Type
   if (isTouched("roundType")) {
     valuesArray.push({
-      propertyId: "69525713c9ba83a076aac419",
+      propertyId: mappingValues?.roundType?.id || "",
       key: "roundType",
       value: values.roundType || "",
     });
-    propertyIds.push("69525713c9ba83a076aac419");
+    propertyIds.push(mappingValues?.roundType?.id || "");
   }
 
   // Language
   if (isTouched("language")) {
     valuesArray.push({
-      propertyId: "6952577bc9ba83a076aac41a",
+      propertyId: mappingValues?.language?.id || "",
       key: "language",
       value: values.language || "",
     });
-    propertyIds.push("6952577bc9ba83a076aac41a");
+    propertyIds.push(mappingValues?.language?.id || "");
   }
 
   // Voice
   if (isTouched("voice")) {
     valuesArray.push({
-      propertyId: "695257b4c9ba83a076aac41b",
+      propertyId: mappingValues?.voice?.id || "",
       key: "voice",
       value: values.voice || "",
     });
-    propertyIds.push("695257b4c9ba83a076aac41b");
+    propertyIds.push(mappingValues?.voice?.id || "");
   }
 
   // Avatar / avatarUrl
   if (isTouched("avatar") && values.avatar) {
     valuesArray.push({
-      propertyId: "6985806ca5d62230806a8cee",
+      propertyId: mappingValues?.avatarUrl?.id || "",
       key: "avatarUrl",
       value: values.avatar,
     });
-    propertyIds.push("6985806ca5d62230806a8cee");
+    propertyIds.push(mappingValues?.avatarUrl?.id || "");
   }
 
   // Personality Traits - if any trait is touched, include all traits
   if (isPersonalityTouched()) {
     const personalityTraits = [
       {
-        propertyId: "695257cdc9ba83a076aac41d",
+        propertyId: mappingValues?.empathy?.fields?.[0]?._id || "",
         key: "empathy",
         value: values.personality.empathy,
       },
       {
-        propertyId: "695257e4c9ba83a076aac41e",
+        propertyId: mappingValues?.rapport?.fields?.[1]?._id || "",
         key: "rapport",
         value: values.personality.rapport,
       },
       {
-        propertyId: "69525807c9ba83a076aac420",
+        propertyId: mappingValues?.exploration?.fields?.[2]?._id || "",
         key: "exploration",
         value: values.personality.exploration,
       },
       {
-        propertyId: "69525827c9ba83a076aac421",
+        propertyId: mappingValues?.speed?.fields?.[3]?._id || "",
         key: "speed",
         value: values.personality.speed,
       },
     ];
 
     valuesArray.push({
-      propertyId: "69525848c9ba83a076aac423",
+      propertyId: mappingValues?.personalityTraits?.id || "",
       key: "personalityTraits",
       value: personalityTraits,
     });
-    propertyIds.push("69525848c9ba83a076aac423");
+    propertyIds.push(mappingValues?.personalityTraits?.id || "");
   }
 
   return {

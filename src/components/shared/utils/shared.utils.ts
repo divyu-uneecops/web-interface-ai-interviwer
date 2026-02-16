@@ -115,7 +115,7 @@ export const transformToCreateRoundPayload = (
     {
       propertyId: mappingValues?.interviewerName?.id || "",
       key: "interviewerName",
-      value: "695f4c61c9ba83a076aac7de", // Replace with actual interviewer name if needed
+      value: values?.interviewer || "",
     },
     {
       propertyId: mappingValues?.jobID?.id || "",
@@ -125,7 +125,7 @@ export const transformToCreateRoundPayload = (
     {
       propertyId: mappingValues?.interviewerID?.id || "",
       key: "interviewerID",
-      value: "695f4c61c9ba83a076aac7de", // Replace as needed
+      value: values?.interviewer || "",
     },
     {
       propertyId: mappingValues?._skillForRound?.id || "",

@@ -147,7 +147,7 @@ export const transformToCreateRoundPayload = (
     mappingValues?.language?.id || "",
     mappingValues?.duration?.id || "",
     mappingValues?.accessibility?.id || "",
-    mappingValues?.questionType?.id || "",
+    mappingValues?.questionsType?.id || "",
     mappingValues?.numOfAiQuestions?.id || "",
     mappingValues?.interviewInstructions?.id || "",
     mappingValues?.allowSkip?.id || "",

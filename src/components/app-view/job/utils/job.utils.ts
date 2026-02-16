@@ -190,12 +190,15 @@ export const transformAPIResponseToJobDetail = (
 
 export const transformToCreateJobPayload = (
   values: JobFormData,
-  formId: string
+  propertyIds: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   // Transform skills to API format (array of arrays)
   const requiredSkills = (values.skills || []).map((skill) => [
     {
-      propertyId: "695259b2c9ba83a076aac434",
+      propertyId: propertyIds?.requiredSkills?.fields?.[0]?._id || "",
       key: "skill",
       value: skill,
     },
@@ -203,62 +206,62 @@ export const transformToCreateJobPayload = (
 
   const valuesArray = [
     {
-      propertyId: "69525644c9ba83a076aac414",
+      propertyId: propertyIds?.title?.id || "",
       key: "title",
       value: values?.title,
     },
     {
-      propertyId: "695257bfc9ba83a076aac41c",
+      propertyId: propertyIds?.industry?.id || "",
       key: "industry",
       value: values?.industry,
     },
     {
-      propertyId: "695257f8c9ba83a076aac41f",
+      propertyId: propertyIds?.jobLevel?.id || "",
       key: "jobLevel",
       value: values?.jobLevel,
     },
     {
-      propertyId: "69525830c9ba83a076aac422",
+      propertyId: propertyIds?.jobType?.id || "",
       key: "jobType",
       value: values?.jobType,
     },
     {
-      propertyId: "69525880c9ba83a076aac425",
+      propertyId: propertyIds?.minExp?.id || "",
       key: "minExp",
       value: values?.minExperience,
     },
     {
-      propertyId: "69525898c9ba83a076aac427",
+      propertyId: propertyIds?.maxExp?.id || "",
       key: "maxExp",
       value: values?.maxExperience,
     },
     {
-      propertyId: "695258ccc9ba83a076aac42a",
+      propertyId: propertyIds?.description?.id || "",
       key: "description",
       value: values?.description,
     },
     {
-      propertyId: "695258e5c9ba83a076aac42c",
+      propertyId: propertyIds?.numOfOpenings?.id || "",
       key: "numOfOpenings",
       value: values?.noOfOpenings,
     },
     {
-      propertyId: "6952595cc9ba83a076aac431",
+      propertyId: propertyIds?.status?.id || "",
       key: "status",
       value: values?.status,
     },
     {
-      propertyId: "6952598ec9ba83a076aac432",
+      propertyId: propertyIds?.accessibility?.id || "",
       key: "accessibility",
       value: "Private", // TODO: change in future if needed
     },
     {
-      propertyId: "695259d0c9ba83a076aac435",
+      propertyId: propertyIds?.requiredSkills?.id || "",
       key: "requiredSkills",
       value: requiredSkills,
     },
     {
-      propertyId: "6957547fc9ba83a076aac57c",
+      propertyId: propertyIds?.formUser?.id || "",
       key: "formUser",
       value: ["6936a4d92276e3fc3ac7b13b"], // TODO: change in future if needed
     },
@@ -267,7 +270,19 @@ export const transformToCreateJobPayload = (
   return {
     values: valuesArray,
     propertyIds: [
-      "69525644c9ba83a076aac414",
+      propertyIds?.title?.id,
+      propertyIds?.industry?.id,
+      propertyIds?.jobLevel?.id,
+      propertyIds?.jobType?.id,
+      propertyIds?.minExp?.id,
+      propertyIds?.maxExp?.id,
+      propertyIds?.description?.id,
+      propertyIds?.numOfOpenings?.id,
+      propertyIds?.attachment?.id,
+      propertyIds?.status?.id,
+      propertyIds?.accessibility?.id,
+      propertyIds?.requiredSkills?.id,
+      propertyIds?.formUser?.id,
       "695257bfc9ba83a076aac41c",
       "695257f8c9ba83a076aac41f",
       "69525830c9ba83a076aac422",
@@ -281,14 +296,6 @@ export const transformToCreateJobPayload = (
       "695259d0c9ba83a076aac435",
       "6957547fc9ba83a076aac57c",
     ],
-    flows: [
-      {
-        stageId: "1",
-        status: "PENDING",
-      },
-    ],
-    status: "PENDING",
-    formId: formId,
   };
 };
 

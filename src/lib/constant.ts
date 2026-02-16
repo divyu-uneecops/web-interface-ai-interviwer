@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
     RESEND_OTP: "/admin/auth/user/verify/request-otp",
   },
   JOB_OPENING: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/{objectId}/records/{id}",
     DETAIL: "/api/objects/{objectId}/records/{id}",

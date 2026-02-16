@@ -137,9 +137,11 @@ export function CreateJobModal({
           // Create mode - create new job
           const payload = transformToCreateJobPayload(
             values,
-            form?.createJobs || ""
+            mappingValues?.jobOpening
           );
-          const response = await jobService.createJobOpening({}, payload);
+          const response = await jobService.createJobOpening({}, payload, {
+            objectId: views?.["jobs"]?.objectId || "",
+          });
           toast.success(response?.message || "Job created successfully", {
             duration: 8000,
           });
@@ -262,7 +264,7 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.jobOpening?.industry?.map(
+                    {(mappingValues?.jobOpening?.industry?.values ?? []).map(
                       (option, index) => (
                         <SelectItem key={index} value={option}>
                           {option}
@@ -290,7 +292,7 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.jobOpening?.jobLevel?.map(
+                    {(mappingValues?.jobOpening?.jobLevel?.values ?? []).map(
                       (option, index) => (
                         <SelectItem key={index} value={option}>
                           {option}
@@ -318,7 +320,7 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.jobOpening?.jobType?.map(
+                    {(mappingValues?.jobOpening?.jobType?.values ?? []).map(
                       (option, index) => (
                         <SelectItem key={index} value={option}>
                           {option}
@@ -477,11 +479,13 @@ export function CreateJobModal({
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mappingValues?.jobOpening?.status?.map((option, index) => (
-                      <SelectItem key={index} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    {(mappingValues?.jobOpening?.status?.values ?? []).map(
+                      (option, index) => (
+                        <SelectItem key={index} value={option}>
+                          {option}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>

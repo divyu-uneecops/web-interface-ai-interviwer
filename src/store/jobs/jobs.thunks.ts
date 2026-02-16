@@ -43,16 +43,17 @@ export const fetchFormProperties = createAsyncThunk(
 
       // Extract options for jobLevel, industry, and jobType fields
 
-      const result: Record<string, Record<string, any[]>> = {};
+      const result: Record<
+        string,
+        Record<
+          string,
+          { id: string; name: string; values: any[]; fields: any[] }
+        >
+      > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
           result[index === 0 ? "jobOpening" : "createRound"] =
-            extractFormProperties(
-              item.value,
-              index === 0
-                ? ["jobLevel", "industry", "jobType", "status"]
-                : ["roundType", "language", "duration", "reminderTime"]
-            );
+            extractFormProperties(item.value);
         }
       });
 
@@ -65,22 +66,26 @@ export const fetchFormProperties = createAsyncThunk(
   }
 );
 
-const extractFormProperties = (formProperties: any[], targets: string[]) => {
+const extractFormProperties = (formProperties: any[]) => {
   if (!Array.isArray(formProperties)) {
     return {};
   }
-  const result: Record<string, any[]> = {};
+  const result: Record<
+    string,
+    { id: string; name: string; values: any[]; fields: any[] }
+  > = {};
 
   for (const section of formProperties) {
     if (Array.isArray(section?.fields || [])) {
       for (const field of section?.fields || []) {
-        if (targets.includes(field?.key || "")) {
-          result[field?.key || ""] = Array.isArray(
-            field?.optionsConfig?.values || []
-          )
+        result[field?.key || ""] = {
+          id: field?._id,
+          name: field?.name,
+          values: Array.isArray(field?.optionsConfig?.values || [])
             ? field?.optionsConfig?.values
-            : [];
-        }
+            : [],
+          fields: field?.fields || [],
+        };
       }
     }
   }

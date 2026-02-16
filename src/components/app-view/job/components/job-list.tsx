@@ -84,10 +84,12 @@ export default function JobList() {
       id: "status",
       label: "Status",
       options:
-        mappingValues?.jobOpening?.status?.map((status: string) => ({
-          value: status,
-          label: status,
-        })) || [],
+        (mappingValues?.jobOpening?.status?.values ?? []).map(
+          (status: string) => ({
+            value: status,
+            label: status,
+          })
+        ) || [],
     },
   ];
 

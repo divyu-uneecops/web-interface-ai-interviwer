@@ -4,7 +4,10 @@ export interface CreateJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void; // Callback after successful create/update
-  mappingValues: Record<string, Record<string, any[]>>;
+  mappingValues: Record<
+    string,
+    Record<string, { id?: string; name?: string; values: any[]; fields: any[] }>
+  >;
   form: Record<string, any>;
   views: Record<string, any>;
   isEditMode?: boolean; // If provided, modal will be in edit mode

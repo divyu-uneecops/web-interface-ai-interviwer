@@ -125,7 +125,11 @@ export function CreateJobModal({
             dirtyFields[fieldKey] = true;
           });
 
-          const payload = transformToUpdateJobPayload(values, dirtyFields);
+          const payload = transformToUpdateJobPayload(
+            values,
+            dirtyFields,
+            mappingValues?.jobOpening
+          );
           const response = await jobService.updateJobOpening(
             { id: jobId, objectId: views?.["jobs"]?.objectId || "" },
             payload

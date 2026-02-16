@@ -301,7 +301,11 @@ export const transformToCreateJobPayload = (
 
 export const transformToUpdateJobPayload = (
   values: JobFormData,
-  dirtyFields: Partial<Record<keyof JobFormData, boolean | any>>
+  dirtyFields: Partial<Record<keyof JobFormData, boolean | any>>,
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   const valuesArray: any[] = [];
   const propertyIds: string[] = [];
@@ -314,108 +318,108 @@ export const transformToUpdateJobPayload = (
   // Title
   if (isDirty("title")) {
     valuesArray.push({
-      propertyId: "69525644c9ba83a076aac414",
+      propertyId: mappingValues?.title?.id || "",
       key: "title",
       value: values?.title || "",
     });
-    propertyIds.push("69525644c9ba83a076aac414");
+    propertyIds.push(mappingValues?.title?.id || "");
   }
 
   // Industry
   if (isDirty("industry")) {
     valuesArray.push({
-      propertyId: "695257bfc9ba83a076aac41c",
+      propertyId: mappingValues?.industry?.id || "",
       key: "industry",
       value: values?.industry || "",
     });
-    propertyIds.push("695257bfc9ba83a076aac41c");
+    propertyIds.push(mappingValues?.industry?.id || "");
   }
 
   // Job Level
   if (isDirty("jobLevel")) {
     valuesArray.push({
-      propertyId: "695257f8c9ba83a076aac41f",
+      propertyId: mappingValues?.jobLevel?.id || "",
       key: "jobLevel",
       value: values?.jobLevel || "",
     });
-    propertyIds.push("695257f8c9ba83a076aac41f");
+    propertyIds.push(mappingValues?.jobLevel?.id || "");
   }
 
   // Job Type
   if (isDirty("jobType")) {
     valuesArray.push({
-      propertyId: "69525830c9ba83a076aac422",
+      propertyId: mappingValues?.jobType?.id || "",
       key: "jobType",
       value: values?.jobType || "",
     });
-    propertyIds.push("69525830c9ba83a076aac422");
+    propertyIds.push(mappingValues?.jobType?.id || "");
   }
 
   // Min Experience
   if (isDirty("minExperience")) {
     valuesArray.push({
-      propertyId: "69525880c9ba83a076aac425",
+      propertyId: mappingValues?.minExp?.id || "",
       key: "minExp",
       value: values?.minExperience,
     });
-    propertyIds.push("69525880c9ba83a076aac425");
+    propertyIds.push(mappingValues?.minExp?.id || "");
   }
 
   // Max Experience
   if (isDirty("maxExperience")) {
     valuesArray.push({
-      propertyId: "69525898c9ba83a076aac427",
+      propertyId: mappingValues?.maxExp?.id || "",
       key: "maxExp",
       value: values?.maxExperience,
     });
-    propertyIds.push("69525898c9ba83a076aac427");
+    propertyIds.push(mappingValues?.maxExp?.id || "");
   }
 
   // Description
   if (isDirty("description")) {
     valuesArray.push({
-      propertyId: "695258ccc9ba83a076aac42a",
+      propertyId: mappingValues?.description?.id || "",
       key: "description",
       value: values?.description || "",
     });
-    propertyIds.push("695258ccc9ba83a076aac42a");
+    propertyIds.push(mappingValues?.description?.id || "");
   }
 
   // No. of Openings
   if (isDirty("noOfOpenings")) {
     valuesArray.push({
-      propertyId: "695258e5c9ba83a076aac42c",
+      propertyId: mappingValues?.numOfOpenings?.id || "",
       key: "numOfOpenings",
       value: values?.noOfOpenings,
     });
-    propertyIds.push("695258e5c9ba83a076aac42c");
+    propertyIds.push(mappingValues?.numOfOpenings?.id || "");
   }
 
   // Status
   if (isDirty("status")) {
     valuesArray.push({
-      propertyId: "6952595cc9ba83a076aac431",
+      propertyId: mappingValues?.status?.id || "",
       key: "status",
       value: values?.status || "",
     });
-    propertyIds.push("6952595cc9ba83a076aac431");
+    propertyIds.push(mappingValues?.status?.id || "");
   }
 
   // Required Skills
   if (isDirty("skills")) {
     const requiredSkills = (values.skills || []).map((skill) => [
       {
-        propertyId: "695259b2c9ba83a076aac434",
+        propertyId: mappingValues?.requiredSkills?.fields?.[0]?._id || "",
         key: "skill",
         value: skill,
       },
     ]);
     valuesArray.push({
-      propertyId: "695259d0c9ba83a076aac435",
+      propertyId: mappingValues?.requiredSkills?.id || "",
       key: "requiredSkills",
       value: requiredSkills,
     });
-    propertyIds.push("695259d0c9ba83a076aac435");
+    propertyIds.push(mappingValues?.requiredSkills?.id || "");
   }
 
   return {

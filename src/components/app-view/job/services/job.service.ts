@@ -68,17 +68,17 @@ export const jobService = {
       payload,
       signal
     ),
-  deleteApplicant: (id: string) =>
+  deleteApplicant: (urlIds: Record<string, string>) =>
     serverInterfaceService.delete(
-      buildUrl(API_ENDPOINTS.APPLICANT.DELETE, { id })
+      buildUrl(API_ENDPOINTS.APPLICANT.DELETE, urlIds)
     ),
   updateApplicant: (
-    id: string,
+    urlIds: { id: string; objectId: string },
     payload: Record<string, any>,
     signal?: AbortSignal
   ) =>
     serverInterfaceService.patch(
-      buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, { id }),
+      buildUrl(API_ENDPOINTS.APPLICANT.UPDATE, urlIds),
       payload
     ),
   createInterviewFormInstance: (
@@ -106,17 +106,18 @@ export const jobService = {
   getRounds: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string; viewId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.CREATE_ROUND.LIST,
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.LIST, urlIds),
       params,
       payload,
       signal
     ),
-  deleteRound: (id: string) =>
+  deleteRound: (urlIds: { id: string; objectId: string }) =>
     serverInterfaceService.delete(
-      buildUrl(API_ENDPOINTS.CREATE_ROUND.DELETE, { id })
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.DELETE, urlIds)
     ),
   uploadApplicantAttachment: (
     payload: Record<string, any>,

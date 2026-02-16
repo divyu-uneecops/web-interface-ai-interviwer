@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   Dialog,
@@ -62,6 +63,8 @@ export function AddApplicantModal({
   isEditMode = false,
   applicantDetail,
   applicantId,
+  form,
+  views,
 }: AddApplicantModalProps) {
   const [applicantTab, setApplicantTab] = useState<"single" | "bulk">("single");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,9 +92,10 @@ export function AddApplicantModal({
           // Handle file upload if attachment exists and is new
           let attachmentPath: string | undefined;
           if (values?.attachment && formik?.touched?.attachment) {
+            attachmentPath = `${uuidv4()}/${values?.attachment?.name}`;
             // Step 1: Get S3 upload params from API
             const s3Data = await jobService.uploadApplicantAttachment({
-              name: `695c928dc9ba83a076aac6cd//${values?.attachment?.name}`,
+              name: attachmentPath,
               size: values?.attachment?.size,
             });
 
@@ -116,7 +120,6 @@ export function AddApplicantModal({
               s3Data?.url,
               formData
             );
-            attachmentPath = values?.attachment?.name;
           }
           // Calculate dirty fields by comparing current values with initial values
           // Use Formik's touched fields to determine which fields have been edited
@@ -133,7 +136,10 @@ export function AddApplicantModal({
             attachmentPath
           );
           const response = await jobService.updateApplicant(
-            applicantId,
+            {
+              id: applicantId,
+              objectId: views?.["applicants"]?.objectId || "",
+            },
             updatePayload
           );
           toast.success(response?.message || "Applicant updated successfully", {
@@ -143,13 +149,13 @@ export function AddApplicantModal({
           // Handle file upload if attachment exists
           let attachmentPath: string | undefined;
           if (values?.attachment) {
-            attachmentPath = values?.attachment?.name;
+            attachmentPath = `${uuidv4()}/${values?.attachment?.name}`;
           }
           // Step 1: Get S3 upload params from API
           if (values?.attachment) {
             // This request returns S3 pre-signed POST data
             const s3Data = await jobService.uploadApplicantAttachment({
-              name: `695c928dc9ba83a076aac6cd//${values?.attachment?.name}`,
+              name: attachmentPath,
               size: values?.attachment?.size,
             });
 
@@ -178,7 +184,8 @@ export function AddApplicantModal({
           const payload = transformApplicantToCreatePayload(
             values,
             jobInfo.jobId,
-            attachmentPath
+            attachmentPath || "",
+            form?.createApplicants || ""
           );
           // Create new applicant
           const response = await jobService.createApplicant(payload);

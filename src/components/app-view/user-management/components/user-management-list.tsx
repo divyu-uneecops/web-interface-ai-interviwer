@@ -42,7 +42,7 @@ import {
 import { useAppSelector } from "@/store/hooks";
 
 const SEARCH_DEBOUNCE_MS = 400;
-const PAGE_LIMIT = 15;
+const PAGE_LIMIT = 10;
 
 export default function UserManagementList() {
   const [searchQuery, setSearchQuery] = useState("");

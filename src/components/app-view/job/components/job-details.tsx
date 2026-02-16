@@ -308,31 +308,45 @@ export default function JobDetails() {
       return;
     }
 
-    const jobIdFilter = {
-      key: "#.records.jobID",
-      operator: "$eq",
-      value: params?.id,
-      type: "text",
-    };
-
     const [
       roundsResult,
       applicantsResult,
       interviewsScheduledResult,
       interviewsCompletedResult,
     ] = await Promise.allSettled([
-      jobService.getRounds(listParams, {
-        ...appIdPayload,
-        filters: {
-          $and: [jobIdFilter],
+      jobService.getRounds(
+        listParams,
+        {
+          ...appIdPayload,
+          filters: {
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
+            ],
+          },
         },
-      }),
+        {
+          objectId: views?.["rounds"]?.objectId || "",
+          viewId: views?.["rounds"]?.viewId || "",
+        }
+      ),
       jobService.getApplicants(
         listParams,
         {
           ...appIdPayload,
           filters: {
-            $and: [jobIdFilter],
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
+            ],
           },
         },
         {
@@ -346,7 +360,12 @@ export default function JobDetails() {
           ...appIdPayload,
           filters: {
             $and: [
-              jobIdFilter,
+              {
+                key: "#.records.jobId",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
               {
                 key: "#.records.status",
                 operator: "$in",
@@ -367,7 +386,12 @@ export default function JobDetails() {
           ...appIdPayload,
           filters: {
             $and: [
-              jobIdFilter,
+              {
+                key: "#.records.jobId",
+                operator: "$eq",
+                value: params?.id,
+                type: "text",
+              },
               {
                 key: "#.records.status",
                 operator: "$in",
@@ -533,22 +557,29 @@ export default function JobDetails() {
         offset: currentRoundsOffset,
       };
 
-      const response = await jobService.getRounds(params_query, {
-        filters: {
-          $and: [
-            {
-              key: "#.records.jobID",
-              operator: "$eq",
-              value: params?.id as string,
-              type: "text",
-            },
-          ],
+      const response = await jobService.getRounds(
+        params_query,
+        {
+          filters: {
+            $and: [
+              {
+                key: "#.records.jobID",
+                operator: "$eq",
+                value: params?.id as string,
+                type: "text",
+              },
+            ],
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        sort: {
-          createdOn: "DESC",
-        },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["rounds"]?.objectId || "",
+          viewId: views?.["rounds"]?.viewId || "",
+        }
+      );
       const result = transformAPIResponseToRounds(response.data, response.page);
       setRounds(result.rounds);
       setRoundsPagination({
@@ -590,7 +621,7 @@ export default function JobDetails() {
 
     try {
       const listParams: Record<string, any> = {
-        limit: PAGE_LIMIT,
+        limit: 1,
         offset: currentJobInterviewsOffset,
         ...(jobInterviewsSearchKeyword
           ? { query: jobInterviewsSearchKeyword }
@@ -847,37 +878,19 @@ export default function JobDetails() {
         id: "applicants",
         header: "Applicants",
         align: "left",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a]">
-            {typeof interview?.candidateName === "string"
-              ? interview.candidateName
-              : interview?.candidateName?.name}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateName,
       },
       {
         id: "email",
         header: "Email",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {typeof interview?.candidateEmail === "string"
-              ? interview.candidateEmail
-              : interview?.candidateEmail?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateEmail?.label,
       },
       {
         id: "round",
         header: "Round",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {typeof interview?.roundName === "string"
-              ? interview.roundName
-              : interview?.roundName?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.roundName?.label,
       },
       {
         id: "status",
@@ -920,11 +933,7 @@ export default function JobDetails() {
         id: "interviewDate",
         header: "Interview date",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {formatInterviewDate(interview?.interviewDate)}
-          </span>
-        ),
+        accessor: (interview) => formatInterviewDate(interview?.interviewDate),
       },
     ],
     []
@@ -955,7 +964,10 @@ export default function JobDetails() {
   const handleDeleteApplicant = async (id: string) => {
     if (isEmpty(id)) return;
     try {
-      const response = await jobService.deleteApplicant(id);
+      const response = await jobService.deleteApplicant({
+        id,
+        objectId: views?.["applicants"]?.objectId || "",
+      });
       toast.success(response ? response : "Applicant deleted successfully", {
         duration: 8000, // 8 seconds
       });
@@ -974,7 +986,10 @@ export default function JobDetails() {
   const handleDeleteRound = async (id: string) => {
     if (isEmpty(id)) return;
     try {
-      const response = await jobService.deleteRound(id);
+      const response = await jobService.deleteRound({
+        id,
+        objectId: views?.["rounds"]?.objectId || "",
+      });
       toast.success(response ? response : "Round deleted successfully", {
         duration: 8000, // 8 seconds
       });
@@ -1495,6 +1510,7 @@ export default function JobDetails() {
             fetchJobDetail();
           }}
           mappingValues={mappingValues}
+          form={form}
           views={views}
           isEditMode={true}
           jobDetail={{
@@ -1524,6 +1540,8 @@ export default function JobDetails() {
           }}
           mappingValues={mappingValues}
           jobId={(params?.id as string) || ""}
+          form={form}
+          views={views}
         />
       )}
 
@@ -1556,6 +1574,8 @@ export default function JobDetails() {
             reminderTime: editingRound?.reminderTime || "3 days",
           }}
           roundId={editingRound?.id}
+          form={form}
+          views={views}
         />
       )}
 
@@ -1569,6 +1589,8 @@ export default function JobDetails() {
             // Handle applicant submission here
             fetchApplicants();
           }}
+          form={form}
+          views={views}
         />
       )}
 
@@ -1598,6 +1620,8 @@ export default function JobDetails() {
             // Handle applicant update here
             fetchApplicants();
           }}
+          form={form}
+          views={views}
         />
       )}
 

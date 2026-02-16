@@ -17,21 +17,14 @@ export function transformAPIResponseToInterviews(
       valuesMap[val.key] = val.value;
     });
 
-    // Extract candidate name from formUser array
-    let candidateName = "N/A";
-    const formUser = valuesMap.formUser;
-    if (Array.isArray(formUser) && formUser.length > 0) {
-      candidateName = formUser[0] || "N/A";
-    } else if (typeof formUser === "string") {
-      candidateName = formUser;
-    }
+    const formUser = valuesMap.formUser?.[0]?.name || "N/A";
 
     // Normalize status
     const statusValue = valuesMap.status;
 
     return {
       id: item.id,
-      candidateName: candidateName,
+      candidateName: formUser,
       candidateEmail: valuesMap.applicantEmail || "N/A",
       jobTitle: valuesMap.jobTitle || "N/A",
       interviewerName: valuesMap.interviewerName || "N/A",

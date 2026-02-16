@@ -35,6 +35,8 @@ export interface CreateRoundModalProps {
   isEditMode?: boolean;
   roundDetail?: RoundFormData | null;
   roundId?: string;
+  form: Record<string, any>;
+  views: Record<string, any>;
 }
 
 export interface RoundFormData {

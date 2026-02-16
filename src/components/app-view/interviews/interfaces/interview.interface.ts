@@ -2,7 +2,7 @@ export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled";
 
 export interface InterviewDetail {
   id: string;
-  candidateName: Record<string, any>;
+  candidateName: string;
   candidateEmail: Record<string, any>;
   jobTitle: Record<string, any>;
   interviewerName: Record<string, any>;

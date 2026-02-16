@@ -59,7 +59,7 @@ export function InterviewerList() {
       id: "roundType",
       label: "Round Type",
       options:
-        mappingValues?.interviewers?.roundType?.map((status: string) => ({
+        mappingValues?.createRound?.roundType?.map((status: string) => ({
           value: status,
           label: status,
         })) || [],
@@ -68,7 +68,7 @@ export function InterviewerList() {
       id: "language",
       label: "Language",
       options:
-        mappingValues?.interviewers?.language?.map((status: string) => ({
+        mappingValues?.createRound?.language?.map((status: string) => ({
           value: status,
           label: status,
         })) || [],
@@ -77,7 +77,7 @@ export function InterviewerList() {
       id: "voice",
       label: "Voice",
       options:
-        mappingValues?.interviewers?.language?.map((status: string) => ({
+        mappingValues?.interviewers?.voice?.map((status: string) => ({
           value: status,
           label: status,
         })) || [],

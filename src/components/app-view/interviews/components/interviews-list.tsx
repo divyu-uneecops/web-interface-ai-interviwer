@@ -28,6 +28,7 @@ import {
 import { statusStyles } from "../constants/interview.constants";
 import { DataTableSkeleton } from "@/components/shared/components/data-table-skeleton";
 import { interviewService } from "../services/interview.service";
+import { useAppSelector } from "@/store/hooks";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -48,6 +49,7 @@ export default function InterviewsList() {
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     status: [],
   });
+  const { views } = useAppSelector((state) => state.appState);
 
   // Define filter groups for interviews
   const interviewFilterGroups: FilterGroup[] = [
@@ -95,28 +97,35 @@ export default function InterviewsList() {
 
     try {
       const params: Record<string, any> = {
-        limit: PAGE_LIMIT,
+        limit: 1,
         offset: currentOffset,
         ...(searchKeyword ? { query: searchKeyword } : {}),
       };
 
-      const response = await interviewService.getInterviewsFromView(params, {
-        filters: {
-          $and: [
-            ...(appliedFilters?.status?.length > 0
-              ? [
-                  {
-                    key: "#.records.status",
-                    operator: "$in",
-                    value: appliedFilters.status,
-                    type: "select",
-                  },
-                ]
-              : []),
-          ],
+      const response = await interviewService.getInterviewsFromView(
+        params,
+        {
+          filters: {
+            $and: [
+              ...(appliedFilters?.status?.length > 0
+                ? [
+                    {
+                      key: "#.records.status",
+                      operator: "$in",
+                      value: appliedFilters.status,
+                      type: "select",
+                    },
+                  ]
+                : []),
+            ],
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+        {
+          objectId: views?.["interviews"]?.objectId || "",
+          viewId: views?.["interviews"]?.viewId || "",
+        }
+      );
 
       // Transform API response
       const result = transformAPIResponseToInterviews(
@@ -166,41 +175,25 @@ export default function InterviewsList() {
         id: "applicants",
         header: "Applicants",
         align: "left",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a]">
-            {interview?.candidateName?.name}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateName,
       },
       {
         id: "email",
         header: "Email",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.candidateEmail?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.candidateEmail?.label,
       },
       {
         id: "job",
         header: "Job title",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.jobTitle?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.jobTitle?.label,
       },
       {
         id: "round",
         header: "Round",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {interview?.roundName?.label}
-          </span>
-        ),
+        accessor: (interview) => interview?.roundName?.label,
       },
       {
         id: "status",
@@ -243,11 +236,7 @@ export default function InterviewsList() {
         id: "interviewDate",
         header: "Interview date",
         align: "center",
-        cell: (interview) => (
-          <span className="text-sm font-normal text-[#0a0a0a] text-center">
-            {formatInterviewDate(interview?.interviewDate)}
-          </span>
-        ),
+        accessor: (interview) => formatInterviewDate(interview?.interviewDate),
       },
     ],
     []

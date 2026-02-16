@@ -209,6 +209,8 @@ export function CreateRoundModal({
   isEditMode = false,
   roundDetail,
   roundId,
+  form,
+  views,
 }: CreateRoundModalProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -261,7 +263,10 @@ export function CreateRoundModal({
             dirtyFields
           );
           const response = await roundService.updateRound(
-            roundId,
+            {
+              id: roundId,
+              objectId: views?.["rounds"]?.objectId || "",
+            },
             updatePayload
           );
           toast.success(response?.message || "Round updated successfully", {
@@ -269,7 +274,11 @@ export function CreateRoundModal({
           });
         } else {
           // Create new round
-          const payload = transformToCreateRoundPayload(values, jobId);
+          const payload = transformToCreateRoundPayload(
+            values,
+            jobId,
+            form?.createRounds || ""
+          );
           const response = await roundService.createRound({}, payload);
           toast.success(response?.message || "Round created successfully", {
             duration: 8000,
@@ -364,12 +373,23 @@ export function CreateRoundModal({
         });
       }
 
-      const response = await interviewerService.getInterviewers(params, {
-        filters: {
-          $and: filterConditions,
+      const response = await roundService.getInterviewers(
+        params,
+        {
+          filters: {
+            $and: filterConditions,
+          },
+          sort: {
+            createdOn: "DESC",
+          },
+          appId: "69521cd1c9ba83a076aac3ae",
         },
-        appId: "69521cd1c9ba83a076aac3ae",
-      });
+
+        {
+          objectId: views?.["interviewers"]?.objectId || "",
+          viewId: views?.["interviewers"]?.viewId || "",
+        }
+      );
 
       const result = transformAPIResponseToInterviewers(
         response?.data || [],

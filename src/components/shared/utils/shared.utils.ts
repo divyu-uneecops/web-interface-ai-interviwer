@@ -3,12 +3,15 @@ import { RoundFormData } from "../interfaces/shared.interface";
 export const transformToCreateRoundPayload = (
   values: RoundFormData,
   jobId: string,
-  formId: string
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   // Skills for round (each as its own array of one object)
   const skillsForRound = (values?.skills || []).map((skill) => [
     {
-      propertyId: "69627d06c9ba83a076aac8f8",
+      propertyId: mappingValues?._skillForRound?.fields?.[0]?._id || "",
       key: "_skill_",
       value: skill,
     },
@@ -26,12 +29,12 @@ export const transformToCreateRoundPayload = (
             ) {
               return [
                 {
-                  propertyId: "69627d97c9ba83a076aac8fa",
+                  propertyId: mappingValues?._questions?.fields?.[0]?._id || "",
                   key: "_question",
                   value: questionText,
                 },
                 {
-                  propertyId: "69627dcdc9ba83a076aac8fb",
+                  propertyId: mappingValues?._questions?.fields?.[1]?._id || "",
                   key: "_qType",
                   value: "hybrid",
                 },
@@ -45,125 +48,125 @@ export const transformToCreateRoundPayload = (
   // Main values array (follows order and structure from example JSON)
   const valuesArray = [
     {
-      propertyId: "69525a92c9ba83a076aac43d",
+      propertyId: mappingValues?.roundName?.id || "",
       key: "roundName",
       value: values?.roundName || "",
     },
     {
-      propertyId: "69525ad1c9ba83a076aac43f",
+      propertyId: mappingValues?.roundType?.id || "",
       key: "roundType",
       value: values?.roundType || "",
     },
     {
-      propertyId: "69525aefc9ba83a076aac440",
+      propertyId: mappingValues?.roundObjective?.id || "",
       key: "roundObjective",
       value: values?.roundObjective || "",
     },
     {
-      propertyId: "69525b69c9ba83a076aac443",
+      propertyId: mappingValues?.language?.id || "",
       key: "language",
       value: values?.language || "",
     },
     {
-      propertyId: "69525bb8c9ba83a076aac448",
+      propertyId: mappingValues?.duration?.id || "",
       key: "duration",
       value: values?.duration || "",
     },
     {
-      propertyId: "69525c1cc9ba83a076aac44a",
+      propertyId: mappingValues?.accessibility?.id || "",
       key: "accessibility",
       value: "Private", // TODO: Needs to Change in future
     },
     {
-      propertyId: "69525c85c9ba83a076aac44d",
+      propertyId: mappingValues?.questionType?.id || "",
       key: "questionsType",
       value: values?.questionType || "",
     },
     {
-      propertyId: "69525ca7c9ba83a076aac44e",
+      propertyId: mappingValues?.numOfAiQuestions?.id || "",
       key: "numOfAiQuestions",
       value: values?.aiGeneratedQuestions,
     },
     {
-      propertyId: "69525dd4c9ba83a076aac454",
+      propertyId: mappingValues?.interviewInstructions?.id || "",
       key: "interviewInstructions",
       value: values?.interviewInstructions || "",
     },
     {
-      propertyId: "69525decc9ba83a076aac455",
+      propertyId: mappingValues?.allowSkip?.id || "",
       key: "allowSkip",
       value: values?.allowSkip,
     },
     {
-      propertyId: "69525e05c9ba83a076aac456",
+      propertyId: mappingValues?.sendReminder?.id || "",
       key: "sendReminder",
       value: values?.sendReminder,
     },
     {
-      propertyId: "69576660c9ba83a076aac596",
+      propertyId: mappingValues?.formUser?.id || "",
       key: "formUser",
       value: ["6936a4d92276e3fc3ac7b13b"], // Replace with actual user id if needed
     },
     {
-      propertyId: "6960b827c9ba83a076aac89b",
+      propertyId: mappingValues?.jobName?.id || "",
       key: "jobName",
       value: jobId || "",
     },
     {
-      propertyId: "6960b94ec9ba83a076aac89c",
+      propertyId: mappingValues?.interviewerName?.id || "",
       key: "interviewerName",
       value: "695f4c61c9ba83a076aac7de", // Replace with actual interviewer name if needed
     },
     {
-      propertyId: "69626f4dc9ba83a076aac8f2",
+      propertyId: mappingValues?.jobID?.id || "",
       key: "jobID",
       value: jobId || "",
     },
     {
-      propertyId: "69626f8fc9ba83a076aac8f3",
+      propertyId: mappingValues?.interviewerID?.id || "",
       key: "interviewerID",
       value: "695f4c61c9ba83a076aac7de", // Replace as needed
     },
     {
-      propertyId: "69627d2ec9ba83a076aac8f9",
+      propertyId: mappingValues?._skillForRound?.id || "",
       key: "_skillForRound",
       value: skillsForRound,
     },
     {
-      propertyId: "69627df8c9ba83a076aac8fc",
+      propertyId: mappingValues?._questions?.id || "",
       key: "_questions",
       value: questions,
     },
   ];
 
   const propertyIds = [
-    "69525a07c9ba83a076aac437",
-    "69525a92c9ba83a076aac43d",
-    "69525ad1c9ba83a076aac43f",
-    "69525aefc9ba83a076aac440",
-    "69525b69c9ba83a076aac443",
-    "69525bb8c9ba83a076aac448",
-    "69525bf5c9ba83a076aac449",
-    "69525c1cc9ba83a076aac44a",
-    "69525c85c9ba83a076aac44d",
-    "69525ca7c9ba83a076aac44e",
-    "69525dd4c9ba83a076aac454",
-    "69525decc9ba83a076aac455",
-    "69525e05c9ba83a076aac456",
-    "69576660c9ba83a076aac596",
-    "6960b827c9ba83a076aac89b",
-    "6960b94ec9ba83a076aac89c",
-    "69626f4dc9ba83a076aac8f2",
-    "69626f8fc9ba83a076aac8f3",
-    "69627d2ec9ba83a076aac8f9",
-    "69627df8c9ba83a076aac8fc",
-    "69525e6bc9ba83a076aac458",
-    "69525e47c9ba83a076aac457",
+    mappingValues?.roundId?.id || "",
+    mappingValues?.roundName?.id || "",
+    mappingValues?.roundType?.id || "",
+    mappingValues?.roundObjective?.id || "",
+    mappingValues?.language?.id || "",
+    mappingValues?.duration?.id || "",
+    mappingValues?.accessibility?.id || "",
+    mappingValues?.questionType?.id || "",
+    mappingValues?.numOfAiQuestions?.id || "",
+    mappingValues?.interviewInstructions?.id || "",
+    mappingValues?.allowSkip?.id || "",
+    mappingValues?.sendReminder?.id || "",
+    mappingValues?.formUser?.id || "",
+    mappingValues?.accessLink?.id || "",
+    mappingValues?.jobName?.id || "",
+    mappingValues?.interviewerName?.id || "",
+    mappingValues?.jobID?.id || "",
+    mappingValues?.interviewerID?.id || "",
+    mappingValues?._skillForRound?.id || "",
+    mappingValues?._questions?.id || "",
+    mappingValues?.reminderTime?.id || "",
+    mappingValues?.numOfCustomQuestions?.id || "",
   ];
 
   if (values?.sendReminder) {
     valuesArray.push({
-      propertyId: "69525e47c9ba83a076aac457",
+      propertyId: mappingValues?.reminderTime?.id || "",
       key: "reminderTime",
       value: values?.reminderTime,
     });
@@ -171,7 +174,7 @@ export const transformToCreateRoundPayload = (
 
   if (values?.questionType === "hybrid") {
     valuesArray.push({
-      propertyId: "69525e6bc9ba83a076aac458",
+      propertyId: mappingValues?.numOfCustomQuestions?.id || "",
       key: "numOfCustomQuestions",
       value: values?.customQuestions,
     });
@@ -180,14 +183,6 @@ export const transformToCreateRoundPayload = (
   return {
     values: valuesArray,
     propertyIds,
-    flows: [
-      {
-        stageId: "1",
-        status: "PENDING",
-      },
-    ],
-    status: "PENDING",
-    formId: formId,
   };
 };
 

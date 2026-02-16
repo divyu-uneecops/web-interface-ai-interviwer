@@ -63,6 +63,7 @@ export function AddApplicantModal({
   isEditMode = false,
   applicantDetail,
   applicantId,
+  mappingValues,
   form,
   views,
 }: AddApplicantModalProps) {
@@ -185,10 +186,12 @@ export function AddApplicantModal({
             values,
             jobInfo.jobId,
             attachmentPath || "",
-            form?.createApplicants || ""
+            mappingValues?.applicants || ""
           );
           // Create new applicant
-          const response = await jobService.createApplicant(payload);
+          const response = await jobService.createApplicant(payload, {
+            objectId: views?.["applicants"]?.objectId || "",
+          });
           toast.success(response?.message || "Applicant added successfully", {
             duration: 8000,
           });

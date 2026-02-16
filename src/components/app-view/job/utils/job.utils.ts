@@ -516,41 +516,44 @@ export const transformApplicantToCreatePayload = (
   values: ApplicantForm,
   jobId: string,
   attachmentPath: string,
-  formId: string
+  mappingValues: Record<
+    string,
+    { id?: string; name?: string; values: any[]; fields?: any[] }
+  >
 ) => {
   const valuesArray: any[] = [];
 
   // Status
   valuesArray.push({
-    propertyId: "695259a6c9ba83a076aac433",
+    propertyId: mappingValues?.status?.id || "",
     key: "status",
     value: "Applied",
   });
 
   // Form User
   valuesArray.push({
-    propertyId: "695766c0c9ba83a076aac598",
+    propertyId: mappingValues?.formUser?.id || "",
     key: "formUser",
     value: ["6936a4d92276e3fc3ac7b13b"], // TODO: Needs to Change in future
   });
 
   // Name
   valuesArray.push({
-    propertyId: "695c91fec9ba83a076aac6c8",
+    propertyId: mappingValues?.name?.id || "",
     key: "name",
     value: values?.name,
   });
 
   // Email
   valuesArray.push({
-    propertyId: "695c9244c9ba83a076aac6c9",
+    propertyId: mappingValues?.email?.id || "",
     key: "email",
     value: values?.email,
   });
 
   // Phone
   valuesArray.push({
-    propertyId: "695c9276c9ba83a076aac6ca",
+    propertyId: mappingValues?.phone?.id || "",
     key: "phone",
     value: values?.contact,
   });
@@ -558,7 +561,7 @@ export const transformApplicantToCreatePayload = (
   // Attachment (if provided)
   if (attachmentPath) {
     valuesArray.push({
-      propertyId: "695c928dc9ba83a076aac6cd",
+      propertyId: mappingValues?.attachment?.id || "",
       key: "attachment",
       value: [attachmentPath],
     });
@@ -566,41 +569,33 @@ export const transformApplicantToCreatePayload = (
 
   // jobTitle - value assumed from caller or fixed, change as needed
   valuesArray.push({
-    propertyId: "6960ab8ec9ba83a076aac883",
+    propertyId: mappingValues?.jobTitle?.id || "",
     key: "jobTitle",
     value: jobId ?? "", // This should be the jobTitle propertyId or value, update as needed
   });
 
   // jobID
   valuesArray.push({
-    propertyId: "69632938c9ba83a076aac901",
+    propertyId: mappingValues?.jobID?.id || "",
     key: "jobID",
     value: jobId,
   });
 
   // Build propertyIds array (order must match the values doc in prompt, attachments/jobTitle might be missing if not provided)
   const propertyIds = [
-    "695259a6c9ba83a076aac433",
-    "695766c0c9ba83a076aac598",
-    "695c91fec9ba83a076aac6c8",
-    "695c9244c9ba83a076aac6c9",
-    "695c9276c9ba83a076aac6ca",
-    "695c928dc9ba83a076aac6cd",
-    "6960ab8ec9ba83a076aac883",
-    "69632938c9ba83a076aac901",
+    mappingValues?.status?.id,
+    mappingValues?.formUser?.id,
+    mappingValues?.name?.id,
+    mappingValues?.email?.id,
+    mappingValues?.phone?.id,
+    mappingValues?.attachment?.id,
+    mappingValues?.jobTitle?.id,
+    mappingValues?.jobID?.id,
   ];
 
   return {
     values: valuesArray,
     propertyIds,
-    flows: [
-      {
-        stageId: "1",
-        status: "PENDING",
-      },
-    ],
-    status: "PENDING",
-    formId: formId,
   };
 };
 

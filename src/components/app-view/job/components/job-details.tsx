@@ -1591,6 +1591,7 @@ export default function JobDetails() {
           }}
           form={form}
           views={views}
+          mappingValues={mappingValues}
         />
       )}
 
@@ -1622,6 +1623,7 @@ export default function JobDetails() {
           }}
           form={form}
           views={views}
+          mappingValues={mappingValues}
         />
       )}
 

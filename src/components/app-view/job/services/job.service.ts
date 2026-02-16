@@ -50,9 +50,13 @@ export const jobService = {
       buildUrl(API_ENDPOINTS.JOB_OPENING.UPDATE, urlIds),
       payload
     ),
-  createApplicant: (payload: Record<string, any>, signal?: AbortSignal) =>
+  createApplicant: (
+    payload: Record<string, any>,
+    urlIds: { objectId: string },
+    signal?: AbortSignal
+  ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.APPLICANT.CREATE,
+      buildUrl(API_ENDPOINTS.APPLICANT.CREATE, urlIds),
       {},
       payload,
       signal

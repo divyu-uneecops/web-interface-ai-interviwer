@@ -19,7 +19,8 @@ export const API_ENDPOINTS = {
     FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   APPLICANT: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/{objectId}/records/{id}",
     UPDATE: "/api/objects/{objectId}/records/{id}",
@@ -33,7 +34,7 @@ export const API_ENDPOINTS = {
     FROM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   CREATE_ROUND: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/{objectId}/records/{id}",
     DELETE: "/api/objects/{objectId}/records/{id}",

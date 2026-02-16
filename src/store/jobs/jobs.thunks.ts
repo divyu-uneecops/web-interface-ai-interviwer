@@ -14,6 +14,8 @@ export const fetchFormProperties = createAsyncThunk(
       const jobOpeningFormId = form.createJobs;
       const createRoundObjectId = views?.rounds?.objectId;
       const createRoundFormId = form.createRounds;
+      const applicantsObjectId = views?.applicants?.objectId;
+      const applicantsFormId = form.createApplicants;
 
       if (!jobOpeningObjectId || !jobOpeningFormId) {
         return rejectWithValue(
@@ -25,7 +27,11 @@ export const fetchFormProperties = createAsyncThunk(
           "Create round form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
       }
-
+      if (!applicantsObjectId || !applicantsFormId) {
+        return rejectWithValue(
+          "Applicants form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
+        );
+      }
       const response = await Promise.allSettled([
         serverInterfaceService.get(
           buildUrl(API_ENDPOINTS.JOB_OPENING.FORM_PROPERTIES, {
@@ -37,6 +43,12 @@ export const fetchFormProperties = createAsyncThunk(
           buildUrl(API_ENDPOINTS.CREATE_ROUND.FORM_PROPERTIES, {
             objectId: createRoundObjectId,
             formId: createRoundFormId,
+          })
+        ),
+        serverInterfaceService.get(
+          buildUrl(API_ENDPOINTS.APPLICANT.FORM_PROPERTIES, {
+            objectId: applicantsObjectId,
+            formId: applicantsFormId,
           })
         ),
       ]);
@@ -52,8 +64,13 @@ export const fetchFormProperties = createAsyncThunk(
       > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result[index === 0 ? "jobOpening" : "createRound"] =
-            extractFormProperties(item.value);
+          result[
+            index === 0
+              ? "jobOpening"
+              : index === 1
+              ? "createRound"
+              : "applicants"
+          ] = extractFormProperties(item.value);
         }
       });
 

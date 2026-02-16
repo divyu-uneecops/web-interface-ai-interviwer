@@ -143,4 +143,8 @@ export interface AddApplicantModalProps {
   applicantId?: string;
   form: Record<string, string>;
   views: Record<string, any>;
+  mappingValues: Record<
+    string,
+    Record<string, { id?: string; name?: string; values: any[]; fields: any[] }>
+  >;
 }

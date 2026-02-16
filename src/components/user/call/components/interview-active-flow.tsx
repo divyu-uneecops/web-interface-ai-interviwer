@@ -35,6 +35,7 @@ import { buildPenaltyPayload } from "../utils/call.utils";
 
 const REMINDER_THRESHOLD_SECONDS = 5 * 60; // 5 minutes
 const DEFAULT_DURATION_MINUTES = 30;
+const PERIODIC_SCREENSHOT_INTERVAL_MS = 2 * 10 * 1000; // 2 minutes
 
 /** Parse round duration string (e.g. "30 mins", "45 minutes", "1 hour") to total seconds. */
 function parseDurationToSeconds(duration: string | undefined): number {
@@ -90,6 +91,7 @@ export function InterviewActiveFlow({
   const totalDurationSecondsRef = useRef(0);
   const fiveMinReminderShownRef = useRef(false);
   const lastReportedFaceWarningRef = useRef<string | null>(null);
+  const interviewActiveRef = useRef(false);
 
   useEffect(() => {
     const video = screenShareVideoRef.current;
@@ -237,6 +239,28 @@ export function InterviewActiveFlow({
     lastReportedFaceWarningRef.current = faceWarning;
     submitPenaltyEvent(faceWarning);
   }, [faceWarning]);
+
+  // Keep ref in sync so interval callback can skip after interview ends
+  useEffect(() => {
+    interviewActiveRef.current =
+      timeRemainingSeconds !== null && timeRemainingSeconds > 0;
+  }, [timeRemainingSeconds]);
+
+  // Send screenshot every 2 minutes while interview is active (depend only on showTipsModal so interval is not recreated every second)
+  useEffect(() => {
+    if (showTipsModal) return;
+
+    const sendPeriodicScreenshot = () => {
+      if (!interviewActiveRef.current) return;
+      submitPenaltyEvent("periodicScreenshot");
+    };
+
+    const intervalId = setInterval(
+      sendPeriodicScreenshot,
+      PERIODIC_SCREENSHOT_INTERVAL_MS
+    );
+    return () => clearInterval(intervalId);
+  }, [showTipsModal]);
 
   // Ensure video plays when component mounts and stream is available
   useEffect(() => {

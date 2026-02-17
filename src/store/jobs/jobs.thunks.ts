@@ -16,6 +16,8 @@ export const fetchFormProperties = createAsyncThunk(
       const createRoundFormId = form.createRounds;
       const applicantsObjectId = views?.applicants?.objectId;
       const applicantsFormId = form.createApplicants;
+      const interviewsObjectId = views?.interviews?.objectId;
+      const interviewsFormId = form.createInterviews;
 
       if (!jobOpeningObjectId || !jobOpeningFormId) {
         return rejectWithValue(
@@ -30,6 +32,12 @@ export const fetchFormProperties = createAsyncThunk(
       if (!applicantsObjectId || !applicantsFormId) {
         return rejectWithValue(
           "Applicants form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
+        );
+      }
+
+      if (!interviewsObjectId || !interviewsFormId) {
+        return rejectWithValue(
+          "Interviews form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
       }
       const response = await Promise.allSettled([
@@ -51,6 +59,12 @@ export const fetchFormProperties = createAsyncThunk(
             formId: applicantsFormId,
           })
         ),
+        serverInterfaceService.get(
+          buildUrl(API_ENDPOINTS.INTERVIEW.FORM_PROPERTIES, {
+            objectId: interviewsObjectId,
+            formId: interviewsFormId,
+          })
+        ),
       ]);
 
       // Extract options for jobLevel, industry, and jobType fields
@@ -64,13 +78,13 @@ export const fetchFormProperties = createAsyncThunk(
       > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result[
-            index === 0
-              ? "jobOpening"
-              : index === 1
-              ? "createRound"
-              : "applicants"
-          ] = extractFormProperties(item.value);
+          const map = {
+            "0": "jobOpening",
+            "1": "createRound",
+            "2": "applicants",
+            3: "interviews",
+          } as Record<string, string>;
+          result[map[index]] = extractFormProperties(item.value);
         }
       });
 

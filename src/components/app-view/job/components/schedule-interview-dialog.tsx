@@ -42,6 +42,7 @@ export interface ScheduleInterviewDialogProps {
   round: Round | null;
   jobId: string;
   views: Record<string, any>;
+  mappingValues: Record<string, any>;
   onSuccess?: () => void;
 }
 
@@ -63,30 +64,6 @@ const COPY_FEEDBACK_MS = 2000;
 
 // Interview form instance (forminstances) constants — property IDs from form schema
 
-const SCHEDULE_INTERVIEW_PROPERTY_IDS = [
-  "6960bae9c9ba83a076aac8a4",
-  "6960bb55c9ba83a076aac8a6",
-  "6960bb8cc9ba83a076aac8a7",
-  "6960bc56c9ba83a076aac8aa",
-  "6960bcfcc9ba83a076aac8ae",
-  "6960bd1ec9ba83a076aac8af",
-  "6960c795c9ba83a076aac8b1",
-  "6968b19ac90d705a920ddbec",
-  "6968b256c90d705a920ddbf0",
-  "6968b28bc90d705a920ddbf1",
-  "6968b2e2c90d705a920ddbf2",
-  "69732b4c1641f4dea8f6600a",
-  "6989bedefdb0e9975c9f5e8e",
-  "6989bf0abd6acbd1fd13d199",
-  "6989bf73dfb659edb0bec752",
-  "6989bfc7d2fcbec3ff44e4aa",
-  "6989c0cadfb659edb0bec755",
-  "698d5c25b598b586ab9c9589",
-  "698d5c47bd6acbd1fd13d1ac",
-  "698d5ce9bb2ef527cbb8244e",
-  "698d5d0d2d28552b6f555924",
-];
-
 function mapLinkValidityToV2(value: string): string {
   const opt = LINK_VALIDITY_OPTIONS.find((o) => o.value === value);
   return opt ? opt.label : value;
@@ -104,7 +81,7 @@ function buildScheduleInterviewPayload(
     interviewLink: string;
     createdAt: number;
   },
-  formId: string
+  mappingValues: Record<string, any>
 ): Record<string, unknown> {
   const {
     roundId,
@@ -118,75 +95,98 @@ function buildScheduleInterviewPayload(
   } = options;
 
   const categoryScoresValue = [
-    { propertyId: "6989c016dd395e99bbbb74a8", key: "technical" },
-    { propertyId: "6989c051dfb659edb0bec753", key: "communication" },
-    { propertyId: "6989c0702d28552b6f555906", key: "problemSolving" },
-    { propertyId: "6989c08cdfb659edb0bec754", key: "leadership" },
-    { propertyId: "6989c0a41fccaff8d0e0bf2e", key: "cultureFit" },
+    {
+      propertyId: mappingValues?.["categoryScores"]?.fields?.[0]?._id,
+      key: "technical",
+    },
+    {
+      propertyId: mappingValues?.["categoryScores"]?.fields?.[1]?._id,
+      key: "communication",
+    },
+    {
+      propertyId: mappingValues?.["categoryScores"]?.fields?.[2]?._id,
+      key: "problemSolving",
+    },
+    {
+      propertyId: mappingValues?.["categoryScores"]?.fields?.[3]?._id,
+      key: "leadership",
+    },
+    {
+      propertyId: mappingValues?.["categoryScores"]?.fields?.[4]?._id,
+      key: "cultureFit",
+    },
   ];
 
   const values = [
     {
-      propertyId: "6960bae9c9ba83a076aac8a4",
+      propertyId: mappingValues?.["applicantEmail"]?.id,
       key: "applicantEmail",
       value: applicant?.id,
     },
     {
-      propertyId: "6960bb55c9ba83a076aac8a6",
+      propertyId: mappingValues?.["roundName"]?.id,
       key: "roundName",
       value: roundId,
     },
     {
-      propertyId: "6960bb8cc9ba83a076aac8a7",
+      propertyId: mappingValues?.["interviewerName"]?.id,
       key: "interviewerName",
       value: interviewerId,
     },
     {
-      propertyId: "6960bc56c9ba83a076aac8aa",
+      propertyId: mappingValues?.["status"]?.id,
       key: "status",
       value: "Scheduled",
     },
-    { propertyId: "6960bcfcc9ba83a076aac8ae", key: "score", value: 0 },
+    { propertyId: mappingValues?.["score"]?.id, key: "score", value: 0 },
     {
-      propertyId: "6960bd1ec9ba83a076aac8af",
+      propertyId: mappingValues?.["formUser"]?.id,
       key: "formUser",
       value: formUser,
     },
     {
-      propertyId: "6960c795c9ba83a076aac8b1",
+      propertyId: mappingValues?.["jobTitle"]?.id,
       key: "jobTitle",
       value: jobId,
     },
-    { propertyId: "6968b19ac90d705a920ddbec", key: "jobId", value: jobId },
-    { propertyId: "6968b256c90d705a920ddbf0", key: "roundId", value: roundId },
+    { propertyId: mappingValues?.["jobId"]?.id, key: "jobId", value: jobId },
     {
-      propertyId: "6968b28bc90d705a920ddbf1",
+      propertyId: mappingValues?.["roundId"]?.id,
+      key: "roundId",
+      value: roundId,
+    },
+    {
+      propertyId: mappingValues?.["interviewerId"]?.id,
       key: "interviewerId",
       value: interviewerId,
     },
     {
-      propertyId: "6968b2e2c90d705a920ddbf2",
+      propertyId: mappingValues?.["applicantId"]?.id,
       key: "applicantId",
       value: applicant?.id,
     },
     {
-      propertyId: "6989c0cadfb659edb0bec755",
+      propertyId: mappingValues?.["categoryScores"]?.id,
       key: "categoryScores",
       value: categoryScoresValue,
     },
     {
-      propertyId: "698d5c25b598b586ab9c9589",
+      propertyId: mappingValues?.["v2LinkValidity"]?.id,
       key: "v2LinkValidity",
       value: linkValidityV2,
     },
-    { propertyId: "698d5c47bd6acbd1fd13d1ac", key: "v2Notes", value: notes },
     {
-      propertyId: "698d5ce9bb2ef527cbb8244e",
+      propertyId: mappingValues?.["v2Notes"]?.id,
+      key: "v2Notes",
+      value: notes,
+    },
+    {
+      propertyId: mappingValues?.["createdAt"]?.id,
       key: "createdAt",
       value: createdAt,
     },
     {
-      propertyId: "698d5d0d2d28552b6f555924",
+      propertyId: mappingValues?.["interviewLink"]?.id,
       key: "interviewLink",
       value: interviewLink,
     },
@@ -194,10 +194,29 @@ function buildScheduleInterviewPayload(
 
   return {
     values,
-    propertyIds: SCHEDULE_INTERVIEW_PROPERTY_IDS,
-    flows: [{ stageId: "1", status: "PENDING" }],
-    status: "PENDING",
-    formId: formId,
+    propertyIds: [
+      mappingValues?.["applicantEmail"]?.id,
+      mappingValues?.["roundName"]?.id,
+      mappingValues?.["interviewerName"]?.id,
+      mappingValues?.["status"]?.id,
+      mappingValues?.["score"]?.id,
+      mappingValues?.["formUser"]?.id,
+      mappingValues?.["jobTitle"]?.id,
+      mappingValues?.["jobId"]?.id,
+      mappingValues?.["roundId"]?.id,
+      mappingValues?.["interviewerId"]?.id,
+      mappingValues?.["applicantId"]?.id,
+      mappingValues?.["_interviewId"]?.id,
+      mappingValues?.["summary"]?.id,
+      mappingValues?.["strengths"]?.id,
+      mappingValues?.["weaknesses"]?.id,
+      mappingValues?.["recommendation"]?.id,
+      mappingValues?.["categoryScores"]?.id,
+      mappingValues?.["v2LinkValidity"]?.id,
+      mappingValues?.["v2Notes"]?.id,
+      mappingValues?.["createdAt"]?.id,
+      mappingValues?.["interviewLink"]?.id,
+    ] as string[],
   };
 }
 
@@ -208,6 +227,7 @@ export function ScheduleInterviewDialog({
   round,
   jobId,
   views,
+  mappingValues,
   onSuccess,
 }: ScheduleInterviewDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -484,13 +504,16 @@ export function ScheduleInterviewDialog({
             interviewLink,
             createdAt,
           },
-          form?.["createInterviews"]
+          mappingValues?.["interviews"]
         )
       );
 
       await Promise.all(
         payloads.map((payload) =>
-          jobService.createInterviewFormInstance(payload as Record<string, any>)
+          jobService.createInterviewFormInstance(
+            payload as Record<string, any>,
+            { objectId: views?.["interviews"]?.objectId || "" }
+          )
         )
       );
 

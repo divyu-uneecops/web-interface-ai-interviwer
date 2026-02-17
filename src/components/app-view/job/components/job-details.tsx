@@ -1639,6 +1639,7 @@ export default function JobDetails() {
           round={scheduleInterviewRound}
           jobId={(params?.id as string) || ""}
           views={views}
+          mappingValues={mappingValues}
           onSuccess={() => {}}
         />
       )}

@@ -41,9 +41,10 @@ export const API_ENDPOINTS = {
     FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   INTERVIEW: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DETAIL: "/api/objects/interviews/records/{id}",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   FEEDBACK: {
     SAVE: "/api/v2/forminstances",

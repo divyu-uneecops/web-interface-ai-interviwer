@@ -88,10 +88,11 @@ export const jobService = {
     ),
   createInterviewFormInstance: (
     payload: Record<string, any>,
+    urlIds: { objectId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.INTERVIEW.CREATE,
+      buildUrl(API_ENDPOINTS.INTERVIEW.CREATE, urlIds),
       {},
       payload,
       signal

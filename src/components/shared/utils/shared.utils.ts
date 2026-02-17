@@ -130,7 +130,8 @@ export const transformToCreateRoundPayload = (
       value: values?.interviewer || "",
     },
     {
-      propertyId: mappingValues?.v2_skillForRound?.id || "",
+      //TODO: Change in future
+      propertyId: "69833ad78e11e2580092cd40",
       key: "v2_skillForRound",
       value: skillsForRound,
     },
@@ -160,7 +161,8 @@ export const transformToCreateRoundPayload = (
     mappingValues?.interviewerName?.id || "",
     mappingValues?.jobID?.id || "",
     mappingValues?.interviewerID?.id || "",
-    mappingValues?.v2_skillForRound?.id || "",
+    //TODO: Change in future
+    "69833ad78e11e2580092cd40",
     mappingValues?.v2_questions?.id || "",
     mappingValues?.reminderTime?.id || "",
     mappingValues?.numOfCustomQuestions?.id || "",

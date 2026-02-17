@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import jobsReducer from "./jobs/jobsSlice";
 import interviewersReducer from "./interviewers/interviewersSlice";
 import userManagementReducer from "./user-management/userManagementSlice";
+import callReducer from "./call/callSlice";
 import appReducer from "./app/appSlice";
 
 export const makeStore = () => {
@@ -11,6 +12,7 @@ export const makeStore = () => {
       jobs: jobsReducer,
       interviewers: interviewersReducer,
       userManagement: userManagementReducer,
+      call: callReducer,
     },
   });
 };

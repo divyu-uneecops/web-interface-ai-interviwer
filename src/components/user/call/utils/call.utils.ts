@@ -1,5 +1,3 @@
-// Penalty/event form instance config (forminstances API for exit fullscreen & face validation events)
-const PENALTY_FORM_ID = "698c16d7fdb0e9975c9f5e9c";
 const PENALTY_PROPERTY_IDS = {
   interviewId: "698c17cd2d28552b6f555919",
   eventType: "698c1813ac16de7384384f10",
@@ -21,7 +19,7 @@ export function buildPenaltyPayload(
   const values: Array<{
     propertyId: string;
     key: string;
-    value: string | number;
+    value: string | number | any[];
   }> = [
     {
       propertyId: PENALTY_PROPERTY_IDS.interviewId,
@@ -43,7 +41,7 @@ export function buildPenaltyPayload(
     values.push({
       propertyId: PENALTY_PROPERTY_IDS.screenshot,
       key: "screenshot",
-      value: screenshotValue,
+      value: [screenshotValue],
     });
   }
   const propertyIds = screenshotValue
@@ -52,8 +50,5 @@ export function buildPenaltyPayload(
   return {
     values,
     propertyIds,
-    flows: [],
-    status: "PENDING",
-    formId: PENALTY_FORM_ID,
   };
 }

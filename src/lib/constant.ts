@@ -44,7 +44,6 @@ export const API_ENDPOINTS = {
     CREATE: "/api/v2/forminstances",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DETAIL: "/api/objects/interviews/records/{id}",
-    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   FEEDBACK: {
     SAVE: "/api/v2/forminstances",

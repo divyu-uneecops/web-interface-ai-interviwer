@@ -5,7 +5,7 @@ import type { RootState } from "@/store";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchFormProperties = createAsyncThunk(
-  "jobs/fetchFormProperties",
+  "call/fetchFormProperties",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as RootState;

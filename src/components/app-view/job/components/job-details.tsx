@@ -180,7 +180,7 @@ export default function JobDetails() {
   const PAGE_LIMIT = 10;
 
   const listParams = { limit: 1, offset: 0 };
-  const appIdPayload = { appId: "69521cd1c9ba83a076aac3ae" };
+  const appIdPayload = { appId: process.env.NEXT_PUBLIC_APP_ID || "" };
 
   // Fetch job detail
   useEffect(() => {
@@ -283,7 +283,7 @@ export default function JobDetails() {
       const response = await jobService.getJobDetail(
         { id: params.id, objectId: views?.["jobs"]?.objectId || "" },
         {
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         }
       );
       const transformedJob = transformAPIResponseToJobDetail(
@@ -500,7 +500,7 @@ export default function JobDetails() {
           sort: {
             createdOn: "DESC",
           },
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         },
         {
           objectId: views?.["applicants"]?.objectId || "",
@@ -573,7 +573,7 @@ export default function JobDetails() {
           sort: {
             createdOn: "DESC",
           },
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         },
         {
           objectId: views?.["rounds"]?.objectId || "",
@@ -653,7 +653,7 @@ export default function JobDetails() {
                 : []),
             ],
           },
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         },
         {
           objectId: views?.["interviews"]?.objectId || "",

@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/constant";
+import { buildUrl } from "@/lib/utils";
 import serverInterfaceService from "@/services/server-interface.service";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -71,7 +72,9 @@ export const fetchForm = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await serverInterfaceService.get<AppFormItem[]>(
-        API_ENDPOINTS.APP.FORM
+        buildUrl(API_ENDPOINTS.APP.FORM, {
+          orgId: process.env.NEXT_PUBLIC_ORGANIZATION_ID || "",
+        })
       );
       return transformFormResponse(response ?? []);
     } catch (error: any) {
@@ -87,7 +90,9 @@ export const fetchViews = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await serverInterfaceService.get<AppObjectViewsItem[]>(
-        API_ENDPOINTS.APP.VIEWS
+        buildUrl(API_ENDPOINTS.APP.VIEWS, {
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
+        })
       );
       return transformViewsResponse(response ?? []);
     } catch (error: any) {

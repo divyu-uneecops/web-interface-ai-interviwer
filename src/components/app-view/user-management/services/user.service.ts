@@ -2,8 +2,8 @@ import { API_ENDPOINTS } from "@/lib/constant";
 import serverInterfaceService from "@/services/server-interface.service";
 import { buildUrl } from "@/lib/utils";
 
-const ORG_ID = "69521ba88ecab90ed22cbcd9";
-const APP_ID = "69521cd1c9ba83a076aac3ae";
+const ORG_ID = process.env.NEXT_PUBLIC_ORGANIZATION_ID || "";
+const APP_ID = process.env.NEXT_PUBLIC_APP_ID || "";
 
 export const userService = {
   getUsers: (params?: Record<string, any>, signal?: AbortSignal) =>

@@ -3,7 +3,7 @@ import serverInterfaceService from "@/services/server-interface.service";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { buildUrl } from "@/lib/utils";
 
-const ORG_ID = "69521ba88ecab90ed22cbcd9";
+const ORG_ID = process.env.NEXT_PUBLIC_ORGANIZATION_ID || "";
 
 export const fetchRoles = createAsyncThunk(
   "userManagement/fetchRoles",

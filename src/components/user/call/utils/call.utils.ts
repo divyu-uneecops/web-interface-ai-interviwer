@@ -1,20 +1,9 @@
-const PENALTY_PROPERTY_IDS = {
-  interviewId: "698c17cd2d28552b6f555919",
-  eventType: "698c1813ac16de7384384f10",
-  timeStamp: "698c185e2d28552b6f55591a",
-  screenshot: "698ec056dfb659edb0bec787",
-};
-const PENALTY_PROPERTY_IDS_BASE_LIST = [
-  PENALTY_PROPERTY_IDS.interviewId,
-  PENALTY_PROPERTY_IDS.eventType,
-  PENALTY_PROPERTY_IDS.timeStamp,
-];
-
 export function buildPenaltyPayload(
   interviewId: string,
   eventType: string,
   timeStamp: number,
-  screenshotValue: string | null
+  screenshotValue: string | null,
+  mappingValues: Record<string, any>
 ) {
   const values: Array<{
     propertyId: string;
@@ -22,31 +11,35 @@ export function buildPenaltyPayload(
     value: string | number | any[];
   }> = [
     {
-      propertyId: PENALTY_PROPERTY_IDS.interviewId,
+      propertyId: mappingValues?.interviewId?.id || "",
       key: "interviewId",
       value: interviewId,
     },
     {
-      propertyId: PENALTY_PROPERTY_IDS.eventType,
+      propertyId: mappingValues?.eventType?.id,
       key: "eventType",
       value: eventType,
     },
     {
-      propertyId: PENALTY_PROPERTY_IDS.timeStamp,
+      propertyId: mappingValues?.timeStamp?.id,
       key: "timeStamp",
       value: timeStamp,
     },
   ];
   if (screenshotValue) {
     values.push({
-      propertyId: PENALTY_PROPERTY_IDS.screenshot,
+      propertyId: mappingValues?.screenshot?.id,
       key: "screenshot",
       value: [screenshotValue],
     });
   }
-  const propertyIds = screenshotValue
-    ? [...PENALTY_PROPERTY_IDS_BASE_LIST, PENALTY_PROPERTY_IDS.screenshot]
-    : PENALTY_PROPERTY_IDS_BASE_LIST;
+  const propertyIds = [
+    mappingValues?.interviewId?.id,
+    mappingValues?.eventType?.id,
+    mappingValues?.timeStamp?.id,
+    mappingValues?.screenshot?.id,
+  ];
+
   return {
     values,
     propertyIds,

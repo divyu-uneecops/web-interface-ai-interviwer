@@ -10,10 +10,11 @@ export const fetchFormProperties = createAsyncThunk(
     try {
       const state = getState() as RootState;
       const { form, views } = state.appState;
-      const interviewsObjectId = views?.interviews?.objectId;
-      const interviewsFormId = form.createInterviews;
+      const interviewsPenaltyObjectId =
+        views?.interviewproctoringevents?.objectId;
+      const interviewsPenaltyFormId = form?.createInterviewproctoringevents;
 
-      if (!interviewsObjectId || !interviewsFormId) {
+      if (!interviewsPenaltyObjectId || !interviewsPenaltyFormId) {
         return rejectWithValue(
           "Job opening form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
@@ -21,9 +22,9 @@ export const fetchFormProperties = createAsyncThunk(
 
       const response = await Promise.allSettled([
         serverInterfaceService.get(
-          buildUrl(API_ENDPOINTS.INTERVIEW.FORM_PROPERTIES, {
-            objectId: interviewsObjectId,
-            formId: interviewsFormId,
+          buildUrl(API_ENDPOINTS.INTERVIEW_PENALTY.FROM_PROPERTIES, {
+            objectId: interviewsPenaltyObjectId,
+            formId: interviewsPenaltyFormId,
           })
         ),
       ]);
@@ -39,7 +40,9 @@ export const fetchFormProperties = createAsyncThunk(
       > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result["interviews"] = extractFormProperties(item.value);
+          result["interviewProctoringPenalty"] = extractFormProperties(
+            item.value
+          );
         }
       });
 

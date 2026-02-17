@@ -94,6 +94,7 @@ export function InterviewActiveFlow({
   const lastReportedFaceWarningRef = useRef<string | null>(null);
   const interviewActiveRef = useRef(false);
   const { views } = useAppSelector((state) => state.appState);
+  const { mappingValues } = useAppSelector((state) => state.call);
 
   useEffect(() => {
     const video = screenShareVideoRef.current;
@@ -159,7 +160,8 @@ export function InterviewActiveFlow({
       interviewId,
       eventType,
       Math.floor(Date.now() / 1000),
-      screenshotPath
+      screenshotPath,
+      mappingValues?.interviewProctoringPenalty
     );
     applicantAuthService
       .submitPenaltyFormInstance(payload, {

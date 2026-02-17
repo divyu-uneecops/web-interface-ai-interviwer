@@ -57,5 +57,6 @@ export const API_ENDPOINTS = {
   INTERVIEW_PENALTY: {
     CREATE: "/api/objects/{objectId}/records",
     UPLOAD: "/api/storage-accounts/lego/upload",
+    FROM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
 };

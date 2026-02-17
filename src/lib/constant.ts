@@ -1,7 +1,7 @@
 export const API_ENDPOINTS = {
   APP: {
-    FORM: "/api/orgs/{orgId}/forms",
-    VIEWS: "/api/apps/{appId}/objects/views",
+    FORM: "/api/organisations/{orgId}/forms?limit=10000",
+    VIEWS: "/api/organisations/{orgId}/apps/{appId}/objects/views",
   },
   AUTH: {
     VERIFY_EMAIL: "/admin/auth/_verify",

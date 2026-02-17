@@ -14,6 +14,10 @@ export const fetchFormProperties = createAsyncThunk(
       const jobOpeningFormId = form.createJobs;
       const createRoundObjectId = views?.rounds?.objectId;
       const createRoundFormId = form.createRounds;
+      const applicantsObjectId = views?.applicants?.objectId;
+      const applicantsFormId = form.createApplicants;
+      const interviewsObjectId = views?.interviews?.objectId;
+      const interviewsFormId = form.createInterviews;
 
       if (!jobOpeningObjectId || !jobOpeningFormId) {
         return rejectWithValue(
@@ -25,7 +29,17 @@ export const fetchFormProperties = createAsyncThunk(
           "Create round form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
       }
+      if (!applicantsObjectId || !applicantsFormId) {
+        return rejectWithValue(
+          "Applicants form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
+        );
+      }
 
+      if (!interviewsObjectId || !interviewsFormId) {
+        return rejectWithValue(
+          "Interviews form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
+        );
+      }
       const response = await Promise.allSettled([
         serverInterfaceService.get(
           buildUrl(API_ENDPOINTS.JOB_OPENING.FORM_PROPERTIES, {
@@ -39,20 +53,38 @@ export const fetchFormProperties = createAsyncThunk(
             formId: createRoundFormId,
           })
         ),
+        serverInterfaceService.get(
+          buildUrl(API_ENDPOINTS.APPLICANT.FORM_PROPERTIES, {
+            objectId: applicantsObjectId,
+            formId: applicantsFormId,
+          })
+        ),
+        serverInterfaceService.get(
+          buildUrl(API_ENDPOINTS.INTERVIEW.FORM_PROPERTIES, {
+            objectId: interviewsObjectId,
+            formId: interviewsFormId,
+          })
+        ),
       ]);
 
       // Extract options for jobLevel, industry, and jobType fields
 
-      const result: Record<string, Record<string, any[]>> = {};
+      const result: Record<
+        string,
+        Record<
+          string,
+          { id: string; name: string; values: any[]; fields: any[] }
+        >
+      > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result[index === 0 ? "jobOpening" : "createRound"] =
-            extractFormProperties(
-              item.value,
-              index === 0
-                ? ["jobLevel", "industry", "jobType", "status"]
-                : ["roundType", "language", "duration", "reminderTime"]
-            );
+          const map = {
+            "0": "jobOpening",
+            "1": "createRound",
+            "2": "applicants",
+            3: "interviews",
+          } as Record<string, string>;
+          result[map[index]] = extractFormProperties(item.value);
         }
       });
 
@@ -65,22 +97,26 @@ export const fetchFormProperties = createAsyncThunk(
   }
 );
 
-const extractFormProperties = (formProperties: any[], targets: string[]) => {
+const extractFormProperties = (formProperties: any[]) => {
   if (!Array.isArray(formProperties)) {
     return {};
   }
-  const result: Record<string, any[]> = {};
+  const result: Record<
+    string,
+    { id: string; name: string; values: any[]; fields: any[] }
+  > = {};
 
   for (const section of formProperties) {
     if (Array.isArray(section?.fields || [])) {
       for (const field of section?.fields || []) {
-        if (targets.includes(field?.key || "")) {
-          result[field?.key || ""] = Array.isArray(
-            field?.optionsConfig?.values || []
-          )
+        result[field?.key || ""] = {
+          id: field?._id,
+          name: field?.name,
+          values: Array.isArray(field?.optionsConfig?.values || [])
             ? field?.optionsConfig?.values
-            : [];
-        }
+            : [],
+          fields: field?.fields || [],
+        };
       }
     }
   }

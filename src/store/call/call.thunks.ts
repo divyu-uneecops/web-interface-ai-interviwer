@@ -1,43 +1,43 @@
 import { API_ENDPOINTS } from "@/lib/constant";
-import serverInterfaceService from "@/services/server-interface.service";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { RootState } from "@/store";
 import { buildUrl } from "@/lib/utils";
+import serverInterfaceService from "@/services/server-interface.service";
+import type { RootState } from "@/store";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchFormProperties = createAsyncThunk(
-  "interviewers/fetchFormProperties",
+  "call/fetchFormProperties",
   async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState() as RootState;
       const { form, views } = state.appState;
-      const createRoundObjectId = views?.rounds?.objectId;
-      const createRoundFormId = form.createRounds;
-      const interviewersObjectId = views?.interviewers?.objectId;
-      const interviewersFormId = form.createInterviewers;
+      const interviewsPenaltyObjectId =
+        views?.interviewproctoringevents?.objectId;
+      const interviewsPenaltyFormId = form?.createInterviewproctoringevents;
+      const feedbackObjectId = views?.["feedback"]?.objectId;
+      const feedbackFormId = form?.createFeedback;
 
-      if (!createRoundObjectId || !createRoundFormId) {
+      if (
+        !interviewsPenaltyObjectId ||
+        !interviewsPenaltyFormId ||
+        !feedbackObjectId ||
+        !feedbackFormId
+      ) {
         return rejectWithValue(
-          "Create round form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
-        );
-      }
-
-      if (!interviewersObjectId || !interviewersFormId) {
-        return rejectWithValue(
-          "Interviewers form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
+          "Job opening form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
       }
 
       const response = await Promise.allSettled([
         serverInterfaceService.get(
-          buildUrl(API_ENDPOINTS.CREATE_ROUND.FORM_PROPERTIES, {
-            objectId: createRoundObjectId,
-            formId: createRoundFormId,
+          buildUrl(API_ENDPOINTS.INTERVIEW_PENALTY.FROM_PROPERTIES, {
+            objectId: interviewsPenaltyObjectId,
+            formId: interviewsPenaltyFormId,
           })
         ),
         serverInterfaceService.get(
-          buildUrl(API_ENDPOINTS.INTERVIEWER.FROM_PROPERTIES, {
-            objectId: interviewersObjectId,
-            formId: interviewersFormId,
+          buildUrl(API_ENDPOINTS.FEEDBACK.FORM_PROPERTIES, {
+            objectId: feedbackObjectId,
+            formId: feedbackFormId,
           })
         ),
       ]);
@@ -53,7 +53,7 @@ export const fetchFormProperties = createAsyncThunk(
       > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result[index === 0 ? "createRound" : "interviewers"] =
+          result[index === 0 ? "interviewProctoringPenalty" : "feedback"] =
             extractFormProperties(item.value);
         }
       });

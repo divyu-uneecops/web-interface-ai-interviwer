@@ -6,10 +6,11 @@ export const roundService = {
   createRound: (
     params: Record<string, any>,
     payload: Record<string, any>,
+    urlIds: { objectId: string },
     signal?: AbortSignal
   ) =>
     serverInterfaceService.post(
-      API_ENDPOINTS.CREATE_ROUND.CREATE,
+      buildUrl(API_ENDPOINTS.CREATE_ROUND.CREATE, urlIds),
       params,
       payload,
       signal

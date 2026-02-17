@@ -1,7 +1,7 @@
 export const API_ENDPOINTS = {
   APP: {
-    FORM: "/api/orgs/69521ba88ecab90ed22cbcd9/forms",
-    VIEWS: "/api/apps/69521cd1c9ba83a076aac3ae/objects/views",
+    FORM: "/api/organisations/{orgId}/forms?limit=10000",
+    VIEWS: "/api/organisations/{orgId}/apps/{appId}/objects/views",
   },
   AUTH: {
     VERIFY_EMAIL: "/admin/auth/_verify",
@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD_VERIFY_OTP: "/admin/auth/forgot-password/verify-otp",
   },
   JOB_OPENING: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/{objectId}/records/{id}",
     DETAIL: "/api/objects/{objectId}/records/{id}",
@@ -21,7 +21,8 @@ export const API_ENDPOINTS = {
     FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   APPLICANT: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DELETE: "/api/objects/{objectId}/records/{id}",
     UPDATE: "/api/objects/{objectId}/records/{id}",
@@ -29,25 +30,27 @@ export const API_ENDPOINTS = {
     DOWNLOAD_ATTACHMENT: "/api/storage-accounts/lego/download",
   },
   INTERVIEWER: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/{objectId}/records/{id}",
     FROM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   CREATE_ROUND: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     UPDATE: "/api/objects/{objectId}/records/{id}",
     DELETE: "/api/objects/{objectId}/records/{id}",
     FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   INTERVIEW: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     LIST: "/api/objects/{objectId}/views/{viewId}/records",
     DETAIL: "/api/objects/interviews/records/{id}",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   FEEDBACK: {
-    SAVE: "/api/v2/forminstances",
+    SAVE: "/api/objects/{objectId}/records",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   USER: {
     LIST: "/admin/orgs/{orgId}/apps/{appId}/users",
@@ -55,7 +58,8 @@ export const API_ENDPOINTS = {
     ROLES_LIST: "/admin/orgs/{orgId}/roles",
   },
   INTERVIEW_PENALTY: {
-    CREATE: "/api/v2/forminstances",
+    CREATE: "/api/objects/{objectId}/records",
     UPLOAD: "/api/storage-accounts/lego/upload",
+    FROM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
 };

@@ -1,6 +1,5 @@
 import api from "./axios.service";
 
-
 class ServerInterfaceService {
   async get<T = any>(
     url: string,

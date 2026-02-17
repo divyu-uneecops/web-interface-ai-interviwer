@@ -119,7 +119,7 @@ export default function InterviewsList() {
                 : []),
             ],
           },
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         },
         {
           objectId: views?.["interviews"]?.objectId || "",

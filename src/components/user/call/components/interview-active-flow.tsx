@@ -32,6 +32,7 @@ import { applicantAuthService } from "../services/applicant-auth.service";
 
 import "@livekit/components-styles";
 import { buildPenaltyPayload } from "../utils/call.utils";
+import { useAppSelector } from "@/store/hooks";
 
 const REMINDER_THRESHOLD_SECONDS = 5 * 60; // 5 minutes
 const DEFAULT_DURATION_MINUTES = 30;
@@ -92,6 +93,8 @@ export function InterviewActiveFlow({
   const fiveMinReminderShownRef = useRef(false);
   const lastReportedFaceWarningRef = useRef<string | null>(null);
   const interviewActiveRef = useRef(false);
+  const { views } = useAppSelector((state) => state.appState);
+  const { mappingValues } = useAppSelector((state) => state.call);
 
   useEffect(() => {
     const video = screenShareVideoRef.current;
@@ -156,11 +159,14 @@ export function InterviewActiveFlow({
     const payload = buildPenaltyPayload(
       interviewId,
       eventType,
-      Math.floor(Date.now() / 1000),
-      screenshotPath
+      Date.now(),
+      screenshotPath,
+      mappingValues?.interviewProctoringPenalty
     );
     applicantAuthService
-      .submitPenaltyFormInstance(payload)
+      .submitPenaltyFormInstance(payload, {
+        objectId: views?.["interviewproctoringevents"]?.objectId || "",
+      })
       .catch((err) =>
         console.error("Penalty form instance submit error:", err)
       );

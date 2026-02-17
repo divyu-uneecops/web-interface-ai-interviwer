@@ -84,10 +84,12 @@ export default function JobList() {
       id: "status",
       label: "Status",
       options:
-        mappingValues?.jobOpening?.status?.map((status: string) => ({
-          value: status,
-          label: status,
-        })) || [],
+        (mappingValues?.jobOpening?.status?.values ?? []).map(
+          (status: string) => ({
+            value: status,
+            label: status,
+          })
+        ) || [],
     },
   ];
 
@@ -100,7 +102,8 @@ export default function JobList() {
     Set<string>
   >(new Set());
 
-  const appIdPayload = { appId: "69521cd1c9ba83a076aac3ae" };
+  const appIdPayload = { appId: process.env.NEXT_PUBLIC_APP_ID || "" };
+
   const listParams = { limit: 1, offset: 0 };
 
   const fetchStats = async () => {
@@ -386,7 +389,7 @@ export default function JobList() {
           sort: {
             createdOn: "DESC",
           },
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         },
         {
           objectId: views?.["jobs"]?.objectId || "",

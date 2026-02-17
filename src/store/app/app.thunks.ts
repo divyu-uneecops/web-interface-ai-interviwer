@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/constant";
+import { buildUrl } from "@/lib/utils";
 import serverInterfaceService from "@/services/server-interface.service";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -70,10 +71,15 @@ export const fetchForm = createAsyncThunk(
   "app/fetchForm",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await serverInterfaceService.get<AppFormItem[]>(
-        API_ENDPOINTS.APP.FORM
+      const response = await serverInterfaceService.get<{
+        data: AppFormItem[];
+        page: { limit: number; total: number; offset: number };
+      }>(
+        buildUrl(API_ENDPOINTS.APP.FORM, {
+          orgId: process.env.NEXT_PUBLIC_ORGANIZATION_ID || "",
+        })
       );
-      return transformFormResponse(response ?? []);
+      return transformFormResponse(response?.data ?? []);
     } catch (error: any) {
       return rejectWithValue(
         error?.response?.data?.message || "Failed to fetch Form Properties"
@@ -87,7 +93,10 @@ export const fetchViews = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await serverInterfaceService.get<AppObjectViewsItem[]>(
-        API_ENDPOINTS.APP.VIEWS
+        buildUrl(API_ENDPOINTS.APP.VIEWS, {
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
+          orgId: process.env.NEXT_PUBLIC_ORGANIZATION_ID || "",
+        })
       );
       return transformViewsResponse(response ?? []);
     } catch (error: any) {

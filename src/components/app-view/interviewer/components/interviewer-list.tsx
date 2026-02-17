@@ -58,29 +58,32 @@ export function InterviewerList() {
     {
       id: "roundType",
       label: "Round Type",
-      options:
-        mappingValues?.createRound?.roundType?.map((status: string) => ({
+      options: (mappingValues?.createRound?.roundType?.values ?? []).map(
+        (status: string) => ({
           value: status,
           label: status,
-        })) || [],
+        })
+      ),
     },
     {
       id: "language",
       label: "Language",
-      options:
-        mappingValues?.createRound?.language?.map((status: string) => ({
+      options: (mappingValues?.createRound?.language?.values ?? []).map(
+        (status: string) => ({
           value: status,
           label: status,
-        })) || [],
+        })
+      ),
     },
     {
       id: "voice",
       label: "Voice",
-      options:
-        mappingValues?.interviewers?.voice?.map((status: string) => ({
+      options: (mappingValues?.interviewers?.voice?.values ?? []).map(
+        (status: string) => ({
           value: status,
           label: status,
-        })) || [],
+        })
+      ),
     },
   ];
 
@@ -203,7 +206,7 @@ export function InterviewerList() {
           sort: {
             createdOn: "DESC",
           },
-          appId: "69521cd1c9ba83a076aac3ae",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "",
         },
         {
           objectId: views?.["interviewers"]?.objectId || "",

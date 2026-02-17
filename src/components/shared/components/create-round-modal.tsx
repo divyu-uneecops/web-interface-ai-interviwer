@@ -260,7 +260,8 @@ export function CreateRoundModal({
 
           const updatePayload = transformToUpdateRoundPayload(
             values,
-            dirtyFields
+            dirtyFields,
+            mappingValues?.createRound
           );
           const response = await roundService.updateRound(
             {
@@ -277,9 +278,11 @@ export function CreateRoundModal({
           const payload = transformToCreateRoundPayload(
             values,
             jobId,
-            form?.createRounds || ""
+            mappingValues?.createRound
           );
-          const response = await roundService.createRound({}, payload);
+          const response = await roundService.createRound({}, payload, {
+            objectId: views?.["rounds"]?.objectId || "",
+          });
           toast.success(response?.message || "Round created successfully", {
             duration: 8000,
           });
@@ -527,13 +530,13 @@ export function CreateRoundModal({
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mappingValues?.createRound?.roundType?.map(
-                          (option, index) => (
-                            <SelectItem key={index} value={option}>
-                              {option}
-                            </SelectItem>
-                          )
-                        )}
+                        {(
+                          mappingValues?.createRound?.roundType?.values ?? []
+                        ).map((option, index) => (
+                          <SelectItem key={index} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -595,13 +598,13 @@ export function CreateRoundModal({
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mappingValues?.createRound?.duration?.map(
-                          (option, index) => (
-                            <SelectItem key={index} value={option}>
-                              {option}
-                            </SelectItem>
-                          )
-                        )}
+                        {(
+                          mappingValues?.createRound?.duration?.values ?? []
+                        ).map((option, index) => (
+                          <SelectItem key={index} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -622,13 +625,13 @@ export function CreateRoundModal({
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mappingValues?.createRound?.language?.map(
-                          (option, index) => (
-                            <SelectItem key={index} value={option}>
-                              {option}
-                            </SelectItem>
-                          )
-                        )}
+                        {(
+                          mappingValues?.createRound?.language?.values ?? []
+                        ).map((option, index) => (
+                          <SelectItem key={index} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1090,13 +1093,14 @@ export function CreateRoundModal({
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                              {mappingValues?.createRound?.reminderTime?.map(
-                                (option, index) => (
-                                  <SelectItem key={index} value={option}>
-                                    {option}
-                                  </SelectItem>
-                                )
-                              )}
+                              {(
+                                mappingValues?.createRound?.reminderTime
+                                  ?.values ?? []
+                              ).map((option, index) => (
+                                <SelectItem key={index} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>

@@ -4,13 +4,15 @@ import {
   StartInterviewPayload,
   StartInterviewResponse,
 } from "../interfaces/applicant-auth.interface";
+import { buildUrl } from "@/lib/utils";
 
 export interface FeedbackFormInstancePayload {
-  values: Array<{ propertyId: string; key: string; value: string | number }>;
+  values: Array<{
+    propertyId: string;
+    key: string;
+    value: string | number | any[];
+  }>;
   propertyIds: string[];
-  flows: Array<{ stageId: string; status: string }>;
-  status: string;
-  formId: string;
 }
 
 export const applicantAuthService = {
@@ -18,7 +20,7 @@ export const applicantAuthService = {
     payload: StartInterviewPayload
   ): Promise<StartInterviewResponse> =>
     serverInterfaceService.post<StartInterviewResponse>(
-      "http://localhost:8021/api/start-interview",
+      `${process.env.NEXT_PUBLIC_BE_API_URL}/api/start-interview`,
       {},
       {
         email: payload.email,
@@ -26,19 +28,21 @@ export const applicantAuthService = {
       }
     ),
   submitFeedbackFormInstance: (
-    payload: FeedbackFormInstancePayload
+    payload: FeedbackFormInstancePayload,
+    urlIds: { objectId: string }
   ): Promise<{ message?: string }> =>
     serverInterfaceService.post<{ message?: string }>(
-      API_ENDPOINTS.FEEDBACK.SAVE,
+      buildUrl(API_ENDPOINTS.FEEDBACK.SAVE, urlIds),
       {},
       payload
     ),
   /** Submit penalty/event form instance (e.g. exit fullscreen, face validation events) to /api/v2/forminstances */
   submitPenaltyFormInstance: (
-    payload: FeedbackFormInstancePayload
+    payload: FeedbackFormInstancePayload,
+    urlIds: { objectId: string }
   ): Promise<{ message?: string }> =>
     serverInterfaceService.post<{ message?: string }>(
-      API_ENDPOINTS.INTERVIEW_PENALTY.CREATE,
+      buildUrl(API_ENDPOINTS.INTERVIEW_PENALTY.CREATE, urlIds),
       {},
       payload
     ),

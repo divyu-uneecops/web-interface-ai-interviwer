@@ -28,10 +28,11 @@ export const applicantAuthService = {
       }
     ),
   submitFeedbackFormInstance: (
-    payload: FeedbackFormInstancePayload
+    payload: FeedbackFormInstancePayload,
+    urlIds: { objectId: string }
   ): Promise<{ message?: string }> =>
     serverInterfaceService.post<{ message?: string }>(
-      API_ENDPOINTS.FEEDBACK.SAVE,
+      buildUrl(API_ENDPOINTS.FEEDBACK.SAVE, urlIds),
       {},
       payload
     ),

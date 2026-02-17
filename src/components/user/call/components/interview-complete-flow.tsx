@@ -10,19 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/header";
 import { applicantAuthService } from "../services/applicant-auth.service";
 import { useRouter } from "next/navigation";
-
-// Feedback form instance config (formId and property IDs for interview feedback)
-const FEEDBACK_FORM_ID = "6981bfe01695f2d642cdd71c";
-const FEEDBACK_PROPERTY_IDS = {
-  interviewId: "6981c011a2d8ac88d5110a14",
-  experience: "6981c03cbd9c4fae1b616a7a",
-  rating: "6981c072bd9c4fae1b616a7b",
-};
-const FEEDBACK_PROPERTY_IDS_LIST = [
-  FEEDBACK_PROPERTY_IDS.interviewId,
-  FEEDBACK_PROPERTY_IDS.experience,
-  FEEDBACK_PROPERTY_IDS.rating,
-];
+import { useAppSelector } from "@/store/hooks";
+import { RootState } from "@/store";
 
 export interface InterviewCompleteFlowProps {
   interviewId: string;
@@ -34,6 +23,8 @@ export function InterviewCompleteFlow({
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { views } = useAppSelector((state: RootState) => state.appState);
+  const { mappingValues } = useAppSelector((state: RootState) => state.call);
   const router = useRouter();
 
   const handleSubmit = async () => {
@@ -42,28 +33,30 @@ export function InterviewCompleteFlow({
       const payload = {
         values: [
           {
-            propertyId: FEEDBACK_PROPERTY_IDS.interviewId,
+            propertyId: mappingValues?.feedback?.interviewId?.id || "",
             key: "interviewId",
             value: interviewId,
           },
           {
-            propertyId: FEEDBACK_PROPERTY_IDS.experience,
+            propertyId: mappingValues?.feedback?.experience?.id || "",
             key: "experience",
             value: feedback || "",
           },
           {
-            propertyId: FEEDBACK_PROPERTY_IDS.rating,
+            propertyId: mappingValues?.feedback?.rating?.id || "",
             key: "rating",
             value: rating,
           },
         ],
-        propertyIds: FEEDBACK_PROPERTY_IDS_LIST,
-        flows: [],
-        status: "PENDING",
-        formId: FEEDBACK_FORM_ID,
+        propertyIds: [
+          mappingValues?.feedback?.interviewId?.id,
+          mappingValues?.feedback?.experience?.id,
+          mappingValues?.feedback?.rating?.id,
+        ],
       };
       const response = await applicantAuthService.submitFeedbackFormInstance(
-        payload
+        payload,
+        { objectId: views?.["feedback"]?.objectId || "" }
       );
       toast.success(response?.message ?? "Feedback submitted successfully!", {
         duration: 8000,

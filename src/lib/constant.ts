@@ -47,7 +47,8 @@ export const API_ENDPOINTS = {
     FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   FEEDBACK: {
-    SAVE: "/api/v2/forminstances",
+    SAVE: "/api/objects/{objectId}/records",
+    FORM_PROPERTIES: "/api/objects/{objectId}/forms/{formId}/properties",
   },
   USER: {
     LIST: "/admin/orgs/{orgId}/apps/{appId}/users",

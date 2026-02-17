@@ -13,8 +13,15 @@ export const fetchFormProperties = createAsyncThunk(
       const interviewsPenaltyObjectId =
         views?.interviewproctoringevents?.objectId;
       const interviewsPenaltyFormId = form?.createInterviewproctoringevents;
+      const feedbackObjectId = views?.["feedback"]?.objectId;
+      const feedbackFormId = form?.createFeedback;
 
-      if (!interviewsPenaltyObjectId || !interviewsPenaltyFormId) {
+      if (
+        !interviewsPenaltyObjectId ||
+        !interviewsPenaltyFormId ||
+        !feedbackObjectId ||
+        !feedbackFormId
+      ) {
         return rejectWithValue(
           "Job opening form or view not loaded in app state. Ensure fetchForm and fetchViews have run first."
         );
@@ -25,6 +32,12 @@ export const fetchFormProperties = createAsyncThunk(
           buildUrl(API_ENDPOINTS.INTERVIEW_PENALTY.FROM_PROPERTIES, {
             objectId: interviewsPenaltyObjectId,
             formId: interviewsPenaltyFormId,
+          })
+        ),
+        serverInterfaceService.get(
+          buildUrl(API_ENDPOINTS.FEEDBACK.FORM_PROPERTIES, {
+            objectId: feedbackObjectId,
+            formId: feedbackFormId,
           })
         ),
       ]);
@@ -40,9 +53,8 @@ export const fetchFormProperties = createAsyncThunk(
       > = {};
       response.forEach((item, index) => {
         if (item.status === "fulfilled") {
-          result["interviewProctoringPenalty"] = extractFormProperties(
-            item.value
-          );
+          result[index === 0 ? "interviewProctoringPenalty" : "feedback"] =
+            extractFormProperties(item.value);
         }
       });
 

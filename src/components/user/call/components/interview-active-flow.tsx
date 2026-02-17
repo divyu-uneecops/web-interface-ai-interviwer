@@ -159,13 +159,13 @@ export function InterviewActiveFlow({
     const payload = buildPenaltyPayload(
       interviewId,
       eventType,
-      Math.floor(Date.now() / 1000),
+      Date.now(),
       screenshotPath,
       mappingValues?.interviewProctoringPenalty
     );
     applicantAuthService
       .submitPenaltyFormInstance(payload, {
-        objectId: views?.["interviews"]?.objectId || "",
+        objectId: views?.["interviewproctoringevents"]?.objectId || "",
       })
       .catch((err) =>
         console.error("Penalty form instance submit error:", err)

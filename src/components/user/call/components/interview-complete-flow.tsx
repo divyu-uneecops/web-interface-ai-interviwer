@@ -47,11 +47,17 @@ export function InterviewCompleteFlow({
             key: "rating",
             value: rating,
           },
+          {
+            propertyId: mappingValues?.feedback?.v2TimeStamp?.id || "",
+            key: "v2TimeStamp",
+            value: Date.now(),
+          },
         ],
         propertyIds: [
           mappingValues?.feedback?.interviewId?.id,
           mappingValues?.feedback?.experience?.id,
           mappingValues?.feedback?.rating?.id,
+          mappingValues?.feedback?.v2TimeStamp?.id,
         ],
       };
       const response = await applicantAuthService.submitFeedbackFormInstance(

@@ -11,8 +11,8 @@ export const transformToCreateRoundPayload = (
   // Skills for round (each as its own array of one object)
   const skillsForRound = (values?.skills || []).map((skill) => [
     {
-      propertyId: mappingValues?._skillForRound?.fields?.[0]?._id || "",
-      key: "_skill_",
+      propertyId: mappingValues?.v2_skillForRound?.fields?.[0]?._id || "",
+      key: "v2_skill_",
       value: skill,
     },
   ]);
@@ -29,13 +29,15 @@ export const transformToCreateRoundPayload = (
             ) {
               return [
                 {
-                  propertyId: mappingValues?._questions?.fields?.[0]?._id || "",
-                  key: "_question",
+                  propertyId:
+                    mappingValues?.v2_questions?.fields?.[0]?._id || "",
+                  key: "v2_question",
                   value: questionText,
                 },
                 {
-                  propertyId: mappingValues?._questions?.fields?.[1]?._id || "",
-                  key: "_qType",
+                  propertyId:
+                    mappingValues?.v2_questions?.fields?.[1]?._id || "",
+                  key: "v2_qType",
                   value: "hybrid",
                 },
               ];
@@ -128,13 +130,13 @@ export const transformToCreateRoundPayload = (
       value: values?.interviewer || "",
     },
     {
-      propertyId: mappingValues?._skillForRound?.id || "",
-      key: "_skillForRound",
+      propertyId: mappingValues?.v2_skillForRound?.id || "",
+      key: "v2_skillForRound",
       value: skillsForRound,
     },
     {
-      propertyId: mappingValues?._questions?.id || "",
-      key: "_questions",
+      propertyId: mappingValues?.v2_questions?.id || "",
+      key: "v2_questions",
       value: questions,
     },
   ];
@@ -158,8 +160,8 @@ export const transformToCreateRoundPayload = (
     mappingValues?.interviewerName?.id || "",
     mappingValues?.jobID?.id || "",
     mappingValues?.interviewerID?.id || "",
-    mappingValues?._skillForRound?.id || "",
-    mappingValues?._questions?.id || "",
+    mappingValues?.v2_skillForRound?.id || "",
+    mappingValues?.v2_questions?.id || "",
     mappingValues?.reminderTime?.id || "",
     mappingValues?.numOfCustomQuestions?.id || "",
   ];

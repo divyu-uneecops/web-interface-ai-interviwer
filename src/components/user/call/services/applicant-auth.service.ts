@@ -20,7 +20,7 @@ export const applicantAuthService = {
     payload: StartInterviewPayload
   ): Promise<StartInterviewResponse> =>
     serverInterfaceService.post<StartInterviewResponse>(
-      "http://localhost:8021/api/start-interview",
+      `${process.env.NEXT_PUBLIC_BE_API_URL}/api/start-interview`,
       {},
       {
         email: payload.email,

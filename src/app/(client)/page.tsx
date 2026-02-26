@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,11 @@ import { Header } from "@/components/header";
 import AIInterviewSession from "@/components/ai-interview-session";
 
 export default function HomePage() {
+  // Scroll to top on page load/reload to ensure first page is shown
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f0fdf4] via-[#f7fef9] to-[#ecfdf5] overflow-x-hidden">
       {/* Header */}

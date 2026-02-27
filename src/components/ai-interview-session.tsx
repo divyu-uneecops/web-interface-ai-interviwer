@@ -183,6 +183,8 @@ export default function AIInterviewSession() {
           box-sizing: border-box;
           margin: 0;
           padding: 0;
+          background: var(--ai-bg-dark);
+          border-radius: 30px 0px 30px 0px;
           font-family: var(--ai-font-body);
           isolation: isolate;
           contain: layout style paint;
@@ -197,9 +199,8 @@ export default function AIInterviewSession() {
         .ai-interview-session-root .session-wrapper {
           height: 100%;
           width: 100%;
-          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 25%, #bbf7d0 50%, #d1fae5 75%, #ecfdf5 100%);
-          background-size: 200% 200%;
-          animation: gradient-shift 8s ease infinite;
+          background: var(--ai-bg-dark);
+          border-radius: 26px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -273,7 +274,7 @@ export default function AIInterviewSession() {
         /* LEFT PANEL */
         .left-panel {
           background: #0a1f14;
-          border-radius: 16px;
+          border-radius: 0 16px 16px 0;
           padding: 16px;
           display: flex;
           flex-direction: column;
@@ -368,7 +369,7 @@ export default function AIInterviewSession() {
         /* RIGHT PANEL - TRANSCRIPT */
         .transcript-panel {
           background: #0a1f14;
-          border-radius: 16px;
+          border-radius: 0 16px 16px 0;
           display: flex;
           flex-direction: column;
           overflow: hidden;

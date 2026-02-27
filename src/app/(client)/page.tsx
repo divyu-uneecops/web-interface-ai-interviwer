@@ -131,13 +131,11 @@ export default function HomePage() {
 
               <Scroll3DReveal variant="flip-left" delay={350} duration={800}>
                 <p className="text-sm text-[#404040] leading-7 max-w-[600px]">
-                  Conduct structured, unbiased interviews at scale using{" "}
-                  <span className="font-semibold text-[#02563d]">advanced AI</span>
-                  . Screen candidates 24/7 with{" "}
-                  <span className="font-semibold text-[#02563d]">text, voice, or video</span>{" "}
-                  interviews powered by{" "}
-                  <span className="font-semibold text-[#02563d]">natural language understanding</span>
-                  .
+                  Run secure, unbiased interviews at scale with enterprise-grade AI.
+                  Enable 24/7 video interviews with{" "}
+                  <span className="font-semibold text-[#02563d]">real-time proctoring, scoring</span> and{" "}
+                  <span className="font-semibold text-[#02563d]">intelligent anti-cheating</span>{" "}
+                  technology.
                 </p>
               </Scroll3DReveal>
 
@@ -241,40 +239,40 @@ export default function HomePage() {
 
       {/* ============ MULTI-MODAL INTERVIEWS ============ */}
       <section className="bg-gradient-to-b from-[#fafafa] via-[#f7fef9] to-[#f0fdf4] py-20 px-8">
-        <div className="container mx-auto max-w-[1376px] flex items-center gap-16">
+        <div className="container mx-auto max-w-[1376px] flex items-center gap-24">
           {/* Left image — 3D tilt with Enhanced Effects */}
-          <Scene3D perspective={1000} className="relative w-[566.5px] h-[280px] shrink-0">
+          <Scene3D perspective={1000} className="relative w-[400px] h-[300px] shrink-0">
             <Scroll3DReveal variant="flip-left" duration={900}>
-              <Tilt3DCard tiltMaxX={12} tiltMaxY={12} scale={1.03} className="w-full h-[280px]">
+              <Tilt3DCard tiltMaxX={2} tiltMaxY={2} scale={1.01} className="w-full h-[300px]">
                 <div className="rounded-2xl overflow-hidden shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] hero-image-container group relative">
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(2,86,61,0.2)] via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   {/* Image with enhanced hover */}
                   <img
-                    src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=600&h=280&fit=crop"
+                    src="/AI_InterviewImagess.png"
                     alt="Live Interview"
-                    width={566}
-                    height={280}
-                    className="object-cover w-full h-full transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                    width={400}
+                    height={300}
+                    className="object-cover w-full h-full rounded-2xl transition-all duration-700 group-hover:scale-[1.02] group-hover:brightness-105"
                   />
 
                   {/* Shine sweep on hover */}
                   <div className="absolute inset-0 hero-shine-sweep z-20 pointer-events-none" />
                 </div>
-                <Float3D speed="slow" depth={10} rotateAmount={2} className="absolute -top-[34px] left-[26px]">
-                  <div className="bg-white/95 backdrop-blur-sm border-2 border-[rgba(2,86,61,0.1)] rounded-[14px] px-[18px] py-[14px] shadow-lg glass-3d">
-                    <div className="flex items-center gap-2.5">
-                      <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00c950] opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#00c950]"></span>
+                <div className="absolute -top-8 left-6">
+                  <div className="bg-white rounded-lg px-4 py-2.5 shadow-md border border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-60"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                       </span>
-                      <span className="text-sm font-medium text-neutral-950">
+                      <span className="text-sm font-semibold text-gray-800">
                         Live Interview in Progress
                       </span>
                     </div>
                   </div>
-                </Float3D>
+                </div>
               </Tilt3DCard>
             </Scroll3DReveal>
           </Scene3D>
@@ -325,7 +323,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="text-base font-semibold text-neutral-950 mb-0.5">
                     <AnimatedText
-                      text="Text Chat"
+                      text="Real-time transcription"
                       animation="fade-in"
                       delay={0}
                       className="inline-block"
